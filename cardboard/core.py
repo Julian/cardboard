@@ -44,7 +44,7 @@ def _make_color(name):
     return color
 
 class ManaPool(object):
-    COLORS = {"black", "blue", "green", "red", "white", "colorless"}
+    COLORS = ("black", "blue", "green", "red", "white", "colorless")
 
     black = _make_color("black")
     blue = _make_color("blue")
@@ -66,8 +66,7 @@ class ManaPool(object):
 
     @property
     def pool(self):
-        return [self.black, self.blue, self.green,
-                self.red, self.white, self.colorless]
+        return [getattr(self, c) for c in self.COLORS]
 
     def __repr__(self):
         return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*self.pool)
