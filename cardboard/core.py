@@ -17,6 +17,61 @@ PHASES = [("beginning", ["untap", "draw", "upkeep"]),
           ("ending", ["end", "cleanup"])]
 
 
+def _make_color(name):
+    _color = "_" + name
+
+    @property
+    def color(self):
+        return getattr(self, _color)
+
+    @color.setter
+    def color(self, amount):
+        if amount < 0:
+            raise ValueError("{} mana would be negative.".format(name.title()))
+
+        current = getattr(self, name)
+
+        if amount > current:
+            event = events["mana added to pool"]
+        elif amount == current:
+            return
+        else:
+            event = events["mana left pool"]
+
+        setattr(self, _color, amount)
+        self.player.events.trigger(event=event, player=self.player, color=name)
+
+    return color
+
+class ManaPool(object):
+    COLORS = {"black", "blue", "green", "red", "white", "colorless"}
+
+    black = _make_color("black")
+    blue = _make_color("blue")
+    green = _make_color("green")
+    red = _make_color("red")
+    white = _make_color("white")
+    colorless = _make_color("colorless")
+
+    def __init__(self, for_player):
+        super(ManaPool, self).__init__()
+
+        self.player = for_player
+
+        for color in self.COLORS:
+            setattr(self, "_" + color, 0)
+
+    def __iter__(self):
+        return iter(self.pool)
+
+    @property
+    def pool(self):
+        return [self.black, self.blue, self.green,
+                self.red, self.white, self.colorless]
+
+    def __repr__(self):
+        return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*self.pool)
+
 class Player(object):
     """
     A player in a game.
@@ -32,6 +87,7 @@ class Player(object):
         self._life = int(life)
         self.deck = deck
         self.graveyard = []
+        self.mana = ManaPool(self)
 
         # bypass events for first draw
         self.hand = {self.deck.pop() for _ in range(hand_size)} 

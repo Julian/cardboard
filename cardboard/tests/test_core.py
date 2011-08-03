@@ -127,3 +127,16 @@ class TestStatee(unittest.TestCase):
         self.listen_for(event=e["card added to graveyard"], card=card)
         self.p1.move_to_graveyard(card)
         self.assertHeard(event=e["card added to graveyard"], card=card)
+
+    def test_mana_changed(self):
+        self.listen_for(event=e["mana added to pool"], player=self.p1,
+                        color="red")
+        self.listen_for(event=e["mana left pool"], player=self.p1, color="red")
+
+        self.p1.mana.red += 1
+        self.assertHeard(event=e["mana added to pool"], player=self.p1,
+                         color="red")
+
+        self.p1.mana.red -= 1
+        self.assertHeard(event=e["mana left pool"], player=self.p1,
+                         color="red")

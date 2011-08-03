@@ -40,7 +40,8 @@ events = {e : Event(e) for e in [
                                  "counter added",
                                  "counter removed",
 
-                                 "mana added",
+                                 "mana added to pool",
+                                 "mana left pool",
 
                                  "land played",
 
