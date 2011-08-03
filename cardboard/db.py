@@ -123,12 +123,9 @@ class Creature(Base):
 
         super(Creature, self).__init__()
 
-        # FIXME: Enchant Creature
-        if not "Creature" in card.type:
-            raise ValueError("{} is not a creature (type: {})".format(name,
-                                                                      type))
-
         self.card = card
+
+        power, toughness = str(power), str(toughness)
 
         if "*" not in power:
             power = int(power)
