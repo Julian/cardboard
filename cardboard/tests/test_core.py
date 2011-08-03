@@ -133,10 +133,10 @@ class TestStatee(unittest.TestCase):
                         color="red")
         self.listen_for(event=e["mana left pool"], player=self.p1, color="red")
 
-        self.p1.mana.red += 1
+        self.p1.mana_pool.red += 1
         self.assertHeard(event=e["mana added to pool"], player=self.p1,
                          color="red")
 
-        self.p1.mana.red -= 1
+        self.p1.mana_pool.red -= 1
         self.assertHeard(event=e["mana left pool"], player=self.p1,
                          color="red")

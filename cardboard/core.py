@@ -64,12 +64,9 @@ class ManaPool(object):
     def __iter__(self):
         return iter(self.pool)
 
-    @property
-    def pool(self):
-        return tuple(getattr(self, c) for c in self.COLORS)
-
     def __repr__(self):
-        return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*self.pool)
+        pool = (getattr(self, c) for c in self.COLORS)
+        return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*pool)
 
 class Player(object):
     """
@@ -85,11 +82,14 @@ class Player(object):
         self.name = str(name)
         self._life = int(life)
         self.deck = deck
-        self.graveyard = []
-        self.mana = ManaPool(self)
 
-        # bypass events for first draw
-        self.hand = {self.deck.pop() for _ in range(hand_size)} 
+        self.hand = set()
+        self.draw(hand_size)
+
+        self.graveyard = []
+        self.mana = []
+        self.mana_pool = ManaPool(self)
+
 
     def __str__(self):
         return self.name
