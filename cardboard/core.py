@@ -66,7 +66,7 @@ class ManaPool(object):
 
     @property
     def pool(self):
-        return [getattr(self, c) for c in self.COLORS]
+        return tuple(getattr(self, c) for c in self.COLORS)
 
     def __repr__(self):
         return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*self.pool)
