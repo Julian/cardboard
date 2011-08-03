@@ -1,3 +1,5 @@
+import os.path
+
 from sqlalchemy import Column, ForeignKey, Integer, String, Table, create_engine
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
@@ -157,7 +159,8 @@ class Subtype(Base):
     def __repr__(self):
         return "<{0.__class__.__name__}: {0.name}>".format(self)
 
-engine = create_engine('sqlite:///mtg.db')
+db_file = os.path.join(os.path.dirname(__file__), "mtg.db")
+engine = create_engine('sqlite:///{}'.format(db_file))
 
 Base.metadata.bind = engine
 Base.metadata.create_all()
