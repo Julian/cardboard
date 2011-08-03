@@ -24,7 +24,7 @@ events = {e : Event(e) for e in [
                                  "card not drawn",
                                  "card discarded",
                                  "card not discarded",
-                                 "deck shuffled",
+                                 "library shuffled",
 
                                  "card entered play",
                                  "card left play",

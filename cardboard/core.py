@@ -43,6 +43,7 @@ def _make_color(name):
 
     return color
 
+
 class ManaPool(object):
     COLORS = ("black", "blue", "green", "red", "white", "colorless")
 
@@ -68,6 +69,7 @@ class ManaPool(object):
         pool = (getattr(self, c) for c in self.COLORS)
         return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*pool)
 
+
 class Player(object):
     """
     A player in a game.
@@ -81,7 +83,7 @@ class Player(object):
 
         self.name = str(name)
         self._life = int(life)
-        self.deck = deck
+        self.library = deck
 
         self.hand = set()
         self.draw(hand_size)
@@ -89,7 +91,6 @@ class Player(object):
         self.graveyard = []
         self.mana = []
         self.mana_pool = ManaPool(self)
-
 
     def __str__(self):
         return self.name
@@ -120,23 +121,24 @@ class Player(object):
 
     def draw(self, cards=1):
         """
-        Draw cards from the deck.
+        Draw cards from the library.
 
         """
 
-        if cards > len(self.deck):
-            self.life -= cards - len(self.deck)
-            self.draw(len(self.deck))
+        if cards > len(self.library):
+            self.life = 0
+            return
         else:
             for i in range(cards):
                 self.events.trigger(event=events["card drawn"], player=self)
-            drawn = [self.deck.pop() for _ in range(cards)]
+            drawn = [self.library.pop() for _ in range(cards)]
             self.hand.update(drawn)
             return drawn
 
     def move_to_graveyard(self, card):
         self.graveyard.append(card)
         self.events.trigger(event=events["card added to graveyard"], card=card)
+
 
 class State(object):
     """
