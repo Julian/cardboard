@@ -3,6 +3,7 @@ Cardboard core
 
 """
 
+from functools import partial
 from operator import attrgetter, methodcaller
 import itertools
 
@@ -85,154 +86,159 @@ class ManaPool(object):
         return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*pool)
 
 
-class Player(object):
-    """
-    A player.
+def _make_player_factory(state):
 
-    """
+    e = events
 
-    def __init__(self, handler, deck, name="", hand_size=7, life=20):
-        super(Player, self).__init__()
-
-        self.events = handler
-
-        self.name = str(name)
-
-        self.dead = False
-        self._life = int(life)
-
-        self.hand = set()
-        self.library = deck
-        self.draw(hand_size)
-
-        self.exiled = set()
-        self.graveyard = []
-        self.mana_pool = ManaPool(self)
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return "<Player: {}>".format(self.name or "Unnamed")
-
-    @property
-    def life(self):
-        return self._life
-
-    @life.setter
-    @announce(gained="gained life", lost="lost life", store=events.player.life)
-    def life(self, amount):
-
-        pool = (yield)
-        pool.update(player=self, amount=amount)
-
-        if amount == self.life:
-            return
-        elif amount > self.life:
-            event = "gained"
-        else:
-            event = "lost"
-
-        yield event
-        yield
-        pool["player"]._life = amount
-        yield event
-
-        if pool["player"].life <= 0:
-            pool["player"].die()
-
-    @announce(died="player died", store=events.player)
-    def die(self, reason="life"):
+    class Player(object):
         """
-        End the player's sorrowful life.
-
-        Arguments:
-
-            * reason (default="life")
-                * valid reasons: "life", "library empty", "poison", <a card>
+        A player.
 
         """
 
-        # TODO: Reason
-        pool = (yield)
-        pool.update(player=self, reason=reason)
+        game = state
+        events = state.events
 
-        yield "died"
-        yield
+        def __init__(self, library, hand_size=7, life=20):
+            super(Player, self).__init__()
 
-        self.dead = True
-        yield "died"
+            self.dead = False
+            self._life = int(life)
 
-    @announce(draw="card drawn", store=events.player)
-    def draw(self, cards=1):
-        """
-        Draw cards from the library.
+            self.hand = set()
+            self.library = library
+            self.draw(hand_size)
+
+            self.exiled = set()
+            self.graveyard = []
+            self.mana_pool = ManaPool(self)
+
+        def __str__(self):
+            return self.name
+
+        def __repr__(self):
+            return "<Player: {} Life>".format(self.life)
+
+        @property
+        def life(self):
+            return self._life
+
+        @life.setter
+        @announce(gained="gained life", lost="lost life", store=e.player.life)
+        def life(self, amount):
+
+            pool = (yield)
+            pool.update(player=self, amount=amount)
+
+            if amount == self.life:
+                return
+            elif amount > self.life:
+                event = "gained"
+            else:
+                event = "lost"
+
+            yield event
+            yield
+            pool["player"]._life = amount
+            yield event
+
+            if pool["player"].life <= 0:
+                pool["player"].die()
+
+        @announce(died="player died", store=e.player)
+        def die(self, reason="life"):
+            """
+            End the player's sorrowful life.
+
+            Arguments:
+
+                * reason (default="life")
+                    * one of: "life", "library", "poison", <a card>
+
+            """
+
+            # TODO: Reason
+            pool = (yield)
+            pool.update(player=self, reason=reason)
+
+            yield "died"
+            yield
+
+            self.dead = True
+            yield "died"
+
+        @announce(draw="card drawn", store=e.player)
+        def draw(self, cards=1):
+            """
+            Draw cards from the library.
 
 
-        """
+            """
 
-        if not cards:
-            return
-        elif cards < 0:
-            raise ValueError("Can't draw a negative number of cards.")
+            if not cards:
+                return
+            elif cards < 0:
+                raise ValueError("Can't draw a negative number of cards.")
 
-        if not self.library:
-            self.die(reason="library")
-            return
+            if not self.library:
+                self.die(reason="library")
+                return
 
-        # FIXME: die ^
-        if cards > 1:
-            for i in range(cards):
-                self.draw()
-            return
+            # FIXME: die ^
+            if cards > 1:
+                for i in range(cards):
+                    self.draw()
+                return
 
-        pool = (yield)
-        pool.update(player=self, source=self.library,
-                    destination=self.hand,
-                    source_get=methodcaller("pop"),
-                    destination_add=attrgetter("add"))
+            pool = (yield)
+            pool.update(player=self, source=self.library,
+                        destination=self.hand,
+                        source_get=methodcaller("pop"),
+                        destination_add=attrgetter("add"))
 
-        yield "draw"
-        yield
+            yield "draw"
+            yield
 
-        card = pool["source_get"](pool["source"])
-        pool["destination_add"](pool["destination"])(card)
+            card = pool["source_get"](pool["source"])
+            pool["destination_add"](pool["destination"])(card)
 
-        yield "draw"
+            yield "draw"
 
-    @announce(entered="card entered graveyard", store=events.card.graveyard)
-    def move_to_graveyard(self, card):
-        """
-        Move a card to the graveyard.
+        @announce(entered="card entered graveyard", store=e.card.graveyard)
+        def move_to_graveyard(self, card):
+            """
+            Move a card to the graveyard.
 
-        """
+            """
 
-        pool = (yield)
-        pool.update(player=self, target=card, destination=self.graveyard,
-                    destination_add=attrgetter("append"))
+            pool = (yield)
+            pool.update(player=self, target=card, destination=self.graveyard,
+                        destination_add=attrgetter("append"))
 
-        yield "entered"
-        yield
+            yield "entered"
+            yield
 
-        pool["destination_add"](pool["destination"])(pool["target"])
-        yield "entered"
+            pool["destination_add"](pool["destination"])(pool["target"])
+            yield "entered"
 
-    @announce(removed_from_game="card removed from game", store=events.card)
-    def remove_from_game(self, card):
-        """
-        Remove a card from the game.
+        @announce(removed_from_game="card removed from game", store=e.card)
+        def remove_from_game(self, card):
+            """
+            Remove a card from the game.
 
-        """
+            """
 
-        pool = (yield)
-        pool.update(player=self, target=card, destination=self.exiled,
-                    destination_add=attrgetter("add"))
+            pool = (yield)
+            pool.update(player=self, target=card, destination=self.exiled,
+                        destination_add=attrgetter("add"))
 
-        yield "removed_from_game"
-        yield
+            yield "removed_from_game"
+            yield
 
-        pool["destination_add"](pool["destination"])(pool["target"])
-        yield "removed_from_game"
+            pool["destination_add"](pool["destination"])(pool["target"])
+            yield "removed_from_game"
+
+    return Player
 
 
 def _game_ender(state):
@@ -265,7 +271,7 @@ class State(object):
 
     """
 
-    def __init__(self, handler, players):
+    def __init__(self, handler):
         """
         Initialize a new game state object.
 
@@ -273,23 +279,20 @@ class State(object):
 
         super(State, self).__init__()
 
-        if not players:
-            raise ValueError("At least one player is required.")
-
         self.events = handler
-        self.players = list(players)
-        self.stack = []
 
-        self._turn = itertools.cycle(self.players)
-        self._phase = itertools.cycle(PHASES)
-        self._subphase = iter([])  # Default value for first advance
+        self.players = []
+        self.Player = _make_player_factory(self)
+
         self.end_game = _game_ender(self)
-        self.game_over = False
-
-        self.advance()
 
     def __repr__(self):
         return "<{} Player Game State>".format(len(self.players))
+
+    def add_player(self, *args, **kwargs):
+        player = self.Player(*args, **kwargs)
+        self.players.append(player)
+        return player
 
     def advance(self):
         """
@@ -306,3 +309,12 @@ class State(object):
         finally:
             if self.phase == PHASES[0][0] and self.subphase == PHASES[0][1][0]:
                 self.turn = next(self._turn)
+
+    def start(self):
+        self.game_over = False
+
+        self._turn = itertools.cycle(self.players)
+        self._phase = itertools.cycle(PHASES)
+        self._subphase = iter([])  # Default value for first advance
+
+        self.advance()

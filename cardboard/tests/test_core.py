@@ -9,15 +9,18 @@ from cardboard.tests.util import ANY
 
 
 class TestBehavior(unittest.TestCase):
+    def setUp(self):
+        self.events = mock.Mock()
+        self.state = c.State(self.events)
+        self.p1 = self.state.add_player(library=[], life=1, hand_size=0)
+        self.p2 = self.state.add_player(library=[], life=1, hand_size=0)
+        self.state.start()
+
     def test_advance(self):
-        p1 = c.Player(deck=[], handler=mock.Mock(), life=1, hand_size=0)
-        p2 = c.Player(deck=[], handler=mock.Mock(), life=1, hand_size=0)
-        s = c.State(players=[p1, p2], handler=mock.Mock())
+        self.assertIs(self.state.turn, self.p1)
 
-        self.assertIs(s.turn, p1)
-
-        self.assertEqual(s.phase, "beginning")
-        self.assertEqual(s.subphase, "untap")
+        self.assertEqual(self.state.phase, "beginning")
+        self.assertEqual(self.state.subphase, "untap")
 
         for phase, subphase in [("beginning", "draw"),
                                 ("beginning", "upkeep"),
@@ -31,40 +34,38 @@ class TestBehavior(unittest.TestCase):
                                 ("ending", "end"),
                                 ("ending", "cleanup")]:
 
-            s.advance()
-            self.assertEqual(s.phase, phase)
-            self.assertEqual(s.subphase, subphase)
+            self.state.advance()
+            self.assertEqual(self.state.phase, phase)
+            self.assertEqual(self.state.subphase, subphase)
 
-        s.advance()
+        self.state.advance()
 
-        self.assertIs(s.turn, p2)
+        self.assertIs(self.state.turn, self.p2)
 
-        self.assertEqual(s.phase, "beginning")
-        self.assertEqual(s.subphase, "untap")
+        self.assertEqual(self.state.phase, "beginning")
+        self.assertEqual(self.state.subphase, "untap")
 
     def test_draw(self):
-        p = mock.Mock()
-        p1 = c.Player(deck=[0], handler=p, life=1, hand_size=0)
-        p1.draw()
-        self.assertEqual(p1.hand, {0})
+        self.p1.library = [0]
+        self.p1.draw()
+        self.assertEqual(self.p1.hand, {0})
 
-        p2 = c.Player(deck=range(5), handler=p, life=1, hand_size=0)
-        p2.draw(5)
-        self.assertEqual(p2.hand, set(range(5)))
+        self.p2.library = range(5)
+        self.p2.draw(5)
+        self.assertEqual(self.p2.hand, set(range(5)))
 
     def test_dont_die_when_drawing_zero_cards(self):
-        p = mock.Mock()
-        p1 = c.Player(deck=[0], handler=p, life=1, hand_size=0)
-        self.assertFalse(p1.dead)
-        p1.draw(0)
-        self.assertFalse(p1.dead)
+        self.assertFalse(self.p1.dead)
+        self.p1.draw(0)
+        self.assertFalse(self.p1.dead)
 
 
 class TestPlayerStateEvents(unittest.TestCase):
     def setUp(self):
         self.events = mock.Mock()
-        self.p1 = c.Player(self.events, deck=range(3), life=1, hand_size=0)
-        self.p2 = c.Player(self.events, deck=range(3), life=2, hand_size=0)
+        self.state = c.State(self.events)
+        self.p1 = self.state.add_player(library=[], life=1, hand_size=0)
+        self.p2 = self.state.add_player(library=[], life=1, hand_size=0)
 
     def assertHeard(self, event, with_request=False, handler=None):
         if handler is None:
@@ -114,9 +115,8 @@ class TestPlayerStateEvents(unittest.TestCase):
         self.assertHeard(e.events.player.life["lost"], with_request=True)
 
     def test_card_drawn(self):
-        p1 = c.Player(deck=[1], handler=self.events, life=1, hand_size=0)
-        p1.draw()
-
+        self.p1.library = [1]
+        self.p1.draw()
         self.assertHeard(e.events.player["draw"], with_request=True)
 
         def side_effect(*args, **kwargs):
@@ -126,7 +126,7 @@ class TestPlayerStateEvents(unittest.TestCase):
 
         self.events.trigger.side_effect = side_effect
 
-        p1.draw()
+        self.p1.draw()
         self.assertHeard(e.events.player["died"])
 
     def test_move_to_graveyard(self):
