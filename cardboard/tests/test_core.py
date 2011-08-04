@@ -1,30 +1,23 @@
+import pprint
 import unittest
 
+import mock
 import panglery
 
-from cardboard.events import events as e
-import cardboard.core as c
+from cardboard import core as c, events as e
+from cardboard.tests.util import ANY
 
-class TestPlayerState(unittest.TestCase):
-    def setUp(self):
-        p = panglery.Pangler()
-        self.p1 = c.Player(deck=range(8), event_handler=p, life=1)
-        self.p2 = c.Player(deck=range(8), event_handler=p, life=2)
-        self.p3 = c.Player(deck=range(8), event_handler=p, life=3)
-        self.s = c.State(players=[self.p1, self.p2, self.p3], event_handler=p)
 
-    def test_game_over(self):
-        self.assertFalse(self.s.game_over)
-        self.p1.life -= 1
-        self.assertFalse(self.s.game_over)
-        self.p2.life -= 2
-        self.assertTrue(self.s.game_over)
-
+class TestBehavior(unittest.TestCase):
     def test_advance(self):
-        self.assertIs(self.s.turn, self.p1)
+        p1 = c.Player(deck=[], handler=mock.Mock(), life=1, hand_size=0)
+        p2 = c.Player(deck=[], handler=mock.Mock(), life=1, hand_size=0)
+        s = c.State(players=[p1, p2], handler=mock.Mock())
 
-        self.assertEqual(self.s.phase, "beginning")
-        self.assertEqual(self.s.subphase, "untap")
+        self.assertIs(s.turn, p1)
+
+        self.assertEqual(s.phase, "beginning")
+        self.assertEqual(s.subphase, "untap")
 
         for phase, subphase in [("beginning", "draw"),
                                 ("beginning", "upkeep"),
@@ -38,105 +31,116 @@ class TestPlayerState(unittest.TestCase):
                                 ("ending", "end"),
                                 ("ending", "cleanup")]:
 
-            self.s.advance()
-            self.assertEqual(self.s.phase, phase)
-            self.assertEqual(self.s.subphase, subphase)
+            s.advance()
+            self.assertEqual(s.phase, phase)
+            self.assertEqual(s.subphase, subphase)
 
-        self.s.advance()
+        s.advance()
 
-        self.assertIs(self.s.turn, self.p2)
+        self.assertIs(s.turn, p2)
 
-        self.assertEqual(self.s.phase, "beginning")
-        self.assertEqual(self.s.subphase, "untap")
+        self.assertEqual(s.phase, "beginning")
+        self.assertEqual(s.subphase, "untap")
 
     def test_draw(self):
-        self.p1.draw()
-        self.assertEqual(self.p1.hand, set(range(8)))
+        p = mock.Mock()
+        p1 = c.Player(deck=[0], handler=p, life=1, hand_size=0)
+        p1.draw()
+        self.assertEqual(p1.hand, {0})
+
+        p2 = c.Player(deck=range(5), handler=p, life=1, hand_size=0)
+        p2.draw(5)
+        self.assertEqual(p2.hand, set(range(5)))
+
+    def test_dont_die_when_drawing_zero_cards(self):
+        p = mock.Mock()
+        p1 = c.Player(deck=[0], handler=p, life=1, hand_size=0)
+        self.assertFalse(p1.dead)
+        p1.draw(0)
+        self.assertFalse(p1.dead)
 
 
-class TestStatee(unittest.TestCase):
+class TestPlayerStateEvents(unittest.TestCase):
     def setUp(self):
-        self.pangler = panglery.Pangler()
-        self.p1 = c.Player(deck=range(8), event_handler=self.pangler, life=1)
-        self.p2 = c.Player(deck=range(8), event_handler=self.pangler, life=2)
-        self.p3 = c.Player(deck=range(8), event_handler=self.pangler, life=3)
-        self.s = c.State(players=[self.p1, self.p2, self.p3],
-                         event_handler=self.pangler)
+        self.events = mock.Mock()
+        self.p1 = c.Player(self.events, deck=range(3), life=1, hand_size=0)
+        self.p2 = c.Player(self.events, deck=range(3), life=2, hand_size=0)
 
-        self._listening = []
-        self.heard = []
+    def assertHeard(self, event, with_request=False, handler=None):
+        if handler is None:
+            handler = self.events
 
-    def listen_for(self, **kwargs):
-        self._listening.append(kwargs)
+        e = {"event" : event, "pool" : ANY}
 
-        @self.pangler.subscribe(**kwargs)
-        def got_event(pangler):
-            self.heard.append(kwargs)
+        if not with_request:
+            return handler.trigger.assert_called_with(**e)
 
-    def assertHeard(self, **kwargs):
-        if kwargs not in self._listening:
-            self.fail("Wasn't listening for {}".format(kwargs))
-        return self.assertIn(kwargs, self.heard)
+        r = {"request" : event, "pool" : ANY}
+        self.assertEqual(handler.trigger.call_args_list[-2:], [[r], [e]])
 
-    def assertNotHeard(self, **kwargs):
-        if kwargs not in self._listening:
-            self.fail("Wasn't listening for {}".format(kwargs))
-        return self.assertNotIn(kwargs, self.heard)
+    def test_die(self):
+        self.p1.die()
+        self.assertHeard(e.events.player["died"], with_request=True)
 
+    """
+    # FIXME: This should pass, need to patch a real pangler correctly or think
+    # of the right way to test these
     def test_game_over(self):
-        self.listen_for(event=e["player died"], player=self.p1)
-        self.listen_for(event=e["player died"], player=self.p2)
-        self.listen_for(event=e["game over"])
+        events = panglery.Pangler()
+        trigger = mock.Mock()
+        trigger.side_effect = events.trigger
+        events.trigger = trigger
 
-        self.p2.life -= 1
-        self.assertNotHeard(event=e["player died"], player=self.p2)
-        self.assertNotHeard(event=e["game over"])
+        p1 = c.Player(events, deck=[], life=1, hand_size=0)
+        p2 = c.Player(events, deck=[], life=2, hand_size=0)
+        s = c.State(events, players=[p1, p2])
 
-        self.p2.life -= 1
-        self.assertHeard(event=e["player died"], player=self.p2)
-        self.assertNotHeard(event=e["game over"])
+        # TODO: patch this to check that p2 didn't die here yet
+        p2.life -= 1
 
-        self.p1.life -= 1
-        self.assertHeard(event=e["player died"], player=self.p1)
-        self.assertHeard(event=e["game over"])
+        p2.life -= 1
+        self.assertHeard(e.events.player["died"], handler=events)
+
+        p1.life -= 1
+        self.assertHeard(e.events.game["ended"], with_request=True,
+                         handler=events)
+    """
 
     def test_life_changed(self):
-        self.listen_for(event=e["life gained"])
-        self.listen_for(event=e["life lost"])
-
         self.p1.life += 2
-        self.assertHeard(event=e["life gained"])
+        self.assertHeard(e.events.player.life["gained"], with_request=True)
 
-        self.p2.life -= 1
-        self.assertHeard(event=e["life lost"])
+        self.p1.life -= 2
+        self.assertHeard(e.events.player.life["lost"], with_request=True)
 
     def test_card_drawn(self):
-        self.listen_for(event=e["card drawn"], player=self.p1)
-        self.listen_for(event=e["life lost"], player=self.p1)
+        p1 = c.Player(deck=[1], handler=self.events, life=1, hand_size=0)
+        p1.draw()
 
-        self.p1.draw()
-        self.assertHeard(event=e["card drawn"], player=self.p1)
+        self.assertHeard(e.events.player["draw"], with_request=True)
 
-        self.heard = []
-        self.p1.draw()
-        self.assertNotHeard(event=e["card drawn"], player=self.p1)
-        self.assertHeard(event=e["life lost"], player=self.p1)
+        def side_effect(*args, **kwargs):
+            if e.events.player.draw in kwargs.viewvalues():
+                self.fail("Unexpected card draw")
+            return mock.DEFAULT
+
+        self.events.trigger.side_effect = side_effect
+
+        p1.draw()
+        self.assertHeard(e.events.player["died"])
 
     def test_move_to_graveyard(self):
-        card = object()
-        self.listen_for(event=e["card added to graveyard"], card=card)
-        self.p1.move_to_graveyard(card)
-        self.assertHeard(event=e["card added to graveyard"], card=card)
+        self.p1.move_to_graveyard(object())
+        self.assertHeard(e.events.card.graveyard["entered"], with_request=True)
+
+    def test_remove_from_game(self):
+        self.p1.remove_from_game(object())
+        self.assertHeard(e.events.card["removed_from_game"],
+                         with_request=True)
 
     def test_mana_changed(self):
-        self.listen_for(event=e["mana added to pool"], player=self.p1,
-                        color="red")
-        self.listen_for(event=e["mana left pool"], player=self.p1, color="red")
-
         self.p1.mana_pool.red += 1
-        self.assertHeard(event=e["mana added to pool"], player=self.p1,
-                         color="red")
+        self.assertHeard(e.events.player.mana.red["added"], with_request=True)
 
         self.p1.mana_pool.red -= 1
-        self.assertHeard(event=e["mana left pool"], player=self.p1,
-                         color="red")
+        self.assertHeard(e.events.player.mana.red["left"], with_request=True)
