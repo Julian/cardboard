@@ -97,11 +97,12 @@ class Player(object):
         self.events = handler
 
         self.name = str(name)
+
         self.dead = False
         self._life = int(life)
-        self.library = deck
 
         self.hand = set()
+        self.library = deck
         self.draw(hand_size)
 
         self.exiled = set()
