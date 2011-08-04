@@ -3,7 +3,7 @@ from functools import wraps
 import itertools
 
 
-__all__ = ["Pool", "Event", "EventStore", "announce", "events"]
+__all__ = ["Pool", "EventStore", "collaborate", "events"]
 
 
 class Pool(MutableMapping):
@@ -33,18 +33,20 @@ class Pool(MutableMapping):
 
 
 class Event(object):
-    def __init__(self, description):
+    def __init__(self, name):
         super(Event, self).__init__()
-        self.description = description
+        self.name = name
 
     def __repr__(self):
-        return "<Event: {}>".format(self.description)
+        return "<Event: {.name}>".format(self)
 
 
 class EventStore(MutableMapping):
-    def __init__(self, *args, **kwargs):
-        self._substores = {}
-        self._events = dict(*args, **kwargs)
+    def __init__(self, *events):
+        super(EventStore, self).__init__()
+
+        object.__setattr__(self, "substores", {})
+        object.__setattr__(self, "_events", {k : Event(k) for k in events})
 
     def __contains__(self, k):
         return k in self._events
@@ -55,8 +57,14 @@ class EventStore(MutableMapping):
     def __len__(self):
         return len(self._events)
 
-    def __getattr__(self, attr):
-        return self._substores.setdefault(attr, EventStore())
+    def __getattr__(self, substore):
+        try:
+            return self.substores[substore]
+        except KeyError:
+            raise AttributeError("Substore {} doesn't exist.".format(substore))
+
+    def __setattr__(self, new_substore, events):
+        self.substores[new_substore] = EventStore(*events)
 
     def __getitem__(self, k):
         return self._events[k]
@@ -70,18 +78,14 @@ class EventStore(MutableMapping):
     def __repr__(self):
         return "EventStore({})".format(self._events)
 
-    @property
-    def substores(self):
-        return self._substores.viewkeys()
 
-
-def announce(handler=None, handler_attr="events", store=None, **add_events):
+def collaborate(handler=None, handler_attr="events"):
     """
     Create an announcing action.
 
     Callables using this decorator should conform to the following pattern:
 
-        @announce()
+        @collaborate()
         def action(<arguments>):
 
             <setup>
@@ -112,24 +116,18 @@ def announce(handler=None, handler_attr="events", store=None, **add_events):
 
     """
 
-    if store is None:
-        store = events
-
-    for k, v in add_events.iteritems():
-        store[k] = Event(v)
-
-    def _announce(fn):
+    def _collaborate(fn):
 
         def broadcast_events(handler, event_key, source, initial=(), **kwargs):
             for event in itertools.chain(initial, source):
                 if event is None:
                     return
 
-                kwargs[event_key] = store[event]
+                kwargs[event_key] = event
                 handler.trigger(**kwargs)
 
         @wraps(fn)
-        def announced(*args, **kwargs):
+        def collaborating(*args, **kwargs):
             if handler is None:
                 self = args[0]
                 # nonlocal :/
@@ -151,7 +149,16 @@ def announce(handler=None, handler_attr="events", store=None, **add_events):
             broadcast_events(handle, "request", action, next_yield, pool=pool)
             broadcast_events(handle, "event", action, pool=pool)
 
-        return announced
-    return _announce
+        return collaborating
+    return _collaborate
 
 events = EventStore()
+events.card = {"removed from game"}
+events.card.graveyard = {"entered", "left"}
+events.game = {"started", "ended"}
+events.player = {"died", "draw"}
+events.player.life = {"gained", "lost"}
+events.player.mana = set()
+
+for color in ("black", "blue", "green", "red", "white", "colorless"):
+    setattr(events.player.mana, color, {"added", "left"})

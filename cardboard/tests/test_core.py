@@ -120,7 +120,7 @@ class TestPlayerStateEvents(unittest.TestCase):
         self.assertHeard(e.events.player["draw"], with_request=True)
 
         def side_effect(*args, **kwargs):
-            if e.events.player.draw in kwargs.viewvalues():
+            if e.events.player["draw"] in kwargs.viewvalues():
                 self.fail("Unexpected card draw")
             return mock.DEFAULT
 
@@ -135,7 +135,7 @@ class TestPlayerStateEvents(unittest.TestCase):
 
     def test_remove_from_game(self):
         self.p1.remove_from_game(object())
-        self.assertHeard(e.events.card["removed_from_game"],
+        self.assertHeard(e.events.card["removed from game"],
                          with_request=True)
 
     def test_mana_changed(self):

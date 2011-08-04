@@ -7,7 +7,7 @@ from functools import partial
 from operator import attrgetter, methodcaller
 import itertools
 
-from cardboard.events import announce, events
+from cardboard.events import collaborate, events
 
 PHASES = [("beginning", ["untap", "draw", "upkeep"]),
           ("first main", []),
@@ -28,8 +28,7 @@ def _make_color(name):
         return getattr(self, _color)
 
     @color.setter
-    @announce(added="{} mana entered pool".format(name),
-              left="{} mana left pool".format(name), store=store)
+    @collaborate()
     def color(self, amount):
         """
         Set the number of mana in the {color} mana pool.
@@ -47,9 +46,9 @@ def _make_color(name):
         if amount == current:
             return
         elif amount > current:
-            event = "added"
+            event = store["added"]
         else:
-            event = "left"
+            event = store["left"]
 
         yield event
         yield
@@ -124,28 +123,30 @@ def _make_player_factory(state):
             return self._life
 
         @life.setter
-        @announce(gained="gained life", lost="lost life", store=e.player.life)
+        @collaborate()
         def life(self, amount):
+
+            if amount == self.life:
+                return
 
             pool = (yield)
             pool.update(player=self, amount=amount)
 
-            if amount == self.life:
-                return
-            elif amount > self.life:
-                event = "gained"
+            if amount > self.life:
+                event = events.player.life["gained"]
             else:
-                event = "lost"
+                event = events.player.life["lost"]
 
             yield event
             yield
+
             pool["player"]._life = amount
             yield event
 
             if pool["player"].life <= 0:
                 pool["player"].die()
 
-        @announce(died="player died", store=e.player)
+        @collaborate()
         def die(self, reason="life"):
             """
             End the player's sorrowful life.
@@ -161,13 +162,13 @@ def _make_player_factory(state):
             pool = (yield)
             pool.update(player=self, reason=reason)
 
-            yield "died"
+            yield events.player["died"]
             yield
 
             self.dead = True
-            yield "died"
+            yield events.player["died"]
 
-        @announce(draw="card drawn", store=e.player)
+        @collaborate()
         def draw(self, cards=1):
             """
             Draw cards from the library.
@@ -196,15 +197,15 @@ def _make_player_factory(state):
                         source_get=methodcaller("pop"),
                         destination_add=attrgetter("add"))
 
-            yield "draw"
+            yield events.player["draw"]
             yield
 
             card = pool["source_get"](pool["source"])
             pool["destination_add"](pool["destination"])(card)
 
-            yield "draw"
+            yield events.player["draw"]
 
-        @announce(entered="card entered graveyard", store=e.card.graveyard)
+        @collaborate()
         def move_to_graveyard(self, card):
             """
             Move a card to the graveyard.
@@ -215,13 +216,13 @@ def _make_player_factory(state):
             pool.update(player=self, target=card, destination=self.graveyard,
                         destination_add=attrgetter("append"))
 
-            yield "entered"
+            yield events.card.graveyard["entered"]
             yield
 
             pool["destination_add"](pool["destination"])(pool["target"])
-            yield "entered"
+            yield events.card.graveyard["entered"]
 
-        @announce(removed_from_game="card removed from game", store=e.card)
+        @collaborate()
         def remove_from_game(self, card):
             """
             Remove a card from the game.
@@ -232,18 +233,18 @@ def _make_player_factory(state):
             pool.update(player=self, target=card, destination=self.exiled,
                         destination_add=attrgetter("add"))
 
-            yield "removed_from_game"
+            yield events.card["removed from game"]
             yield
 
             pool["destination_add"](pool["destination"])(pool["target"])
-            yield "removed_from_game"
+            yield events.card["removed from game"]
 
     return Player
 
 
 def _game_ender(state):
     @state.events.subscribe(event=events.player["died"], needs=["pool"])
-    @announce(handler=state.events, ended="game over", store=events.game)
+    @collaborate()
     def end_game(pangler, pool):
         """
         End the game if there is only one living player left.
@@ -256,11 +257,11 @@ def _game_ender(state):
         # TODO: Stop all other events
         pool = (yield)
 
-        yield "ended"
+        yield events.game["ended"]
         yield
 
         self.game_over = True
-        yield "ended"
+        yield events.game["ended"]
 
     return end_game
 
