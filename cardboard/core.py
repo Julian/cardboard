@@ -347,6 +347,8 @@ class Game(object):
                 self.turn = next(self._turn)
 
     def start(self):
+        self.events.trigger(events.game["started"])
+
         self.game_over = False
 
         self._turn = itertools.cycle(self.players)

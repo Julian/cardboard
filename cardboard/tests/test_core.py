@@ -116,42 +116,46 @@ class TestEvents(unittest.TestCase):
         self.p1 = self.game.add_player(library=[], life=1, hand_size=0)
         self.p2 = self.game.add_player(library=[], life=2, hand_size=0)
 
-    def assertHeard(self, event, with_request=False, handler=None):
+    def assertHeard(self, event, request=False, handler=None):
         if handler is None:
             handler = self.events
 
         e = pool(event=event)
         r = pool(request=event)
 
-        if not with_request:
+        if not request:
             return handler.trigger.assert_called_with(**e)
 
         arg_list = handler.trigger.call_args_list
         self.assertEqual(handler.trigger.call_args_list[-2:], [[r], [e]])
 
-    def assertNotHeard(self, event, with_request=False, handler=None):
+    def assertNotHeard(self, event, request=False, handler=None):
         try:
-            self.assertHeard(event, with_request, handler)
+            self.assertHeard(event, request, handler)
         except (AssertionError, IndexError):
             return
         else:
             self.fail("{} was triggered by the handler.".format(event))
 
+    def test_game_started(self):
+        self.game.start()
+        self.events.trigger.assert_called_with(e.events.game["started"])
+
     def test_die(self):
         self.p1.die()
-        self.assertHeard(e.events.player["died"], with_request=True)
+        self.assertHeard(e.events.player["died"], request=True)
 
     def test_life_changed(self):
         self.p1.life += 2
-        self.assertHeard(e.events.player.life["gained"], with_request=True)
+        self.assertHeard(e.events.player.life["gained"], request=True)
 
         self.p1.life -= 2
-        self.assertHeard(e.events.player.life["lost"], with_request=True)
+        self.assertHeard(e.events.player.life["lost"], request=True)
 
     def test_card_drawn(self):
         self.p1.library = [1]
         self.p1.draw()
-        self.assertHeard(e.events.player["draw"], with_request=True)
+        self.assertHeard(e.events.player["draw"], request=True)
 
         def side_effect(*args, **kwargs):
             if e.events.player["draw"] in kwargs.viewvalues():
@@ -190,25 +194,23 @@ class TestEvents(unittest.TestCase):
     def test_put_into_play(self):
         card = mock.Mock()
         self.p1.put_into_play(card)
-        self.assertHeard(e.events.card.field["entered"], with_request=True)
+        self.assertHeard(e.events.card.field["entered"], request=True)
 
     def test_move_to_graveyard(self):
         card = mock.Mock()
         self.p1.move_to_graveyard(card)
-        self.assertHeard(e.events.card.graveyard["entered"], with_request=True)
+        self.assertHeard(e.events.card.graveyard["entered"], request=True)
 
     def test_remove_from_game(self):
         self.p1.remove_from_game(object())
-        self.assertHeard(e.events.card["removed from game"],
-                         with_request=True)
+        self.assertHeard(e.events.card["removed from game"], request=True)
 
     def test_mana_changed(self):
         self.p1.mana_pool.red += 0
-        self.assertNotHeard(e.events.player.mana.red["added"],
-                            with_request=True)
+        self.assertNotHeard(e.events.player.mana.red["added"], request=True)
 
         self.p1.mana_pool.red += 1
-        self.assertHeard(e.events.player.mana.red["added"], with_request=True)
+        self.assertHeard(e.events.player.mana.red["added"], request=True)
 
         self.p1.mana_pool.red -= 1
-        self.assertHeard(e.events.player.mana.red["left"], with_request=True)
+        self.assertHeard(e.events.player.mana.red["left"], request=True)
