@@ -1,3 +1,10 @@
+"""
+Populate the db using a plain-text card listing file from
+
+    http://www.yawgatog.com/resources/oracle/
+
+"""
+
 from collections import deque
 
 from cardboard import db

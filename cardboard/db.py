@@ -1,17 +1,23 @@
 import os.path
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Table, create_engine
+from sqlalchemy import (Column, ForeignKey, Integer, String, Table,
+                        create_engine)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship, sessionmaker
 
-Base = declarative_base()
+DB = os.path.join(os.path.dirname(__file__), "cards.db")
+
+engine = create_engine('sqlite:///{}'.format(DB))
+Base = declarative_base(bind=engine)
+Session = sessionmaker(bind=engine)
 
 cardsubtype_table = Table("cardsubtypes", Base.metadata,
         Column("card_id", Integer, ForeignKey("cards.id"), primary_key=True),
         Column("subtype_id", Integer, ForeignKey("subtypes.id"),
                primary_key=True),
 )
+
 
 class Ability(Base):
 
@@ -28,6 +34,7 @@ class Ability(Base):
     def __repr__(self):
         # TODO: Truncate
         return "<Ability: {}>".format(self.description)
+
 
 class Card(Base):
 
@@ -47,7 +54,8 @@ class Card(Base):
     sets = association_proxy("appearances", "set")
     subtypes = association_proxy("subtype_objects", "name")
 
-    def __init__(self, name, type, casting_cost=None, abilities=None, subtypes=None):
+    def __init__(self, name, type, casting_cost=None, abilities=None,
+                 subtypes=None):
         super(Card, self).__init__()
 
         if abilities is None:
@@ -65,6 +73,7 @@ class Card(Base):
 
     def __repr__(self):
         return "<Card: {0} ({0.type})>".format(self)
+
 
 class Set(Base):
 
@@ -87,6 +96,7 @@ class Set(Base):
     def __repr__(self):
         return "<Set: {0}>".format(self)
 
+
 class SetAppearance(Base):
 
     __tablename__ = "appearances"
@@ -108,14 +118,15 @@ class SetAppearance(Base):
     def __repr__(self):
         return "<{0.card} ({0.set.code}-{0.rarity})>".format(self)
 
+
 class Creature(Base):
 
     __tablename__ = "creatures"
 
     id = Column(Integer, primary_key=True)
     card_id = Column(Integer, ForeignKey("cards.id"))
-    power = Column(Integer)
-    toughness = Column(Integer)
+    base_power = Column(Integer)
+    base_toughness = Column(Integer)
 
     card = relationship("Card", backref=backref("creature", uselist=False))
 
@@ -132,14 +143,15 @@ class Creature(Base):
         if "*" not in toughness:
             toughness = int(toughness)
 
-        self.power = power
-        self.toughness = toughness
+        self.base_power = power
+        self.base_toughness = toughness
 
     def __str__(self):
         return str(self.card)
 
     def __repr__(self):
         return "<{0.card.type}: {0.card}>".format(self)
+
 
 class Subtype(Base):
 
@@ -156,10 +168,4 @@ class Subtype(Base):
     def __repr__(self):
         return "<{0.__class__.__name__}: {0.name}>".format(self)
 
-db_file = os.path.join(os.path.dirname(__file__), "mtg.db")
-engine = create_engine('sqlite:///{}'.format(db_file))
-
-Base.metadata.bind = engine
 Base.metadata.create_all()
-
-Session = sessionmaker(bind=engine)
