@@ -114,7 +114,7 @@ class TestEvents(unittest.TestCase):
         self.events = mock.Mock()
         self.game = c.Game(self.events)
         self.p1 = self.game.add_player(library=[], life=1, hand_size=0)
-        self.p2 = self.game.add_player(library=[], life=1, hand_size=0)
+        self.p2 = self.game.add_player(library=[], life=2, hand_size=0)
 
     def assertHeard(self, event, with_request=False, handler=None):
         if handler is None:
@@ -140,30 +140,6 @@ class TestEvents(unittest.TestCase):
     def test_die(self):
         self.p1.die()
         self.assertHeard(e.events.player["died"], with_request=True)
-
-    """
-    # FIXME: This should pass, need to patch a real pangler correctly or think
-    # of the right way to test these
-    def test_game_over(self):
-        events = panglery.Pangler()
-        trigger = mock.Mock()
-        trigger.side_effect = events.trigger
-        events.trigger = trigger
-
-        p1 = c.Player(events, deck=[], life=1, hand_size=0)
-        p2 = c.Player(events, deck=[], life=2, hand_size=0)
-        s = c.Game(events, players=[p1, p2])
-
-        # TODO: patch this to check that p2 didn't die here yet
-        p2.life -= 1
-
-        p2.life -= 1
-        self.assertHeard(e.events.player["died"], handler=events)
-
-        p1.life -= 1
-        self.assertHeard(e.events.game["ended"], with_request=True,
-                         handler=events)
-    """
 
     def test_life_changed(self):
         self.p1.life += 2
