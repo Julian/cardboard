@@ -1,6 +1,6 @@
 import unittest
 
-from mock import Mock
+import mock
 
 from cardboard.tests.util import ANY
 import cardboard.events as e
@@ -9,7 +9,7 @@ import cardboard.events as e
 class TestCollaborate(unittest.TestCase):
     def test_trigger(self):
 
-        game = Mock()
+        game = mock.Mock()
         r, v, q = (e.Event(i) for i in ["req", "ev", "req ev"])
 
         @e.collaborate(game)
@@ -52,7 +52,7 @@ class TestCollaborate(unittest.TestCase):
         event = e.Event("do event")
 
         class Foo(object):
-            game = Mock()
+            game = mock.Mock()
 
             @e.collaborate()
             def foo(self):
@@ -63,6 +63,16 @@ class TestCollaborate(unittest.TestCase):
         Foo().foo()
         Foo.game.events.trigger.assert_called_once_with(event=event, pool=ANY)
 
+    def test_game_added_to_pool(self):
+        game = mock.Mock()
+
+        @e.collaborate(game)
+        def foo():
+            pool = (yield)
+            self.assertEqual(pool["game"], game)
+            yield
+
+        foo()
 
 class TestEventStore(unittest.TestCase):
     def test_iter(self):
