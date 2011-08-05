@@ -34,17 +34,17 @@ def _make_color(name):
 
         """.format(color=name)
 
+        current = getattr(self, name)
+
         if amount < 0:
             raise ValueError(negative_error)
+        elif amount == current:
+            return
 
         pool = (yield)
         pool.update(amount=amount, color=name)
 
-        current = getattr(self, name)
-
-        if amount == current:
-            return
-        elif amount > current:
+        if amount > current:
             event = store["added"]
         else:
             event = store["left"]
@@ -58,12 +58,12 @@ def _make_color(name):
 
 
 class ManaPool(object):
-    COLORS = ("black", "blue", "green", "red", "white", "colorless")
+    COLORS = ("black", "green", "red", "blue", "white", "colorless")
 
     black = _make_color("black")
-    blue = _make_color("blue")
     green = _make_color("green")
     red = _make_color("red")
+    blue = _make_color("blue")
     white = _make_color("white")
     colorless = _make_color("colorless")
 
@@ -77,7 +77,7 @@ class ManaPool(object):
 
     def __repr__(self):
         pool = (getattr(self, c) for c in self.COLORS)
-        return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*pool)
+        return "[{}B, {}G, {}R, {}U, {}W, {}]".format(*pool)
 
 
 def _make_player_factory(game_state):
@@ -105,9 +105,6 @@ def _make_player_factory(game_state):
             self.exiled = set()
             self.graveyard = []
             self.mana_pool = ManaPool(self)
-
-        def __str__(self):
-            return self.name
 
         def __repr__(self):
             return "<Player: {} Life>".format(self.life)

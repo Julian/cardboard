@@ -8,6 +8,16 @@ from cardboard import core as c, events as e
 from cardboard.tests.util import ANY
 
 
+class TestManaPool(unittest.TestCase):
+    def test_repr(self):
+        o = mock.Mock()
+        m = c.ManaPool(o)
+        self.assertEqual(repr(m), "[0B, 0G, 0R, 0U, 0W, 0]")
+
+        m.black, m.green, m.red, m.blue, m.white, m.colorless = range(1, 7)
+        self.assertEqual(repr(m), "[1B, 2G, 3R, 4U, 5W, 6]")
+
+
 class TestBehavior(unittest.TestCase):
     def setUp(self):
         self.events = mock.Mock()
@@ -59,6 +69,10 @@ class TestBehavior(unittest.TestCase):
         self.p1.draw(0)
         self.assertFalse(self.p1.dead)
 
+    def test_negatives(self):
+        self.assertRaises(ValueError, self.p1.draw, -1)
+        self.assertRaises(ValueError, setattr, self.p1.mana_pool, "black", -1)
+
 
 class TestEvents(unittest.TestCase):
     def setUp(self):
@@ -78,6 +92,14 @@ class TestEvents(unittest.TestCase):
 
         r = {"request" : event, "pool" : ANY}
         self.assertEqual(handler.trigger.call_args_list[-2:], [[r], [e]])
+
+    def assertNotHeard(self, event, with_request=False, handler=None):
+        try:
+            self.assertHeard(event, with_request, handler)
+        except AssertionError:
+            return
+        else:
+            self.fail("{} was triggered by the handler.".format(event))
 
     def test_die(self):
         self.p1.die()
@@ -139,6 +161,10 @@ class TestEvents(unittest.TestCase):
                          with_request=True)
 
     def test_mana_changed(self):
+        self.p1.mana_pool.red += 0
+        self.assertNotHeard(e.events.player.mana.red["added"],
+                            with_request=True)
+
         self.p1.mana_pool.red += 1
         self.assertHeard(e.events.player.mana.red["added"], with_request=True)
 
