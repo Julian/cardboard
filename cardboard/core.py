@@ -3,7 +3,6 @@ Cardboard core
 
 """
 
-from functools import partial
 from operator import attrgetter, methodcaller
 import itertools
 
