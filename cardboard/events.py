@@ -38,7 +38,7 @@ class Event(object):
         self.name = name
 
     def __repr__(self):
-        return "<Event: {.name}>".format(self)
+        return "<Event: {.name} at {:#x}>".format(self, id(self))
 
 
 class EventStore(MutableMapping):
@@ -159,7 +159,8 @@ def collaborate(game=None, handler=None):
     return _collaborate
 
 events = EventStore()
-events.card = {"removed from game"}
+events.card = {"cast", "removed from game"}
+events.card.field = {"entered", "left"}
 events.card.graveyard = {"entered", "left"}
 events.game = {"started", "ended"}
 events.player = {"died", "draw"}

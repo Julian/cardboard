@@ -197,14 +197,57 @@ def _make_player_factory(game_state):
             yield events.player["draw"]
 
         @collaborate()
+        def cast(self, card):
+            """
+            Cast a card.
+
+            """
+
+            if card.is_permanent:
+                destination = self.put_into_play
+            else:
+                destination = self.move_to_graveyard
+
+            pool = (yield)
+            pool.update(owner=self, target=card, destination=destination)
+
+            yield events.card["cast"]
+            yield
+
+            pool["destination"](pool["target"])
+            yield events.card["cast"]
+
+        @collaborate()
+        def put_into_play(self, card):
+            """
+            Add a card to the play field.
+
+            """
+
+            pool = (yield)
+            pool.update(owner=self, target=card, destination=self.game.field,
+                        destination_add=attrgetter("add"))
+
+            yield events.card.field["entered"]
+            yield
+
+            pool["destination_add"](pool["destination"])(pool["target"])
+
+            if pool["destination"] is self.game.field:
+                pool["target"].owner = pool["owner"]
+
+            yield events.card.field["entered"]
+
+        @collaborate()
         def move_to_graveyard(self, card):
             """
             Move a card to the graveyard.
 
             """
 
+            # TODO: remove from source, include in pool (also in rem_from_game)
             pool = (yield)
-            pool.update(player=self, target=card, destination=self.graveyard,
+            pool.update(target=card, destination=self.graveyard,
                         destination_add=attrgetter("append"))
 
             yield events.card.graveyard["entered"]
@@ -273,6 +316,7 @@ class Game(object):
 
         self.events = handler
 
+        self.field = set()
         self.players = []
         self.Player = _make_player_factory(self)
 

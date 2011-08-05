@@ -64,6 +64,36 @@ class TestBehavior(unittest.TestCase):
         self.p2.draw(5)
         self.assertEqual(self.p2.hand, set(range(5)))
 
+    def test_cast(self):
+        permanent = mock.Mock()
+        permanent.is_permanent = True
+
+        nonpermanent = mock.Mock()
+        nonpermanent.is_permanent = False
+
+        self.p1.put_into_play = mock.Mock()
+        self.p1.move_to_graveyard = mock.Mock()
+
+        self.p1.cast(permanent)
+
+        self.p1.put_into_play.assert_called_once_with(permanent)
+        self.assertFalse(self.p1.move_to_graveyard.called)
+
+        self.p1.put_into_play = mock.Mock()
+        self.p1.move_to_graveyard = mock.Mock()
+
+        self.p1.cast(nonpermanent)
+
+        self.p1.move_to_graveyard.assert_called_once_with(nonpermanent)
+        self.assertFalse(self.p1.put_into_play.called)
+
+    def test_put_into_play(self):
+        card = mock.Mock()
+        self.p1.put_into_play(card)
+
+        self.assertIn(card, self.game.field)
+        self.assertEqual(card.owner, self.p1)
+
     def test_dont_die_when_drawing_zero_cards(self):
         self.assertFalse(self.p1.dead)
         self.p1.draw(0)
@@ -72,6 +102,11 @@ class TestBehavior(unittest.TestCase):
     def test_negatives(self):
         self.assertRaises(ValueError, self.p1.draw, -1)
         self.assertRaises(ValueError, setattr, self.p1.mana_pool, "black", -1)
+
+
+def pool(**kwargs):
+    kwargs["pool"] = ANY
+    return kwargs
 
 
 class TestEvents(unittest.TestCase):
@@ -85,18 +120,19 @@ class TestEvents(unittest.TestCase):
         if handler is None:
             handler = self.events
 
-        e = {"event" : event, "pool" : ANY}
+        e = pool(event=event)
+        r = pool(request=event)
 
         if not with_request:
             return handler.trigger.assert_called_with(**e)
 
-        r = {"request" : event, "pool" : ANY}
+        arg_list = handler.trigger.call_args_list
         self.assertEqual(handler.trigger.call_args_list[-2:], [[r], [e]])
 
     def assertNotHeard(self, event, with_request=False, handler=None):
         try:
             self.assertHeard(event, with_request, handler)
-        except AssertionError:
+        except (AssertionError, IndexError):
             return
         else:
             self.fail("{} was triggered by the handler.".format(event))
@@ -151,8 +187,38 @@ class TestEvents(unittest.TestCase):
         self.p1.draw()
         self.assertHeard(e.events.player["died"])
 
+    def test_cast_permanent(self):
+        card = mock.Mock()
+        card.is_permanent = True
+
+        self.p1.cast(card)
+
+        calls = [[pool(request=e.events.card["cast"])],
+                 [pool(request=e.events.card.field["entered"])],
+                 [pool(event=e.events.card.field["entered"])],
+                 [pool(event=e.events.card["cast"])]]
+        self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
+
+    def test_cast_nonpermanent(self):
+        card = mock.Mock()
+        card.is_permanent = False
+
+        self.p1.cast(card)
+
+        calls = [[pool(request=e.events.card["cast"])],
+                 [pool(request=e.events.card.graveyard["entered"])],
+                 [pool(event=e.events.card.graveyard["entered"])],
+                 [pool(event=e.events.card["cast"])]]
+        self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
+
+    def test_put_into_play(self):
+        card = mock.Mock()
+        self.p1.put_into_play(card)
+        self.assertHeard(e.events.card.field["entered"], with_request=True)
+
     def test_move_to_graveyard(self):
-        self.p1.move_to_graveyard(object())
+        card = mock.Mock()
+        self.p1.move_to_graveyard(card)
         self.assertHeard(e.events.card.graveyard["entered"], with_request=True)
 
     def test_remove_from_game(self):
