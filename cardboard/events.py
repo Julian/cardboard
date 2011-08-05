@@ -79,7 +79,7 @@ class EventStore(MutableMapping):
         return "EventStore({})".format(self._events)
 
 
-def collaborate(handler=None, handler_attr="events"):
+def collaborate(game=None, handler=None):
     """
     Create an announcing action.
 
@@ -128,10 +128,16 @@ def collaborate(handler=None, handler_attr="events"):
 
         @wraps(fn)
         def collaborating(*args, **kwargs):
-            if handler is None:
+
+            # nonlocal :/
+            if game is None:
                 self = args[0]
-                # nonlocal :/
-                handle = getattr(self, handler_attr)
+                state = getattr(self, "game")
+            else:
+                state = game
+
+            if handler is None:
+                handle = state.events
             else:
                 handle = handler
 
@@ -142,7 +148,7 @@ def collaborate(handler=None, handler_attr="events"):
             except StopIteration:
                 return  # action cancelled itself
             else:
-                pool = Pool()
+                pool = Pool(game=state)
 
             # just grab the next yield so that an extra yield isn't required
             next_yield = [action.send(pool)]

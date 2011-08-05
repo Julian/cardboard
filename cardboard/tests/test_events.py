@@ -8,41 +8,40 @@ import cardboard.events as e
 
 class TestCollaborate(unittest.TestCase):
     def test_trigger(self):
-        handler = Mock()
 
-        r, v, q = (e.Event(i) for i in ["do request", "do event",
-                                        "do requested event"])
+        game = Mock()
+        r, v, q = (e.Event(i) for i in ["req", "ev", "req ev"])
 
-        @e.collaborate(handler)
+        @e.collaborate(game)
         def nothing():
             pool = (yield)
             yield
-            self.assertFalse(handler.trigger.called)
+            self.assertFalse(game.events.trigger.called)
 
-        @e.collaborate(handler)
+        @e.collaborate(game)
         def request():
             pool = (yield)
             yield r
             yield
-            handler.trigger.assert_called_with(request=r, pool=ANY)
+            game.events.trigger.assert_called_with(request=r, pool=ANY)
 
-        @e.collaborate(handler)
+        @e.collaborate(game)
         def event():
             pool = (yield)
             yield
             yield v
-            handler.trigger.assert_called_with(event=v, pool=ANY)
+            game.events.trigger.assert_called_with(event=v, pool=ANY)
 
 
-        @e.collaborate(handler)
+        @e.collaborate(game)
         def requested_event():
             pool = (yield)
             self.pool = pool
             yield q
-            handler.trigger.assert_called_with(request=q, pool=ANY)
+            game.events.trigger.assert_called_with(request=q, pool=ANY)
             yield
             yield q
-            handler.trigger.assert_called_with(event=q, pool=ANY)
+            game.events.trigger.assert_called_with(event=q, pool=ANY)
 
         nothing()
         request()
@@ -53,7 +52,7 @@ class TestCollaborate(unittest.TestCase):
         event = e.Event("do event")
 
         class Foo(object):
-            events = Mock()
+            game = Mock()
 
             @e.collaborate()
             def foo(self):
@@ -62,7 +61,7 @@ class TestCollaborate(unittest.TestCase):
                 yield event
 
         Foo().foo()
-        Foo.events.trigger.assert_called_once_with(event=event, pool=ANY)
+        Foo.game.events.trigger.assert_called_once_with(event=event, pool=ANY)
 
 
 class TestEventStore(unittest.TestCase):

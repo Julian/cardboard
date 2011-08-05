@@ -67,24 +67,20 @@ class ManaPool(object):
     white = _make_color("white")
     colorless = _make_color("colorless")
 
-    def __init__(self, for_player):
+    def __init__(self, owner):
         super(ManaPool, self).__init__()
-
-        self.player = for_player
-        self.events = self.player.events
+        self.owner = owner
+        self.game = self.owner.game
 
         for color in self.COLORS:
             setattr(self, "_" + color, 0)
-
-    def __iter__(self):
-        return iter(self.pool)
 
     def __repr__(self):
         pool = (getattr(self, c) for c in self.COLORS)
         return "[{}B, {}U, {}G, {}R, {}W, {}]".format(*pool)
 
 
-def _make_player_factory(state):
+def _make_player_factory(game_state):
 
     e = events
 
@@ -94,8 +90,7 @@ def _make_player_factory(state):
 
         """
 
-        game = state
-        events = state.events
+        game = game_state
 
         def __init__(self, library, hand_size=7, life=20):
             super(Player, self).__init__()
@@ -241,8 +236,8 @@ def _make_player_factory(state):
     return Player
 
 
-def _game_ender(state):
-    @state.events.subscribe(event=events.player["died"], needs=["pool"])
+def _game_ender(game):
+    @game.events.subscribe(event=events.player["died"], needs=["pool"])
     @collaborate()
     def end_game(pangler, pool):
         """
@@ -250,7 +245,7 @@ def _game_ender(state):
 
         """
 
-        if sum(1 for player in state.players if player.dead) > 1:
+        if sum(1 for player in game.players if player.dead) > 1:
             return
 
         # TODO: Stop all other events
@@ -265,9 +260,9 @@ def _game_ender(state):
     return end_game
 
 
-class State(object):
+class Game(object):
     """
-    The State object maintains information about the current game state.
+    The Game object maintains information about the current game state.
 
     """
 
@@ -277,7 +272,7 @@ class State(object):
 
         """
 
-        super(State, self).__init__()
+        super(Game, self).__init__()
 
         self.events = handler
 
@@ -287,7 +282,7 @@ class State(object):
         self.end_game = _game_ender(self)
 
     def __repr__(self):
-        return "<{} Player Game State>".format(len(self.players))
+        return "<{} Player Game>".format(len(self.players))
 
     def add_player(self, *args, **kwargs):
         player = self.Player(*args, **kwargs)
