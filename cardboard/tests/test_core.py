@@ -139,33 +139,33 @@ class TestEvents(unittest.TestCase):
 
     def test_game_started(self):
         self.game.start()
-        self.events.trigger.assert_called_with(e.events.game["started"])
+        self.events.trigger.assert_called_with(e.events.game.started)
 
     def test_die(self):
         self.p1.die()
-        self.assertHeard(e.events.player["died"], request=True)
+        self.assertHeard(e.events.player.died, request=True)
 
     def test_life_changed(self):
         self.p1.life += 2
-        self.assertHeard(e.events.player.life["gained"], request=True)
+        self.assertHeard(e.events.player.life.gained, request=True)
 
         self.p1.life -= 2
-        self.assertHeard(e.events.player.life["lost"], request=True)
+        self.assertHeard(e.events.player.life.lost, request=True)
 
     def test_card_drawn(self):
         self.p1.library = [1]
         self.p1.draw()
-        self.assertHeard(e.events.player["draw"], request=True)
+        self.assertHeard(e.events.player.draw, request=True)
 
         def side_effect(*args, **kwargs):
-            if e.events.player["draw"] in kwargs.viewvalues():
+            if e.events.player.draw in kwargs.viewvalues():
                 self.fail("Unexpected card draw")
             return mock.DEFAULT
 
         self.events.trigger.side_effect = side_effect
 
         self.p1.draw()
-        self.assertHeard(e.events.player["died"])
+        self.assertHeard(e.events.player.died)
 
     def test_cast_permanent(self):
         card = mock.Mock()
@@ -173,10 +173,10 @@ class TestEvents(unittest.TestCase):
 
         self.p1.cast(card)
 
-        calls = [[pool(request=e.events.card["cast"])],
-                 [pool(request=e.events.card.field["entered"])],
-                 [pool(event=e.events.card.field["entered"])],
-                 [pool(event=e.events.card["cast"])]]
+        calls = [[pool(request=e.events.card.cast)],
+                 [pool(request=e.events.card.field.entered)],
+                 [pool(event=e.events.card.field.entered)],
+                 [pool(event=e.events.card.cast)]]
         self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
 
     def test_cast_nonpermanent(self):
@@ -185,32 +185,32 @@ class TestEvents(unittest.TestCase):
 
         self.p1.cast(card)
 
-        calls = [[pool(request=e.events.card["cast"])],
-                 [pool(request=e.events.card.graveyard["entered"])],
-                 [pool(event=e.events.card.graveyard["entered"])],
-                 [pool(event=e.events.card["cast"])]]
+        calls = [[pool(request=e.events.card.cast)],
+                 [pool(request=e.events.card.graveyard.entered)],
+                 [pool(event=e.events.card.graveyard.entered)],
+                 [pool(event=e.events.card.cast)]]
         self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
 
     def test_put_into_play(self):
         card = mock.Mock()
         self.p1.put_into_play(card)
-        self.assertHeard(e.events.card.field["entered"], request=True)
+        self.assertHeard(e.events.card.field.entered, request=True)
 
     def test_move_to_graveyard(self):
         card = mock.Mock()
         self.p1.move_to_graveyard(card)
-        self.assertHeard(e.events.card.graveyard["entered"], request=True)
+        self.assertHeard(e.events.card.graveyard.entered, request=True)
 
     def test_remove_from_game(self):
         self.p1.remove_from_game(object())
-        self.assertHeard(e.events.card["removed from game"], request=True)
+        self.assertHeard(e.events.card.removed_from_game, request=True)
 
     def test_mana_changed(self):
         self.p1.mana_pool.red += 0
-        self.assertNotHeard(e.events.player.mana.red["added"], request=True)
+        self.assertNotHeard(e.events.player.mana.red.added, request=True)
 
         self.p1.mana_pool.red += 1
-        self.assertHeard(e.events.player.mana.red["added"], request=True)
+        self.assertHeard(e.events.player.mana.red.added, request=True)
 
         self.p1.mana_pool.red -= 1
-        self.assertHeard(e.events.player.mana.red["left"], request=True)
+        self.assertHeard(e.events.player.mana.red.removed, request=True)

@@ -20,7 +20,7 @@ def _make_color(name):
 
     _color = "_" + name
     negative_error = "{} mana pool would be negative.".format(name.title())
-    store = getattr(events.player.mana, name)
+    color_events = getattr(events.player.mana, name)
 
     @property
     def color(self):
@@ -45,9 +45,9 @@ def _make_color(name):
         pool.update(amount=amount, color=name)
 
         if amount > current:
-            event = store["added"]
+            event = color_events.added
         else:
-            event = store["left"]
+            event = color_events.removed
 
         yield event
         yield
@@ -124,9 +124,9 @@ def _make_player_factory(game_state):
             pool.update(player=self, amount=amount)
 
             if amount > self.life:
-                event = events.player.life["gained"]
+                event = events.player.life.gained
             else:
-                event = events.player.life["lost"]
+                event = events.player.life.lost
 
             yield event
             yield
@@ -153,11 +153,11 @@ def _make_player_factory(game_state):
             pool = (yield)
             pool.update(player=self, reason=reason)
 
-            yield events.player["died"]
+            yield events.player.died
             yield
 
             self.dead = True
-            yield events.player["died"]
+            yield events.player.died
 
         @collaborate()
         def draw(self, cards=1):
@@ -188,13 +188,13 @@ def _make_player_factory(game_state):
                         source_get=methodcaller("pop"),
                         destination_add=attrgetter("add"))
 
-            yield events.player["draw"]
+            yield events.player.draw
             yield
 
             card = pool["source_get"](pool["source"])
             pool["destination_add"](pool["destination"])(card)
 
-            yield events.player["draw"]
+            yield events.player.draw
 
         @collaborate()
         def cast(self, card):
@@ -211,11 +211,11 @@ def _make_player_factory(game_state):
             pool = (yield)
             pool.update(owner=self, target=card, destination=destination)
 
-            yield events.card["cast"]
+            yield events.card.cast
             yield
 
             pool["destination"](pool["target"])
-            yield events.card["cast"]
+            yield events.card.cast
 
         @collaborate()
         def put_into_play(self, card):
@@ -228,7 +228,7 @@ def _make_player_factory(game_state):
             pool.update(owner=self, target=card, destination=self.game.field,
                         destination_add=attrgetter("add"))
 
-            yield events.card.field["entered"]
+            yield events.card.field.entered
             yield
 
             pool["destination_add"](pool["destination"])(pool["target"])
@@ -236,7 +236,7 @@ def _make_player_factory(game_state):
             if pool["destination"] is self.game.field:
                 pool["target"].owner = pool["owner"]
 
-            yield events.card.field["entered"]
+            yield events.card.field.entered
 
         @collaborate()
         def move_to_graveyard(self, card):
@@ -250,11 +250,11 @@ def _make_player_factory(game_state):
             pool.update(target=card, destination=self.graveyard,
                         destination_add=attrgetter("append"))
 
-            yield events.card.graveyard["entered"]
+            yield events.card.graveyard.entered
             yield
 
             pool["destination_add"](pool["destination"])(pool["target"])
-            yield events.card.graveyard["entered"]
+            yield events.card.graveyard.entered
 
         @collaborate()
         def remove_from_game(self, card):
@@ -267,17 +267,17 @@ def _make_player_factory(game_state):
             pool.update(player=self, target=card, destination=self.exiled,
                         destination_add=attrgetter("add"))
 
-            yield events.card["removed from game"]
+            yield events.card.removed_from_game
             yield
 
             pool["destination_add"](pool["destination"])(pool["target"])
-            yield events.card["removed from game"]
+            yield events.card.removed_from_game
 
     return Player
 
 
 def _game_ender(game):
-    @game.events.subscribe(event=events.player["died"], needs=["pool"])
+    @game.events.subscribe(event=events.player.died, needs=["pool"])
     @collaborate()
     def end_game(pangler, pool):
         """
@@ -291,11 +291,11 @@ def _game_ender(game):
         # TODO: Stop all other events
         pool = (yield)
 
-        yield events.game["ended"]
+        yield events.game.ended
         yield
 
         self.game_over = True
-        yield events.game["ended"]
+        yield events.game.ended
 
     return end_game
 
@@ -347,7 +347,7 @@ class Game(object):
                 self.turn = next(self._turn)
 
     def start(self):
-        self.events.trigger(events.game["started"])
+        self.events.trigger(events.game.started)
 
         self.game_over = False
 

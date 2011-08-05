@@ -74,20 +74,31 @@ class TestCollaborate(unittest.TestCase):
 
         foo()
 
-class TestEventStore(unittest.TestCase):
+class TestEvent(unittest.TestCase):
     def test_iter(self):
-        s = e.EventStore("foo", "bar")
-        self.assertEqual(list(iter(s)), ["foo", "bar"])
+        s = e.Event(None, {"foo" : {}, "bar" : {}})
+        self.assertEqual({v.name for v in s}, {"foo", "bar"})
 
-    def test_substore(self):
-        s = e.EventStore("foo")
+    def test_contains(self):
+        s = e.Event(None, {"foo" : {}})
+        f = s.foo
+        self.assertIn(f, s)
 
-        s.test = {"bar", "baz"}
-        self.assertIsInstance(s.test, e.EventStore)
-        self.assertEqual(s.substores.viewkeys(), {"test"})
+    def test_name(self):
+        s = e.Event("s")
+        self.assertEqual(s.name, "s")
 
-        self.assertIsInstance(s.test["bar"], e.Event)
-        self.assertEqual(s.test["bar"].name, "bar")
+    def test_subevents(self):
+        s = e.Event(None, {"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
 
-        self.assertIsInstance(s.test["baz"], e.Event)
-        self.assertEqual(s.test["baz"].name, "baz")
+        self.assertIsInstance(s.a, e.Event)
+        self.assertIsInstance(s.a.b, e.Event)
+        self.assertIsInstance(s.a.c, e.Event)
+        self.assertEqual(s.a.name, "a")
+        self.assertEqual(s.a.b.name, "b")
+        self.assertEqual(s.a.c.name, "c")
+
+        self.assertIsInstance(s.b, e.Event)
+        self.assertIsInstance(s.b.a, e.Event)
+        self.assertEqual(s.b.name, "b")
+        self.assertEqual(s.b.a.name, "a")
