@@ -6,18 +6,21 @@ import cardboard.events as e
 
 class TestEvent(unittest.TestCase):
     def test_iter(self):
-        s = e.Event(None, {"foo" : {}, "bar" : {}})
+        s = e.Event(foo={}, bar={})
         self.assertEqual({v.name for v in s}, {"foo", "bar"})
 
     def test_contains(self):
-        s = e.Event(None, {"foo" : {}})
+        s = e.Event(foo={})
         f = s.foo
         self.assertIn(f, s)
 
     def test_repr_str(self):
-        s = e.Event("s")
-        self.assertEqual(repr(s), "Event('s')")
+        s = e.Event("s", t={})
+        self.assertEqual(repr(s), "<Event: s>")
         self.assertEqual(str(s), "s")
+
+        self.assertEqual(repr(s.t), "<Event: s.t>")
+        self.assertEqual(str(s.t), "t")
 
     def test_name(self):
         s = e.Event("s")
@@ -37,7 +40,7 @@ class TestEvent(unittest.TestCase):
         self.assertEqual(s.subevent_names, {"foo", "bar"})
 
     def test_set_subevents(self):
-        s = e.Event(None, {"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
+        s = e.Event(subevents={"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
 
         self.assertIsInstance(s.a, e.Event)
         self.assertIsInstance(s.a.b, e.Event)

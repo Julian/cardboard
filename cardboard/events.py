@@ -1,5 +1,5 @@
 from collections import OrderedDict
-import itertools
+from itertools import chain
 
 
 __all__ = ["Event", "events", "phases"]
@@ -21,16 +21,20 @@ class Event(object):
 
     """
 
-    def __init__(self, name="", subevents=None, **kwsubevents):
+    def __init__(self, name="", subevents=None, _parent=None, **kwsubevents):
         super(Event, self).__init__()
 
         if subevents is None:
             subevents = {}
 
-        self.name = str(name)
+        if _parent is not None:
+            _parent = ".".join([_parent.fully_qualified_name, name])
 
-        e = itertools.chain(subevents.iteritems(), kwsubevents.iteritems())
-        self._subevents = subevents.__class__((k, Event(k, v)) for k, v in e)
+        self.fully_qualified_name = _parent or name
+
+        all_events = chain(subevents.iteritems(), kwsubevents.iteritems())
+        events = ((k, Event(k, v, _parent=self)) for k, v in all_events)
+        self._subevents = subevents.__class__(events)
 
     def __contains__(self, event):
         return event in self._subevents.viewvalues()
@@ -51,7 +55,11 @@ class Event(object):
         return self.name
 
     def __repr__(self):
-        return "Event('{.name}')".format(self)
+        return "<Event: {.fully_qualified_name}>".format(self)
+
+    @property
+    def name(self):
+        return self.fully_qualified_name.rpartition(".")[2]
 
     @property
     def subevent_names(self):
@@ -106,6 +114,11 @@ events = Event("all",
                           "started" : {},
                           "ended" : {},
                           "phases" : phases,
+
+                          "turn" : {
+                                    "changed" : {},
+                                   },
+
                          },
 
                 "player" : {
