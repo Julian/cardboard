@@ -4,7 +4,7 @@ import unittest
 import mock
 import panglery
 
-from cardboard import core as c, events as e
+from cardboard import core as c, events as e, exceptions as exc
 from cardboard.tests.util import ANY
 
 
@@ -26,34 +26,109 @@ class TestBehavior(unittest.TestCase):
         self.p2 = self.game.add_player(library=[], life=1, hand_size=0)
         self.game.start()
 
-    def test_advance(self):
+    def test_initialize_turn_and_phase(self):
         self.assertIs(self.game.turn, self.p1)
-
         self.assertEqual(self.game.phase, "beginning")
         self.assertEqual(self.game.subphase, "untap")
+
+    def test_next_phase(self):
+        self.game.next_turn = mock.Mock()
 
         for phase, subphase in [("beginning", "draw"),
                                 ("beginning", "upkeep"),
-                                ("first main", None),
+                                ("first_main", None),
                                 ("combat", "beginning"),
-                                ("combat", "declare attackers"),
-                                ("combat", "declare blockers"),
-                                ("combat", "combat damage"),
+                                ("combat", "declare_attackers"),
+                                ("combat", "declare_blockers"),
+                                ("combat", "combat_damage"),
                                 ("combat", "end"),
-                                ("second main", None),
+                                ("second_main", None),
                                 ("ending", "end"),
                                 ("ending", "cleanup")]:
 
-            self.game.advance()
+            self.game.next_phase()
             self.assertEqual(self.game.phase, phase)
             self.assertEqual(self.game.subphase, subphase)
 
-        self.game.advance()
+        # check calls next_turn at end of last subphase
+        self.assertFalse(self.game.next_turn.called)
+        self.game.next_phase()
+        self.assertTrue(self.game.next_turn.called)
 
+    def test_phase_set(self):
+        # just move to the middle of a turn somewhere
+        for i in range(6):
+            self.game.next_phase()
+
+        self.assertIs(self.game.turn, self.p1)
+        self.assertNotEquals(self.game.phase, "beginning")
+        self.assertNotEquals(self.game.subphase, "untap")
+
+        self.game.phase = "beginning"
+
+        self.assertIs(self.game.turn, self.p1)
+        self.assertEquals(self.game.phase, "beginning")
+        self.assertEquals(self.game.subphase, "untap")
+
+        # check that next_phase still works
+        self.test_next_phase()
+
+    def test_phase_set_nonexisting(self):
+        self.assertRaises(ValueError, setattr, self.game, "phase", object())
+
+    def test_next_turn(self):
+        self.assertIs(self.game.turn, self.p1)
+        self.game.next_turn()
         self.assertIs(self.game.turn, self.p2)
-
         self.assertEqual(self.game.phase, "beginning")
         self.assertEqual(self.game.subphase, "untap")
+
+    def test_turn_set(self):
+        events = mock.Mock()
+        game = c.Game(events)
+        p1 = game.add_player(library=[], life=1, hand_size=0)
+        p2 = game.add_player(library=[], life=2, hand_size=0)
+        p3 = game.add_player(library=[], life=3, hand_size=0)
+        game.start()
+
+        game.turn = p3
+
+        self.assertIs(game.turn, p3)
+        self.assertEqual(game.phase, "beginning")
+        self.assertEqual(game.subphase, "untap")
+
+    def test_turn_set_nonexisting(self):
+        self.assertRaises(ValueError, setattr, self.game, "turn", object())
+
+    def test_next_turn_from_middle(self):
+        # just move to the middle of a turn somewhere
+        for i in range(4):
+            self.game.next_phase()
+
+        self.game.next_turn()
+        self.assertIs(self.game.turn, self.p2)
+        self.assertEqual(self.game.phase, "beginning")
+        self.assertEqual(self.game.subphase, "untap")
+
+    def test_unstarted_game(self):
+        game = c.Game(mock.Mock())
+
+        self.assertIs(game.game_over, None)
+
+        self.assertIs(game.turn, None)
+        self.assertIs(game.phase, None)
+        self.assertIs(game.subphase, None)
+
+        self.assertFalse(game.started)
+
+        self.assertRaises(exc.RuntimeError, setattr, game, "phase", "ending")
+        self.assertRaises(exc.RuntimeError, setattr, game, "turn", object())
+        self.assertRaises(exc.RuntimeError, game.next_phase)
+        self.assertRaises(exc.RuntimeError, game.next_turn)
+
+    def test_no_player_game(self):
+        game = c.Game(mock.Mock())
+        self.assertRaises(exc.RuntimeError, game.start)
 
     def test_draw(self):
         self.p1.library = [0]
@@ -140,6 +215,36 @@ class TestEvents(unittest.TestCase):
     def test_game_started(self):
         self.game.start()
         self.events.trigger.assert_called_with(e.events.game.started)
+
+    @unittest.skip
+    def test_next_phase(self):
+        self.assertIs(self.game.turn, self.p1)
+
+        self.assertEqual(self.game.phase, "beginning")
+        self.assertEqual(self.game.subphase, "untap")
+
+        for phase, subphase in [("beginning", "draw"),
+                                ("beginning", "upkeep"),
+                                ("first_main", None),
+                                ("combat", "beginning"),
+                                ("combat", "declare attackers"),
+                                ("combat", "declare blockers"),
+                                ("combat", "combat damage"),
+                                ("combat", "end"),
+                                ("second_main", None),
+                                ("ending", "end"),
+                                ("ending", "cleanup")]:
+
+            self.game.advance()
+            self.assertEqual(self.game.phase, phase)
+            self.assertEqual(self.game.subphase, subphase)
+
+        self.game.advance()
+
+        self.assertIs(self.game.turn, self.p2)
+
+        self.assertEqual(self.game.phase, "beginning")
+        self.assertEqual(self.game.subphase, "untap")
 
     def test_die(self):
         self.p1.die()

@@ -1,28 +1,48 @@
-from collections import MutableMapping
-from functools import wraps
+from collections import OrderedDict
 import itertools
 
 
-__all__ = ["Pool", "Event", "collaborate", "events"]
+__all__ = ["Event", "events", "phases"]
 
 
 class Event(object):
-    def __init__(self, name="", subevents=(), **kwsubevents):
+    """
+    An event container.
+
+    To create ordered sections of the event tree, passing in an OrderedDict is
+    supported.
+
+        >>> from collections import OrderedDict
+        >>> o = OrderedDict([("foo", {}), ("bar", {})])
+        >>> e = Event("Foo", subevents=o)
+
+        >>> list(e)
+        [Event('foo'), Event('bar')]
+
+    """
+
+    def __init__(self, name="", subevents=None, **kwsubevents):
         super(Event, self).__init__()
 
-        self.name = str(name)
-        self._subevents = set()
+        if subevents is None:
+            subevents = {}
 
-        for k, v in dict(subevents, **kwsubevents).iteritems():
-            e = Event(name=k, subevents=v)
-            setattr(self, k, e)
-            self._subevents.add(e)
+        self.name = str(name)
+
+        e = itertools.chain(subevents.iteritems(), kwsubevents.iteritems())
+        self._subevents = subevents.__class__((k, Event(k, v)) for k, v in e)
 
     def __contains__(self, event):
-        return event in self._subevents
+        return event in self._subevents.viewvalues()
+
+    def __getattr__(self, attr):
+        try:
+            return self._subevents[attr]
+        except KeyError:
+            return object.__getattribute__(self, attr)
 
     def __iter__(self):
-        return iter(self._subevents)
+        return iter(self._subevents.viewvalues())
 
     def __len__(self):
         return len(self._subevents)
@@ -31,115 +51,42 @@ class Event(object):
         return self.name
 
     def __repr__(self):
-        return "Event({.name})".format(self)
+        return "Event('{.name}')".format(self)
+
+    @property
+    def subevent_names(self):
+        return self._subevents.viewkeys()
 
 
-class Pool(MutableMapping):
-    def __init__(self, *args, **kwargs):
-        self._parameters = dict(*args, **kwargs)
+phases = OrderedDict([
 
-    def __contains__(self, k):
-        return k in self._parameters
+                      ("beginning", OrderedDict([
+                                                 ("untap", {}),
+                                                 ("draw", {}),
+                                                 ("upkeep", {}),
+                                                 ])),
 
-    def __iter__(self):
-        return iter(self._parameters)
+                      ("first_main", {}),
 
-    def __len__(self):
-        return len(self._parameters)
+                      ("combat", OrderedDict([
+                                              ("beginning", {}),
+                                              ("declare_attackers", {}),
+                                              ("declare_blockers", {}),
+                                              ("combat_damage", {}),
+                                              ("end", {}),
+                                             ])),
 
-    def __getitem__(self, k):
-        return self._parameters[k]
+                      ("second_main", {}),
 
-    def __setitem__(self, k, v):
-        self._parameters[k] = v
+                      ("ending", OrderedDict([
+                                              ("end", {}),
+                                              ("cleanup", {}),
+                                             ])),
+                     ])
 
-    def __delitem__(self, k):
-        del self._parameters[k]
-
-    def __repr__(self):
-        return "Pool({})".format(self._parameters.keys())
-
-
-def collaborate(game=None, handler=None):
-    """
-    Create an announcing action.
-
-    Callables using this decorator should conform to the following pattern:
-
-        @collaborate()
-        def action(<arguments>):
-
-            <setup>
-
-            pool = (yield)   # receive a pool for communicating with listeners
-
-            <populate pool>  # anything that listeners may need to modify
-
-            <yield events>   # ask listeners if they need to participate
-
-            yield            # tell listeners pool is ready for modification
-
-            <body>           # check pool for denials and do work
-
-            <yield events>   # signal listeners that want to know what was done
-
-            <cleanup>
-
-    Events will be triggered by the handler along with the pool by:
-
-        event_handler.trigger(request=event, pool=pool)
-
-    during the first round of yields to the listeners, and by:
-
-        event_handler.trigger(event=event, pool=pool)
-
-    when yielding for the listeners waiting for notifications.
-
-    """
-
-    def _collaborate(fn):
-
-        def broadcast_events(handler, event_key, source, initial=(), **kwargs):
-            for event in itertools.chain(initial, source):
-                if event is None:
-                    return
-
-                kwargs[event_key] = event
-                handler.trigger(**kwargs)
-
-        @wraps(fn)
-        def collaborating(*args, **kwargs):
-
-            # nonlocal :/
-            if game is None:
-                self = args[0]
-                state = getattr(self, "game")
-            else:
-                state = game
-
-            if handler is None:
-                handle = state.events
-            else:
-                handle = handler
-
-            action = fn(*args, **kwargs)
-
-            try:
-                next(action)
-            except StopIteration:
-                return  # action cancelled itself
-            else:
-                pool = Pool(game=state)
-
-            # just grab the next yield so that an extra yield isn't required
-            next_yield = [action.send(pool)]
-            broadcast_events(handle, "request", action, next_yield, pool=pool)
-            broadcast_events(handle, "event", action, pool=pool)
-
-        return collaborating
-    return _collaborate
 
 events = Event("all",
+
                {"card" : {
                           "cast" : {},
                           "removed_from_game" : {},
@@ -158,14 +105,7 @@ events = Event("all",
                 "game" : {
                           "started" : {},
                           "ended" : {},
-
-                          "phases" : {
-                                      "beginning" : {},
-                                      "first_main_phase" : {},
-                                      "combat" : {},
-                                      "second_main_phase" : {},
-                                      "ending" : {},
-                                     }
+                          "phases" : phases,
                          },
 
                 "player" : {

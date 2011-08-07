@@ -1,78 +1,8 @@
+import collections
 import unittest
 
-import mock
-
-from cardboard.tests.util import ANY
 import cardboard.events as e
 
-
-class TestCollaborate(unittest.TestCase):
-    def test_trigger(self):
-
-        game = mock.Mock()
-        r, v, q = (e.Event(i) for i in ["req", "ev", "req ev"])
-
-        @e.collaborate(game)
-        def nothing():
-            pool = (yield)
-            yield
-            self.assertFalse(game.events.trigger.called)
-
-        @e.collaborate(game)
-        def request():
-            pool = (yield)
-            yield r
-            yield
-            game.events.trigger.assert_called_with(request=r, pool=ANY)
-
-        @e.collaborate(game)
-        def event():
-            pool = (yield)
-            yield
-            yield v
-            game.events.trigger.assert_called_with(event=v, pool=ANY)
-
-
-        @e.collaborate(game)
-        def requested_event():
-            pool = (yield)
-            self.pool = pool
-            yield q
-            game.events.trigger.assert_called_with(request=q, pool=ANY)
-            yield
-            yield q
-            game.events.trigger.assert_called_with(event=q, pool=ANY)
-
-        nothing()
-        request()
-        event()
-        requested_event()
-
-    def test_default_handler(self):
-        event = e.Event("do event")
-
-        class Foo(object):
-            game = mock.Mock()
-
-            @e.collaborate()
-            def foo(self):
-                pool = (yield)
-                yield
-                yield event
-
-        Foo().foo()
-        Foo.game.events.trigger.assert_called_once_with(event=event, pool=ANY)
-
-    def test_game_added_to_pool(self):
-        game = mock.Mock()
-
-        @e.collaborate(game)
-        def foo():
-            pool = (yield)
-            self.assertEqual(pool["game"], game)
-            yield
-
-        foo()
 
 class TestEvent(unittest.TestCase):
     def test_iter(self):
@@ -84,11 +14,29 @@ class TestEvent(unittest.TestCase):
         f = s.foo
         self.assertIn(f, s)
 
+    def test_repr_str(self):
+        s = e.Event("s")
+        self.assertEqual(repr(s), "Event('s')")
+        self.assertEqual(str(s), "s")
+
     def test_name(self):
         s = e.Event("s")
         self.assertEqual(s.name, "s")
 
-    def test_subevents(self):
+    def test_kwargs(self):
+        s = e.Event("s", foo={})
+        self.assertIsInstance(s.foo, e.Event)
+        self.assertEqual(s.foo.name, "foo")
+
+        s = e.Event("s", {"foo" : {}}, bar={})
+        self.assertEqual(s.foo.name, "foo")
+        self.assertEqual(s.bar.name, "bar")
+
+    def test_subevent_names(self):
+        s = e.Event("s", {"foo" : {}, "bar" : {}})
+        self.assertEqual(s.subevent_names, {"foo", "bar"})
+
+    def test_set_subevents(self):
         s = e.Event(None, {"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
 
         self.assertIsInstance(s.a, e.Event)
@@ -102,3 +50,12 @@ class TestEvent(unittest.TestCase):
         self.assertIsInstance(s.b.a, e.Event)
         self.assertEqual(s.b.name, "b")
         self.assertEqual(s.b.a.name, "a")
+
+        self.assertRaises(AttributeError, getattr, s, "d")
+
+    def test_ordered(self):
+        keys = ["foo", "bar", "a", "z", "baz", "hello", "world", "oof", "rab"]
+        o = collections.OrderedDict([(a, {}) for a in keys])
+        s = e.Event("s", o)
+        self.assertEqual([v.name for v in s], keys)
+        self.assertIsInstance(s._subevents, collections.OrderedDict)
