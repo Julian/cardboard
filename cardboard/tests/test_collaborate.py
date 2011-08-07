@@ -32,7 +32,6 @@ class TestCollaborate(unittest.TestCase):
             yield v
             game.events.trigger.assert_called_with(event=v, pool=ANY)
 
-
         @c.collaborate(game)
         def requested_event():
             pool = (yield)

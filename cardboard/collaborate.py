@@ -40,7 +40,7 @@ def broadcast_events(handler, event_key, source, initial=(), **kwargs):
         handler.trigger(**kwargs)
 
 
-def collaborate(game=None, handler=None):
+def collaborate(game=None):
     """
     Create a collaborating action that can be listened for and modified.
 
@@ -85,15 +85,11 @@ def collaborate(game=None, handler=None):
             # nonlocal :/
             if game is None:
                 self = args[0]
-                state = getattr(self, "game")
+                state = getattr(self, "game", self)
             else:
                 state = game
 
-            if handler is None:
-                handle = state.events
-            else:
-                handle = handler
-
+            handler = state.events
             action = fn(*args, **kwargs)
 
             try:
@@ -105,8 +101,8 @@ def collaborate(game=None, handler=None):
 
             # just grab the next yield so that an extra yield isn't required
             next_yield = [action.send(pool)]
-            broadcast_events(handle, "request", action, next_yield, pool=pool)
-            broadcast_events(handle, "event", action, pool=pool)
+            broadcast_events(handler, "request", action, next_yield, pool=pool)
+            broadcast_events(handler, "event", action, pool=pool)
 
         return collaborating
     return _collaborate
