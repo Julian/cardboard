@@ -64,9 +64,13 @@ class Card(Base):
             subtypes = []
 
         self.abilities = abilities
+        self.casting_cost = casting_cost
         self.name = name
         self.subtypes = subtypes
         self.type = type
+
+        self.owner = None
+        self.tapped = None
 
     def __str__(self):
         return self.name

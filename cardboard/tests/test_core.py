@@ -237,8 +237,6 @@ class TestEvents(unittest.TestCase):
         self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
 
     def test_next_phase(self):
-        self.maxDiff = None
-
         t = self.events.trigger.call_args_list
 
         self.game.start()
