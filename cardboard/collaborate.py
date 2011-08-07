@@ -31,9 +31,18 @@ class Pool(collections.MutableMapping):
         return "Pool({})".format(self._parameters.keys())
 
 
+def broadcast_events(handler, event_key, source, initial=(), **kwargs):
+    for event in itertools.chain(initial, source):
+        if event is None:
+            return
+
+        kwargs[event_key] = event
+        handler.trigger(**kwargs)
+
+
 def collaborate(game=None, handler=None):
     """
-    Create an announcing action.
+    Create a collaborating action that can be listened for and modified.
 
     Callables using this decorator should conform to the following pattern:
 
@@ -70,14 +79,6 @@ def collaborate(game=None, handler=None):
 
     def _collaborate(fn):
 
-        def broadcast_events(handler, event_key, source, initial=(), **kwargs):
-            for event in itertools.chain(initial, source):
-                if event is None:
-                    return
-
-                kwargs[event_key] = event
-                handler.trigger(**kwargs)
-
         @functools.wraps(fn)
         def collaborating(*args, **kwargs):
 
@@ -96,7 +97,7 @@ def collaborate(game=None, handler=None):
             action = fn(*args, **kwargs)
 
             try:
-                next(action)
+                next(action)  # action is doing setup
             except StopIteration:
                 return  # action cancelled itself
             else:

@@ -308,6 +308,7 @@ def check_started(fn):
         return fn(self, *args, **kwargs)
     return _check_started
 
+
 class Game(object):
     """
     The Game object maintains information about the current game state.
