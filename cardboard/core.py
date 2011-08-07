@@ -337,7 +337,7 @@ class Game(object):
 
         self.game_over = None
         self._phase = None
-        self.subphase = None
+        self._subphase = None
         self._turn = None
 
         self.field = set()
@@ -348,9 +348,11 @@ class Game(object):
 
     @property
     def phase(self):
-        return self._phase
+        if self._phase is not None:
+            return self._phase.name
 
     @phase.setter
+    @collaborate()
     @check_started
     def phase(self, new):
         phase = getattr(events.game.phases, str(new), None)
@@ -358,25 +360,67 @@ class Game(object):
         if phase is None:
             raise ValueError("No phase named {}".format(new))
 
+        pool = (yield)
+        yield phase
+        yield
+
         while next(self._phases) != phase.name:
             pass
 
-        self._phase = phase.name
+        self._phase = phase
+
+        yield phase
+
         self._subphases = iter(s.name for s in phase)
         self.subphase = next(self._subphases, None)
+
+
+    @property
+    def subphase(self):
+        if self._subphase is not None:
+            return self._subphase.name
+
+    @subphase.setter
+    @collaborate()
+    @check_started
+    def subphase(self, new):
+        if new is None:
+            self._subphase = None
+            return
+
+        subphase = getattr(self._phase, str(new))
+
+        pool = (yield)
+        yield subphase
+        yield
+
+        self._subphase = subphase
+
+        yield subphase
 
     @property
     def turn(self):
         return self._turn
 
     @turn.setter
+    @collaborate()
     @check_started
     def turn(self, player):
         if player not in self.players:
             raise ValueError("{} has no player '{}'".format(self, player))
 
+        pool = (yield)
+        pool.update(player=player)
+
+        yield events.game.turn.changed
+        yield
+
         self._turn = player
+
+        yield events.game.turn.changed
+
         self.phase = "beginning"
+
 
     def add_player(self, *args, **kwargs):
         player = self.Player(*args, **kwargs)
@@ -416,7 +460,7 @@ class Game(object):
             raise exceptions.RuntimeError("Starting the game requires at least"
                                           " one player.")
 
-        self.events.trigger(events.game.started)
+        self.events.trigger(event=events.game.started)
 
         self._turns = itertools.cycle(self.players)
         self.game_over = False

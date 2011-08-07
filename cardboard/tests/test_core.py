@@ -1,11 +1,10 @@
-import pprint
+import itertools
 import unittest
 
 import mock
-import panglery
 
 from cardboard import core as c, events as e, exceptions as exc
-from cardboard.tests.util import ANY
+from cardboard.tests.util import ANY, last_events
 
 
 class TestManaPool(unittest.TestCase):
@@ -135,6 +134,9 @@ class TestBehavior(unittest.TestCase):
         self.p1.die()
         self.assertTrue(self.p1.dead)
 
+    def test_die_nonexisting_reason(self):
+        self.assertRaises(ValueError, self.p1.die, "something")
+
     def test_draw(self):
         self.p1.library = [0]
         self.p1.draw()
@@ -219,37 +221,63 @@ class TestEvents(unittest.TestCase):
 
     def test_game_started(self):
         self.game.start()
-        self.events.trigger.assert_called_with(e.events.game.started)
+        self.assertEqual(self.events.trigger.call_args_list[0],
+                         [{"event" : e.events.game.started}])
 
-    @unittest.skip
+    def test_phase_set(self):
+        self.game.start()
+
+        self.game.phase = "combat"
+
+        calls = [[pool(request=e.events.game.phases.combat)],
+                 [pool(event=e.events.game.phases.combat)],
+                 [pool(request=e.events.game.phases.combat.beginning)],
+                 [pool(event=e.events.game.phases.combat.beginning)]]
+
+        self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
+
     def test_next_phase(self):
-        self.assertIs(self.game.turn, self.p1)
+        self.maxDiff = None
 
-        self.assertEqual(self.game.phase, "beginning")
-        self.assertEqual(self.game.subphase, "untap")
+        t = self.events.trigger.call_args_list
 
-        for phase, subphase in [("beginning", "draw"),
-                                ("beginning", "upkeep"),
-                                ("first_main", None),
-                                ("combat", "beginning"),
-                                ("combat", "declare attackers"),
-                                ("combat", "declare blockers"),
-                                ("combat", "combat damage"),
-                                ("combat", "end"),
-                                ("second_main", None),
-                                ("ending", "end"),
-                                ("ending", "cleanup")]:
+        self.game.start()
 
-            self.game.advance()
-            self.assertEqual(self.game.phase, phase)
-            self.assertEqual(self.game.subphase, subphase)
+        for _ in range(2):
+            for phase in e.events.game.phases:
+                calls = [[pool(request=phase)],
+                         [pool(event=phase)]]
 
-        self.game.advance()
+                phase = iter(phase)
+                first_subphase = next(phase, None)
 
-        self.assertIs(self.game.turn, self.p2)
+                if first_subphase is not None:
+                    calls.extend([[pool(request=first_subphase)],
+                                  [pool(event=first_subphase)]])
 
-        self.assertEqual(self.game.phase, "beginning")
-        self.assertEqual(self.game.subphase, "untap")
+                self.assertEqual(t[-len(calls):], calls)
+
+                for subphase in phase:
+                    calls = [[pool(request=subphase)],
+                             [pool(event=subphase)]]
+
+                    self.game.next_phase()
+                    self.assertEqual(t[-2:], calls)
+
+                self.game.next_phase()
+
+    def test_next_turn(self):
+        self.game.start()
+        self.game.next_turn()
+
+        calls = [[pool(request=e.events.game.turn.changed)],
+                 [pool(event=e.events.game.turn.changed)],
+                 [pool(request=e.events.game.phases.beginning)],
+                 [pool(event=e.events.game.phases.beginning)],
+                 [pool(request=e.events.game.phases.beginning.untap)],
+                 [pool(event=e.events.game.phases.beginning.untap)]]
+
+        self.assertEqual(self.events.trigger.call_args_list[-6:], calls)
 
     def test_die(self):
         self.p1.die()
@@ -287,6 +315,7 @@ class TestEvents(unittest.TestCase):
                  [pool(request=e.events.card.field.entered)],
                  [pool(event=e.events.card.field.entered)],
                  [pool(event=e.events.card.cast)]]
+
         self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
 
     def test_cast_nonpermanent(self):
@@ -299,6 +328,7 @@ class TestEvents(unittest.TestCase):
                  [pool(request=e.events.card.graveyard.entered)],
                  [pool(event=e.events.card.graveyard.entered)],
                  [pool(event=e.events.card.cast)]]
+
         self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
 
     def test_put_into_play(self):
