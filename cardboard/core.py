@@ -149,7 +149,11 @@ def _make_player_factory(game_state):
 
             """
 
-            # TODO: Reason
+            # FIXME: Make card valid
+            if reason not in {"life", "library", "poison"}:
+                err = "Oh come now, you can't die from '{}'"
+                raise ValueError(err.format(reason))
+
             pool = (yield)
             pool.update(player=self, reason=reason)
 
@@ -413,6 +417,8 @@ class Game(object):
                                           " one player.")
 
         self.events.trigger(events.game.started)
-        self.game_over = False
+
         self._turns = itertools.cycle(self.players)
+        self.game_over = False
+
         self.next_turn()

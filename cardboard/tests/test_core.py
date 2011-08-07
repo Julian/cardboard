@@ -130,6 +130,11 @@ class TestBehavior(unittest.TestCase):
         game = c.Game(mock.Mock())
         self.assertRaises(exc.RuntimeError, game.start)
 
+    def test_die(self):
+        self.assertFalse(self.p1.dead)
+        self.p1.die()
+        self.assertTrue(self.p1.dead)
+
     def test_draw(self):
         self.p1.library = [0]
         self.p1.draw()
