@@ -10,6 +10,9 @@ class _ANY(object):
 ANY = _ANY()
 
 
-def last_events(events):
-    for event in events:
-        logging.debug({k : v for k, v in events[1].iteritems() if k != "pool"})
+def last_events(game):
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger("event_logger")
+
+    for _, kwargs in game.events.trigger.call_args_list:
+        logger.debug({k : v for k, v in kwargs.iteritems() if k != "pool"})
