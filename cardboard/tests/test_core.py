@@ -217,7 +217,7 @@ class TestEvents(unittest.TestCase):
         except (AssertionError, IndexError):
             return
         else:
-            self.fail("{} was triggered by the handler.".format(event))
+            self.fail("{} was triggered by {}.".format(event, handler))
 
     def test_game_started(self):
         self.game.start()
