@@ -173,7 +173,7 @@ def populate(using):
     seen = {}
     s = db.Session()
 
-    for card in load(using):
+    for card in using:
         appearances = card.pop("appearances")
         creature = card.pop("creature", None)
 
