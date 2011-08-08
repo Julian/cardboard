@@ -5,7 +5,7 @@ import mock
 
 from cardboard import core as c, exceptions as exc
 from cardboard.events import events
-from cardboard.tests.util import ANY, last_events, pool
+from cardboard.tests.util import EventHandlerTestCase, ANY, last_events, pool
 
 
 class TestManaPool(unittest.TestCase):
@@ -47,24 +47,18 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(repr(p4), "<Player (not yet in game)>")
 
 
-class TestSubscribers(unittest.TestCase):
+class TestSubscribers(EventHandlerTestCase):
     def setUp(self):
-        self.events = mock.Mock()
+        super(TestSubscribers, self).setUp()
         self.game = c.Game(self.events)
 
-    def assertSubscribed(self, fn, pool=True, **kwargs):
-        if pool:
-            kwargs.update(needs=["pool"])
-
-        self.assertIn(((fn,), kwargs), self.events.subscribe.call_args_list)
-
-    def test_end(self):
+    def test_end_if_dead(self):
         self.assertSubscribed(self.game.end_if_dead, event=events.player.died)
 
 
-class TestBehavior(unittest.TestCase):
+class TestBehavior(EventHandlerTestCase):
     def setUp(self):
-        self.events = mock.Mock()
+        super(TestBehavior, self).setUp()
         self.game = c.Game(self.events)
         self.p1 = self.game.add_player(library=[], life=1, hand_size=0)
         self.p2 = self.game.add_player(library=[], life=1, hand_size=0)
@@ -229,33 +223,12 @@ class TestBehavior(unittest.TestCase):
         self.assertTrue(game.ended)
 
 
-class TestEvents(unittest.TestCase):
+class TestEvents(EventHandlerTestCase):
     def setUp(self):
-        self.events = mock.Mock()
+        super(TestEvents, self).setUp()
         self.game = c.Game(self.events)
         self.p1 = self.game.add_player(library=[], life=1, hand_size=0)
         self.p2 = self.game.add_player(library=[], life=2, hand_size=0)
-
-    def assertHeard(self, event, request=False, handler=None):
-        if handler is None:
-            handler = self.events
-
-        e = pool(event=event)
-        r = pool(request=event)
-
-        if not request:
-            return handler.trigger.assert_called_with(**e)
-
-        arg_list = handler.trigger.call_args_list
-        self.assertEqual(handler.trigger.call_args_list[-2:], [[r], [e]])
-
-    def assertNotHeard(self, event, request=False, handler=None):
-        try:
-            self.assertHeard(event, request, handler)
-        except (AssertionError, IndexError):
-            return
-        else:
-            self.fail("{} was triggered by {}.".format(event, handler))
 
     def test_game_started(self):
         self.game.start()
@@ -264,41 +237,38 @@ class TestEvents(unittest.TestCase):
 
     def test_phase_set(self):
         self.game.start()
-
         self.game.phase = "combat"
 
-        calls = [[pool(request=events.game.phases.combat)],
-                 [pool(event=events.game.phases.combat)],
-                 [pool(request=events.game.phases.combat.beginning)],
-                 [pool(event=events.game.phases.combat.beginning)]]
+        self.assertLastEventsWere(
 
-        self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
+            pool(request=events.game.phases.combat),
+            pool(event=events.game.phases.combat),
+            pool(request=events.game.phases.combat.beginning),
+            pool(event=events.game.phases.combat.beginning)
+
+        )
+
 
     def test_next_phase(self):
-        t = self.events.trigger.call_args_list
-
         self.game.start()
 
         for _ in range(2):
             for phase in events.game.phases:
-                calls = [[pool(request=phase)],
-                         [pool(event=phase)]]
+                calls = [pool(request=phase), pool(event=phase)]
 
                 phase = iter(phase)
-                first_subphase = next(phase, None)
+                first = next(phase, None)
 
-                if first_subphase is not None:
-                    calls.extend([[pool(request=first_subphase)],
-                                  [pool(event=first_subphase)]])
+                if first is not None:
+                    calls.extend([pool(request=first), pool(event=first)])
 
-                self.assertEqual(t[-len(calls):], calls)
+                self.assertLastEventsWere(*calls)
 
                 for subphase in phase:
-                    calls = [[pool(request=subphase)],
-                             [pool(event=subphase)]]
+                    calls = [pool(request=subphase), pool(event=subphase)]
 
                     self.game.next_phase()
-                    self.assertEqual(t[-2:], calls)
+                    self.assertLastEventsWere(*calls)
 
                 self.game.next_phase()
 
@@ -306,35 +276,38 @@ class TestEvents(unittest.TestCase):
         self.game.start()
         self.game.next_turn()
 
-        calls = [[pool(request=events.game.turn.changed)],
-                 [pool(event=events.game.turn.changed)],
-                 [pool(request=events.game.phases.beginning)],
-                 [pool(event=events.game.phases.beginning)],
-                 [pool(request=events.game.phases.beginning.untap)],
-                 [pool(event=events.game.phases.beginning.untap)]]
+        self.assertLastEventsWere(
 
-        self.assertEqual(self.events.trigger.call_args_list[-6:], calls)
+            pool(request=events.game.turn.changed),
+            pool(event=events.game.turn.changed),
+            pool(request=events.game.phases.beginning),
+            pool(event=events.game.phases.beginning),
+            pool(request=events.game.phases.beginning.untap),
+            pool(event=events.game.phases.beginning.untap)
+
+        )
+
 
     def test_die(self):
         self.p1.die()
-        self.assertHeard(events.player.died, request=True)
+        self.assertLastEventWas(events.player.died)
 
     def test_life_changed(self):
         self.p1.life += 2
-        self.assertHeard(events.player.life.gained, request=True)
+        self.assertLastEventWas(events.player.life.gained)
 
         self.p1.life -= 2
-        self.assertHeard(events.player.life.lost, request=True)
+        self.assertLastEventWas(events.player.life.lost)
 
     def test_life_not_changed(self):
         self.p1.life += 0
-        self.assertNotHeard(events.player.life.gained, request=True)
-        self.assertNotHeard(events.player.life.lost, request=True)
+        self.assertLastEventWasnt(events.player.life.gained)
+        self.assertLastEventWasnt(events.player.life.lost)
 
     def test_card_drawn(self):
         self.p1.library = [1]
         self.p1.draw()
-        self.assertHeard(events.player.draw, request=True)
+        self.assertLastEventWas(events.player.draw)
 
         def side_effect(*args, **kwargs):
             if events.player.draw in kwargs.viewvalues():
@@ -344,19 +317,19 @@ class TestEvents(unittest.TestCase):
         self.events.trigger.side_effect = side_effect
 
         self.p1.draw()
-        self.assertHeard(events.player.died)
+        self.assertLastEventWas(events.player.died)
 
     def test_mana_changed(self):
         self.p1.mana_pool.red += 0
-        self.assertNotHeard(events.player.mana.red.added, request=True)
+        self.assertLastEventWasnt(events.player.mana.red.added)
 
         self.p1.mana_pool.red += 1
-        self.assertHeard(events.player.mana.red.added, request=True)
+        self.assertLastEventWas(events.player.mana.red.added)
 
         self.p1.mana_pool.red -= 1
-        self.assertHeard(events.player.mana.red.removed, request=True)
+        self.assertLastEventWas(events.player.mana.red.removed)
 
     def test_end(self):
         self.game.start()
         self.game.end()
-        self.assertHeard(events.game.ended)
+        self.assertLastEventWas(events.game.ended)
