@@ -226,8 +226,7 @@ class Game(object):
 
     _subscriptions = {
 
-        "_end_if_one_player_left" : {"event" : events.player.died,
-                                     "needs" : ["pool"]},
+        "end_if_dead" : {"event" : events.player.died, "needs" : ["pool"]},
 
     }
 
@@ -387,15 +386,19 @@ class Game(object):
         self.next_turn()
 
     # @subscribed to: events.player.died
-    def _end_if_one_player_left(self):
-        print "CALLED"
+    def end_if_dead(self, pangler=None, pool=None):
+        """
+        End the game if there is only one living player left.
+
+        """
+
         if sum(1 for player in self.players if not player.dead) <= 1:
             self.end()
 
     @collaborate()
-    def end(self, pangler=None, pool=None):
+    def end(self):
         """
-        End the game if there is only one living player left.
+        End the game unconditionally.
 
         """
 

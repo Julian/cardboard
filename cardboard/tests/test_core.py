@@ -3,7 +3,8 @@ import unittest
 
 import mock
 
-from cardboard import core as c, events as e, exceptions as exc
+from cardboard import core as c, exceptions as exc
+from cardboard.events import events
 from cardboard.tests.util import ANY, last_events, pool
 
 
@@ -44,6 +45,22 @@ class TestPlayer(unittest.TestCase):
 
         p4 = c.Player(library=[], name="")
         self.assertEqual(repr(p4), "<Player (not yet in game)>")
+
+
+class TestSubscribers(unittest.TestCase):
+    def setUp(self):
+        self.events = mock.Mock()
+        self.game = c.Game(self.events)
+
+    def assertSubscribed(self, fn, pool=True, **kwargs):
+        if pool:
+            kwargs.update(needs=["pool"])
+
+        self.assertIn(((fn,), kwargs), self.events.subscribe.call_args_list)
+
+    def test_end(self):
+        self.assertSubscribed(self.game.end_if_dead, event=events.player.died)
+
 
 class TestBehavior(unittest.TestCase):
     def setUp(self):
@@ -157,6 +174,11 @@ class TestBehavior(unittest.TestCase):
         game = c.Game(mock.Mock())
         self.assertRaises(exc.RuntimeError, game.start)
 
+    def test_life(self):
+        self.assertFalse(self.p1.dead)
+        self.p1.life -= 2
+        self.assertTrue(self.p1.dead)
+
     def test_die(self):
         self.assertFalse(self.p1.dead)
         self.p1.die()
@@ -186,6 +208,25 @@ class TestBehavior(unittest.TestCase):
     def test_end(self):
         self.game.end()
         self.assertTrue(self.game.ended)
+
+    def test_end_if_dead(self):
+        events = mock.Mock()
+        game = c.Game(events)
+        p1 = game.add_player(library=[], life=1, hand_size=0)
+        p2 = game.add_player(library=[], life=2, hand_size=0)
+        p3 = game.add_player(library=[], life=3, hand_size=0)
+        game.start()
+
+        game.end_if_dead()
+        self.assertFalse(game.ended)
+
+        p1.die()
+        game.end_if_dead()
+        self.assertFalse(game.ended)
+
+        p2.die()
+        game.end_if_dead()
+        self.assertTrue(game.ended)
 
 
 class TestEvents(unittest.TestCase):
@@ -219,17 +260,17 @@ class TestEvents(unittest.TestCase):
     def test_game_started(self):
         self.game.start()
         self.assertEqual(self.events.trigger.call_args_list[0],
-                         [{"event" : e.events.game.started}])
+                         [{"event" : events.game.started}])
 
     def test_phase_set(self):
         self.game.start()
 
         self.game.phase = "combat"
 
-        calls = [[pool(request=e.events.game.phases.combat)],
-                 [pool(event=e.events.game.phases.combat)],
-                 [pool(request=e.events.game.phases.combat.beginning)],
-                 [pool(event=e.events.game.phases.combat.beginning)]]
+        calls = [[pool(request=events.game.phases.combat)],
+                 [pool(event=events.game.phases.combat)],
+                 [pool(request=events.game.phases.combat.beginning)],
+                 [pool(event=events.game.phases.combat.beginning)]]
 
         self.assertEqual(self.events.trigger.call_args_list[-4:], calls)
 
@@ -239,7 +280,7 @@ class TestEvents(unittest.TestCase):
         self.game.start()
 
         for _ in range(2):
-            for phase in e.events.game.phases:
+            for phase in events.game.phases:
                 calls = [[pool(request=phase)],
                          [pool(event=phase)]]
 
@@ -265,63 +306,57 @@ class TestEvents(unittest.TestCase):
         self.game.start()
         self.game.next_turn()
 
-        calls = [[pool(request=e.events.game.turn.changed)],
-                 [pool(event=e.events.game.turn.changed)],
-                 [pool(request=e.events.game.phases.beginning)],
-                 [pool(event=e.events.game.phases.beginning)],
-                 [pool(request=e.events.game.phases.beginning.untap)],
-                 [pool(event=e.events.game.phases.beginning.untap)]]
+        calls = [[pool(request=events.game.turn.changed)],
+                 [pool(event=events.game.turn.changed)],
+                 [pool(request=events.game.phases.beginning)],
+                 [pool(event=events.game.phases.beginning)],
+                 [pool(request=events.game.phases.beginning.untap)],
+                 [pool(event=events.game.phases.beginning.untap)]]
 
         self.assertEqual(self.events.trigger.call_args_list[-6:], calls)
 
     def test_die(self):
         self.p1.die()
-        self.assertHeard(e.events.player.died, request=True)
+        self.assertHeard(events.player.died, request=True)
 
     def test_life_changed(self):
         self.p1.life += 2
-        self.assertHeard(e.events.player.life.gained, request=True)
+        self.assertHeard(events.player.life.gained, request=True)
 
         self.p1.life -= 2
-        self.assertHeard(e.events.player.life.lost, request=True)
+        self.assertHeard(events.player.life.lost, request=True)
+
+    def test_life_not_changed(self):
+        self.p1.life += 0
+        self.assertNotHeard(events.player.life.gained, request=True)
+        self.assertNotHeard(events.player.life.lost, request=True)
 
     def test_card_drawn(self):
         self.p1.library = [1]
         self.p1.draw()
-        self.assertHeard(e.events.player.draw, request=True)
+        self.assertHeard(events.player.draw, request=True)
 
         def side_effect(*args, **kwargs):
-            if e.events.player.draw in kwargs.viewvalues():
+            if events.player.draw in kwargs.viewvalues():
                 self.fail("Unexpected card draw")
             return mock.DEFAULT
 
         self.events.trigger.side_effect = side_effect
 
         self.p1.draw()
-        self.assertHeard(e.events.player.died)
+        self.assertHeard(events.player.died)
 
     def test_mana_changed(self):
         self.p1.mana_pool.red += 0
-        self.assertNotHeard(e.events.player.mana.red.added, request=True)
+        self.assertNotHeard(events.player.mana.red.added, request=True)
 
         self.p1.mana_pool.red += 1
-        self.assertHeard(e.events.player.mana.red.added, request=True)
+        self.assertHeard(events.player.mana.red.added, request=True)
 
         self.p1.mana_pool.red -= 1
-        self.assertHeard(e.events.player.mana.red.removed, request=True)
+        self.assertHeard(events.player.mana.red.removed, request=True)
 
     def test_end(self):
         self.game.start()
         self.game.end()
-        self.assertHeard(e.events.game.ended)
-
-    @unittest.skip
-    def test_end_from_dying(self):
-        self.p3 = self.game.add_player(library=[], life=3, hand_size=0)
-        self.game.start()
-
-        self.p1.die()
-        self.assertNotHeard(e.events.game.ended)
-
-        self.p2.die()
-        self.assertHeard(e.events.game.ended)
+        self.assertHeard(events.game.ended)

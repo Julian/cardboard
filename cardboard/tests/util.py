@@ -1,3 +1,21 @@
+"""
+Utilities for testing.
+
+Notes
+-----
+
+To test if an object with a stubbed out pangler is working properly, check
+that:
+
+    * The function that should trigger the event
+        * does
+
+    * The function that should be subscribed to the event
+        * is
+        * performs correctly when called manually
+
+"""
+
 import logging
 
 class _ANY(object):
