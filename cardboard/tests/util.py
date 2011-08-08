@@ -16,3 +16,8 @@ def last_events(game):
 
     for _, kwargs in game.events.trigger.call_args_list:
         logger.debug({k : v for k, v in kwargs.iteritems() if k != "pool"})
+
+
+def pool(**kwargs):
+    kwargs["pool"] = ANY
+    return kwargs
