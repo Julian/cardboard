@@ -17,6 +17,34 @@ class TestManaPool(unittest.TestCase):
         self.assertEqual(repr(m), "[1B, 2G, 3R, 4U, 5W, 6]")
 
 
+class TestPlayer(unittest.TestCase):
+    def setUp(self):
+        self.game = mock.Mock()
+        self.game.players = []
+
+        def add_existing_player(p):
+            self.game.players.append(p)
+            p.game = self.game
+
+        self.game.add_existing_player.side_effect = add_existing_player
+
+    def test_repr_str(self):
+        p1 = c.Player(library=[], name="Test")
+        self.game.add_existing_player(p1)
+
+        self.assertEqual(repr(p1), "<Player 1: Test>")
+
+        p2 = c.Player(library=[], name="")
+        self.game.add_existing_player(p2)
+
+        self.assertEqual(repr(p2), "<Player 2>")
+
+        p3 = c.Player(library=[], name="Test")
+        self.assertEqual(repr(p3), "<Player (not yet in game): Test>")
+
+        p4 = c.Player(library=[], name="")
+        self.assertEqual(repr(p4), "<Player (not yet in game)>")
+
 class TestBehavior(unittest.TestCase):
     def setUp(self):
         self.events = mock.Mock()
@@ -112,7 +140,7 @@ class TestBehavior(unittest.TestCase):
     def test_unstarted_game(self):
         game = c.Game(mock.Mock())
 
-        self.assertIs(game.game_over, None)
+        self.assertIs(game.ended, None)
 
         self.assertIs(game.turn, None)
         self.assertIs(game.phase, None)
@@ -154,6 +182,10 @@ class TestBehavior(unittest.TestCase):
     def test_negatives(self):
         self.assertRaises(ValueError, self.p1.draw, -1)
         self.assertRaises(ValueError, setattr, self.p1.mana_pool, "black", -1)
+
+    def test_end(self):
+        self.game.end()
+        self.assertTrue(self.game.ended)
 
 
 class TestEvents(unittest.TestCase):
@@ -277,3 +309,19 @@ class TestEvents(unittest.TestCase):
 
         self.p1.mana_pool.red -= 1
         self.assertHeard(e.events.player.mana.red.removed, request=True)
+
+    def test_end(self):
+        self.game.start()
+        self.game.end()
+        self.assertHeard(e.events.game.ended)
+
+    @unittest.skip
+    def test_end_from_dying(self):
+        self.p3 = self.game.add_player(library=[], life=3, hand_size=0)
+        self.game.start()
+
+        self.p1.die()
+        self.assertNotHeard(e.events.game.ended)
+
+        self.p2.die()
+        self.assertHeard(e.events.game.ended)

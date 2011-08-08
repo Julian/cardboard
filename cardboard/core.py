@@ -69,7 +69,6 @@ class ManaPool(object):
     def __init__(self, owner):
         super(ManaPool, self).__init__()
         self.owner = owner
-        self.game = self.owner.game
 
         for color in self.COLORS:
             setattr(self, "_" + color, 0)
@@ -78,6 +77,10 @@ class ManaPool(object):
         pool = (getattr(self, c) for c in self.COLORS)
         return "[{}B, {}G, {}R, {}U, {}W, {}]".format(*pool)
 
+    @property
+    def game(self):
+        return self.owner.game
+
 
 class Player(object):
     """
@@ -85,12 +88,12 @@ class Player(object):
 
     """
 
-    def __init__(self, game, library, hand_size=7, life=20, name=""):
+    def __init__(self, library, hand_size=7, life=20, name=""):
         super(Player, self).__init__()
 
         self.name = name
 
-        self.game = game
+        self.game = None  # set when a Game adds the player
 
         self.dead = False
         self._life = int(life)
@@ -106,8 +109,13 @@ class Player(object):
         self.mana_pool = ManaPool(self)
 
     def __repr__(self):
-        number = self.game.players.index(self) + 1
-        return "<Player {}: {.name}>".format(number, self)
+        if self.game is None:
+            number = "(not yet in game)"
+        else:
+            number = self.game.players.index(self) + 1
+
+        sep = ": " if self.name else ""
+        return "<Player {}{}{.name}>".format(number, sep, self)
 
     @property
     def life(self):
@@ -217,9 +225,11 @@ class Game(object):
     """
 
     _subscriptions = {
-                      "end_game" : {"event" : events.player.died,
-                                    "needs" : ["pool"]},
-                     }
+
+        "_end_if_one_player_left" : {"event" : events.player.died,
+                                     "needs" : ["pool"]},
+
+    }
 
     def __init__(self, handler):
         """
@@ -237,10 +247,11 @@ class Game(object):
         self._phases = itertools.cycle(p.name for p in events.game.phases)
         self._subphases = iter([])  # Default value for first advance
 
-        self.game_over = None
         self._phase = None
         self._subphase = None
         self._turn = None
+
+        self.ended = None
 
         self.field = set()
         self.tapped = set()
@@ -324,9 +335,13 @@ class Game(object):
         self.phase = "beginning"
 
     def add_player(self, **kwargs):
-        player = Player(game=self, **kwargs)
-        self.players.append(player)
+        player = Player(**kwargs)
+        self.add_existing_player(player)
         return player
+
+    def add_existing_player(self, player):
+        player.game = self
+        self.players.append(player)
 
     def next_phase(self):
         """
@@ -354,7 +369,7 @@ class Game(object):
 
     @property
     def started(self):
-        return self.game_over is not None
+        return self.ended is not None
 
     def start(self):
         if not self.players:
@@ -364,23 +379,25 @@ class Game(object):
         self.events.trigger(event=events.game.started)
 
         self._turns = itertools.cycle(self.players)
-        self.game_over = False
+        self.ended = False
 
         for player in self.players:
             player.draw(player.hand_size)
 
         self.next_turn()
 
-    # subscribed to: events.player.died
+    # @subscribed to: events.player.died
+    def _end_if_one_player_left(self):
+        print "CALLED"
+        if sum(1 for player in self.players if not player.dead) <= 1:
+            self.end()
+
     @collaborate()
-    def end_game(self, pangler=None, pool=None):
+    def end(self, pangler=None, pool=None):
         """
         End the game if there is only one living player left.
 
         """
-
-        if sum(1 for player in self.players if player.dead) > 1:
-            return
 
         # TODO: Stop all other events
         pool = (yield)
@@ -388,5 +405,5 @@ class Game(object):
         yield events.game.ended
         yield
 
-        self.game_over = True
+        self.ended = True
         yield events.game.ended
