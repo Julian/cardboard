@@ -72,3 +72,34 @@ class TestCollaborate(unittest.TestCase):
             yield
 
         foo()
+
+
+class TestPool(unittest.TestCase):
+    def test_contains(self):
+        p = c.Pool(foo=())
+        self.assertIn("foo", p)
+
+    def test_iter(self):
+        p = c.Pool(foo=(), bar=[], baz={})
+        self.assertEqual(set(p), {"foo", "bar", "baz"})
+
+    def test_len(self):
+        p = c.Pool(foo=(), bar=[], baz={})
+        self.assertEqual(len(p), 3)
+
+    def test_indexing(self):
+        p = c.Pool(foo=(), bar=[], baz={})
+        self.assertEqual(p["foo"], ())
+        self.assertEqual(p["bar"], [])
+        self.assertEqual(p["baz"], {})
+
+        p["foo"] = None
+        self.assertEqual(p["foo"], None)
+
+        del p["bar"]
+        self.assertNotIn("bar", p)
+
+    def test_repr(self):
+        p = c.Pool(foo=(), bar=[], baz={})
+        r = repr(p).lstrip("Pool([").rstrip("])")
+        self.assertEqual(set(r.split(", ")), {"'foo'", "'bar'", "'baz'"})

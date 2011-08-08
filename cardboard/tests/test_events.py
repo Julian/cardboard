@@ -14,6 +14,10 @@ class TestEvent(unittest.TestCase):
         f = s.foo
         self.assertIn(f, s)
 
+    def test_len(self):
+        s = e.Event(subevents={"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
+        self.assertEqual(len(s), 2)
+
     def test_repr_str(self):
         s = e.Event("s", t={})
         self.assertEqual(repr(s), "<Event: s>")
