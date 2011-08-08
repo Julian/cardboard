@@ -47,6 +47,7 @@ class Card(Base):
                                    backref="cards")
 
     abilities = association_proxy("ability_objects", "description")
+    decks = association_proxy("deck_appearances", "deck")
     sets = association_proxy("appearances", "set")
     subtypes = association_proxy("subtype_objects", "name")
 
@@ -158,6 +159,52 @@ class Card(Base):
         yield events.card.removed_from_game
 
 
+class Deck(Base):
+
+    __tablename__ = "decks"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+
+    cards = association_proxy("card_appearances", "card")
+
+    def __init__(self, name, cards=None):
+        super(Deck, self).__init__()
+
+        self.name = name
+        self.cards = cards or []
+
+    def __repr__(self):
+        return "<Deck: {0.name} ({0.colors})>".format(self)
+
+    @property
+    def colors(self):
+        return "UW"
+
+
+class DeckAppearance(Base):
+
+    __tablename__ = "deck_appearances"
+
+    quantity = Column(Integer)
+
+    card_id = Column(Integer, ForeignKey("cards.id"), primary_key=True)
+    deck_id = Column(Integer, ForeignKey("decks.id"), primary_key=True)
+
+    card = relationship("Card", backref="deck_appearances")
+    deck = relationship("Deck", backref="card_appearances")
+
+    def __init__(self, card=None, deck=None, quantity=1):
+        super(DeckAppearance, self).__init__()
+
+        self.card = card
+        self.deck = deck
+        self.quantity = quantity
+
+    def __repr__(self):
+        return "<{0.deck.name} {0.card} ({0.quantity})>".format(self)
+
+
 class Set(Base):
 
     __tablename__ = "sets"
@@ -170,6 +217,7 @@ class Set(Base):
 
     def __init__(self, name, code):
         super(Set, self).__init__()
+
         self.name = name
         self.code = code
 
@@ -194,6 +242,7 @@ class SetAppearance(Base):
 
     def __init__(self, card=None, set=None, rarity=None):
         super(SetAppearance, self).__init__()
+
         self.card = card
         self.set = set
         self.rarity = rarity
@@ -211,11 +260,9 @@ class Creature(Base):
     base_power = Column(Integer)
     base_toughness = Column(Integer)
 
-    card = relationship("Card",
-                        backref=backref("creature", uselist=False))
+    card = relationship("Card", backref=backref("creature", uselist=False))
 
     def __init__(self, card, power, toughness):
-
         super(Creature, self).__init__()
 
         self.card = card
