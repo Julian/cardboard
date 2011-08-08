@@ -57,6 +57,11 @@ def _make_color(name):
 
 
 class ManaPool(object):
+    """
+    A player's mana pool.
+
+    """
+
     COLORS = ("black", "green", "red", "blue", "white", "colorless")
 
     black = _make_color("black")
@@ -124,6 +129,10 @@ class Player(object):
     @life.setter
     @collaborate()
     def life(self, amount):
+        """
+        Set the player's life total.
+
+        """
 
         if amount == self.life:
             return
@@ -210,11 +219,17 @@ class Player(object):
 
 
 def check_started(fn):
+    """
+    Check if the game has started before allowing the function to be run.
+
+    """
+
     @wraps(fn)
     def _check_started(self, *args, **kwargs):
         if not self.started:
             raise exceptions.RuntimeError("{} has not started.".format(self))
         return fn(self, *args, **kwargs)
+
     return _check_started
 
 
@@ -268,6 +283,11 @@ class Game(object):
     @collaborate()
     @check_started
     def phase(self, new):
+        """
+        Set the current turn's phase.
+
+        """
+
         phase = getattr(events.game.phases, str(new), None)
 
         if phase is None:
@@ -296,6 +316,11 @@ class Game(object):
     @collaborate()
     @check_started
     def subphase(self, new):
+        """
+        Set the current subphase.
+
+        """
+
         if new is None:
             self._subphase = None
             return
@@ -318,6 +343,11 @@ class Game(object):
     @collaborate()
     @check_started
     def turn(self, player):
+        """
+        Set the current turn to a given player.
+
+        """
+
         if player not in self.players:
             raise ValueError("{} has no player '{}'".format(self, player))
 
@@ -334,11 +364,21 @@ class Game(object):
         self.phase = "beginning"
 
     def add_player(self, **kwargs):
+        """
+        Add a new player to the game.
+
+        """
+
         player = Player(**kwargs)
         self.add_existing_player(player)
         return player
 
     def add_existing_player(self, player):
+        """
+        Add an existing Player object to the game.
+
+        """
+
         player.game = self
         self.players.append(player)
 
@@ -360,7 +400,7 @@ class Game(object):
     @check_started
     def next_turn(self):
         """
-        Advance the game to the next player's turn or to a specified player's.
+        Advance the game to the next player's turn.
 
         """
 
@@ -371,6 +411,11 @@ class Game(object):
         return self.ended is not None
 
     def start(self):
+        """
+        Start the game.
+
+        """
+
         if not self.players:
             raise exceptions.RuntimeError("Starting the game requires at least"
                                           " one player.")
