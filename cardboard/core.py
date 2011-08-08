@@ -12,6 +12,9 @@ from cardboard.events import events
 from cardboard import exceptions
 
 
+__all__ = ["Game", "Player"]
+
+
 def _make_color(name):
 
     _color = "_" + name
@@ -93,15 +96,17 @@ class Player(object):
         self._life = int(life)
 
         self.hand = set()
+        self.hand_size = hand_size
+
         self.library = library
-        self.draw(hand_size)
 
         self.exiled = set()
         self.graveyard = []
+
         self.mana_pool = ManaPool(self)
 
     def __repr__(self):
-        number = self.game.players.index(self)
+        number = self.game.players.index(self) + 1
         return "<Player {}: {.name}>".format(number, self)
 
     @property
@@ -196,30 +201,6 @@ class Player(object):
         yield events.player.draw
 
 
-def _game_ender(game):
-    @game.events.subscribe(event=events.player.died, needs=["pool"])
-    @collaborate()
-    def end_game(pangler, pool):
-        """
-        End the game if there is only one living player left.
-
-        """
-
-        if sum(1 for player in game.players if player.dead) > 1:
-            return
-
-        # TODO: Stop all other events
-        pool = (yield)
-
-        yield events.game.ended
-        yield
-
-        self.game_over = True
-        yield events.game.ended
-
-    return end_game
-
-
 def check_started(fn):
     @wraps(fn)
     def _check_started(self, *args, **kwargs):
@@ -235,6 +216,11 @@ class Game(object):
 
     """
 
+    _subscriptions = {
+                      "end_game" : {"event" : events.player.died,
+                                    "needs" : ["pool"]},
+                     }
+
     def __init__(self, handler):
         """
         Initialize a new game state object.
@@ -245,7 +231,8 @@ class Game(object):
 
         self.events = handler
 
-        self.end_game = _game_ender(self)
+        for method, subscription_opts in self._subscriptions.iteritems():
+            self.events.subscribe(getattr(self, method), **subscription_opts)
 
         self._phases = itertools.cycle(p.name for p in events.game.phases)
         self._subphases = iter([])  # Default value for first advance
@@ -336,8 +323,8 @@ class Game(object):
 
         self.phase = "beginning"
 
-    def add_player(self, *args, **kwargs):
-        player = Player(game=self, *args, **kwargs)
+    def add_player(self, **kwargs):
+        player = Player(game=self, **kwargs)
         self.players.append(player)
         return player
 
@@ -379,4 +366,27 @@ class Game(object):
         self._turns = itertools.cycle(self.players)
         self.game_over = False
 
+        for player in self.players:
+            player.draw(player.hand_size)
+
         self.next_turn()
+
+    # subscribed to: events.player.died
+    @collaborate()
+    def end_game(self, pangler=None, pool=None):
+        """
+        End the game if there is only one living player left.
+
+        """
+
+        if sum(1 for player in self.players if player.dead) > 1:
+            return
+
+        # TODO: Stop all other events
+        pool = (yield)
+
+        yield events.game.ended
+        yield
+
+        self.game_over = True
+        yield events.game.ended

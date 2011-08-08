@@ -179,6 +179,7 @@ class Deck(Base):
 
     @property
     def colors(self):
+        # FIXME: return "".join({card.color for card in self.cards})
         return "UW"
 
 
