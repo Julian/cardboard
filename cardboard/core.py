@@ -4,11 +4,11 @@ Cardboard core
 """
 
 from operator import attrgetter, methodcaller
-from functools import wraps
 import itertools
 
 from cardboard.collaborate import collaborate
 from cardboard.events import events
+from cardboard.util.game import check_started
 from cardboard import exceptions
 
 
@@ -215,21 +215,6 @@ class Player(object):
         pool["destination_add"](pool["destination"])(card)
 
         yield events.player.draw
-
-
-def check_started(fn):
-    """
-    Check if the game has started before allowing the function to be run.
-
-    """
-
-    @wraps(fn)
-    def _check_started(self, *args, **kwargs):
-        if not self.started:
-            raise exceptions.RuntimeError("{} has not started.".format(self))
-        return fn(self, *args, **kwargs)
-
-    return _check_started
 
 
 class Game(object):
