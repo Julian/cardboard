@@ -106,7 +106,7 @@ class Player(object):
         self.hand = set()
         self.hand_size = hand_size
 
-        self.library = library
+        self.library = list(library)
 
         self.exiled = set()
         self.graveyard = []
@@ -166,10 +166,9 @@ class Player(object):
 
         """
 
-        # FIXME: Make card valid
+        # FIXME: Make card valid, maybe by a check if reason is on the stack
         if reason not in {"life", "library", "poison"}:
-            err = "Oh come now, you can't die from '{}'"
-            raise ValueError(err.format(reason))
+            raise ValueError("You can't die from '{}'.".format(reason))
 
         pool = (yield)
         pool.update(player=self, reason=reason)
@@ -381,6 +380,11 @@ class Game(object):
 
         player.game = self
         self.players.append(player)
+
+        for card in player.library:
+            card.game = self
+            card.controller = player
+            card.library = player.library
 
     def next_phase(self):
         """

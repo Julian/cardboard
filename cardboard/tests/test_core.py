@@ -5,7 +5,7 @@ import mock
 
 from cardboard import core as c, exceptions as exc
 from cardboard.events import events
-from cardboard.tests.util import EventHandlerTestCase, ANY, last_events, pool
+from cardboard.tests.util import EventHandlerTestCase, ANY, fake_library, pool
 
 
 class TestManaPool(unittest.TestCase):
@@ -45,6 +45,39 @@ class TestPlayer(unittest.TestCase):
 
         p4 = c.Player(library=[], name="")
         self.assertEqual(repr(p4), "<Player (not yet in game)>")
+
+    def test_shallow_copies_library(self):
+        library = [object(), object(), object()]
+        p1 = c.Player(library=library, name="Test")
+
+        self.assertIsNot(p1.library, library)
+        self.assertEqual(p1.library, library)
+
+        for card, original in zip(p1.library, library):
+            self.assertIs(card, original)
+
+
+class TestGame(EventHandlerTestCase):
+    def setUp(self):
+        super(TestGame, self).setUp()
+        self.game = c.Game(self.events)
+
+    def test_informs_players_library_on_add(self):
+        p1 = mock.Mock()
+        p1.library = fake_library(60)
+        self.game.add_existing_player(p1)
+
+        for card in p1.library:
+            self.assertIs(card.game, self.game)
+            self.assertIs(card.controller, p1)
+            self.assertIs(card.library, p1.library)
+
+        p2 = self.game.add_player(library=fake_library(60))
+
+        for card in p2.library:
+            self.assertIs(card.game, self.game)
+            self.assertIs(card.controller, p2)
+            self.assertIs(card.library, p2.library)
 
 
 class TestSubscribers(EventHandlerTestCase):
@@ -182,13 +215,15 @@ class TestBehavior(EventHandlerTestCase):
         self.assertRaises(ValueError, self.p1.die, "something")
 
     def test_draw(self):
-        self.p1.library = [0]
-        self.p1.draw()
-        self.assertEqual(self.p1.hand, {0})
+        card = mock.Mock()
+        p3 = self.game.add_player(library=[card], hand_size=0)
+        p3.draw()
+        self.assertEqual(p3.hand, {card})
 
-        self.p2.library = range(5)
-        self.p2.draw(5)
-        self.assertEqual(self.p2.hand, set(range(5)))
+        library = fake_library(5)
+        p4 = self.game.add_player(library=library, hand_size=0)
+        p4.draw(5)
+        self.assertEqual(p4.hand, set(library))
 
     def test_dont_die_when_drawing_zero_cards(self):
         self.assertFalse(self.p1.dead)
@@ -248,7 +283,6 @@ class TestEvents(EventHandlerTestCase):
 
         )
 
-
     def test_next_phase(self):
         self.game.start()
 
@@ -287,49 +321,48 @@ class TestEvents(EventHandlerTestCase):
 
         )
 
-
     def test_die(self):
         self.p1.die()
-        self.assertLastEventWas(events.player.died)
+        self.assertLastRequestedEventWas(events.player.died)
 
     def test_life_changed(self):
         self.p1.life += 2
-        self.assertLastEventWas(events.player.life.gained)
+        self.assertLastRequestedEventWas(events.player.life.gained)
 
         self.p1.life -= 2
-        self.assertLastEventWas(events.player.life.lost)
+        self.assertLastRequestedEventWas(events.player.life.lost)
 
     def test_life_not_changed(self):
         self.p1.life += 0
-        self.assertLastEventWasnt(events.player.life.gained)
-        self.assertLastEventWasnt(events.player.life.lost)
+        self.assertLastRequestedEventWasNot(events.player.life.gained)
+        self.assertLastRequestedEventWasNot(events.player.life.lost)
 
     def test_card_drawn(self):
         self.p1.library = [1]
         self.p1.draw()
-        self.assertLastEventWas(events.player.draw)
+        self.assertLastRequestedEventWas(events.player.draw)
 
         def side_effect(*args, **kwargs):
-            if events.player.draw in kwargs.viewvalues():
-                self.fail("Unexpected card draw")
+            self.assertFalse(events.player.draw in kwargs.viewvalues(),
+                             "Draw event fired from an empty deck.")
             return mock.DEFAULT
 
         self.events.trigger.side_effect = side_effect
 
         self.p1.draw()
-        self.assertLastEventWas(events.player.died)
+        self.assertLastRequestedEventWas(events.player.died)
 
     def test_mana_changed(self):
         self.p1.mana_pool.red += 0
-        self.assertLastEventWasnt(events.player.mana.red.added)
+        self.assertLastRequestedEventWasNot(events.player.mana.red.added)
 
         self.p1.mana_pool.red += 1
-        self.assertLastEventWas(events.player.mana.red.added)
+        self.assertLastRequestedEventWas(events.player.mana.red.added)
 
         self.p1.mana_pool.red -= 1
-        self.assertLastEventWas(events.player.mana.red.removed)
+        self.assertLastRequestedEventWas(events.player.mana.red.removed)
 
     def test_end(self):
         self.game.start()
         self.game.end()
-        self.assertLastEventWas(events.game.ended)
+        self.assertLastRequestedEventWas(events.game.ended)

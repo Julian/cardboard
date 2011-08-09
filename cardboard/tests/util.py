@@ -28,28 +28,29 @@ class EventHandlerTestCase(unittest.TestCase):
         self.events = mock.Mock()
         self.trigger = self.events.trigger
 
-    def assertLastEventWas(self, event, request=True):
-        evt = pool(event=event)
-        rq = pool(request=event)
+    def failUnexpectedEvents(self, *events):
+        # TODO: Make this look nicer by giving it a nice diff
+        verb = "was" if len(events) == 1 else "were"
+        self.fail("{} {} triggered by {}.".format(events, verb, self.events))
 
-        if not request:
-            return self.events.trigger.assert_called_with(**e)
-        else:
-            args = [[rq], [evt]]
-            self.assertEqual(self.events.trigger.call_args_list[-2:], args)
+    def assertLastRequestedEventWas(self, event):
+        self.assertLastEventsWere(pool(request=event), pool(event=event))
 
-    def assertLastEventWasnt(self, event, request=True):
-        try:
-            self.assertLastEventWas(event, request)
-        except (AssertionError, IndexError):
-            return
-        else:
-            # TODO: Make this look nicer by giving it a nice diff
-            self.fail("{} was triggered by {}.".format(event, self.events))
+    def assertLastRequestedEventWasNot(self, event):
+        return self.assertLastEventsWereNot(pool(request=event),
+                                            pool(event=event))
 
     def assertLastEventsWere(self, *events):
         events = [[i] for i in events]
         self.assertEqual(events, self.trigger.call_args_list[-len(events):])
+
+    def assertLastEventsWereNot(self, *events):
+        try:
+            self.assertLastEventsWere(*events)
+        except (AssertionError, IndexError):
+            return
+        else:
+            self.failUnexpectedEvents(*events)
 
     def assertSubscribed(self, fn, pool=True, **kwargs):
         if pool:
@@ -66,6 +67,10 @@ class _ANY(object):
         return "<any>"
 
 ANY = _ANY()
+
+
+def fake_library(size):
+    return [mock.Mock() for _ in range(size)]
 
 
 def last_events(game):

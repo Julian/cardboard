@@ -9,15 +9,16 @@ class Event(object):
     """
     An event container.
 
-    To create ordered sections of the event tree, passing in an OrderedDict is
+    To create ordered sections of an event tree, passing in an OrderedDict is
     supported.
 
         >>> from collections import OrderedDict
         >>> o = OrderedDict([("foo", {}), ("bar", {})])
         >>> e = Event("Foo", subevents=o)
+        This
 
         >>> list(e)
-        [Event('foo'), Event('bar')]
+        [<Event: Foo.foo>, <Event: Foo.bar>]
 
     """
 
@@ -97,7 +98,11 @@ events = Event("all",
 
                {"card" : {
                           "cast" : {},
-                          "removed_from_game" : {},
+
+                          "exile" : {
+                                     "entered" : {},
+                                     "left" : {},
+                                    },
 
                           "field" : {
                                      "entered" : {},
@@ -108,6 +113,16 @@ events = Event("all",
                                          "entered" : {},
                                          "left" : {},
                                         },
+
+                          "hand" : {
+                                    "entered" : {},
+                                    "left" : {},
+                                   },
+
+                          "library" : {
+                                       "entered" : {},
+                                       "left" : {},
+                                      },
                          },
 
                 "game" : {

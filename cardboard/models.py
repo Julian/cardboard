@@ -2,8 +2,9 @@ from operator import attrgetter, methodcaller
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import backref, reconstructor, relationship
 
+from cardboard import exceptions
 from cardboard.collaborate import collaborate
 from cardboard.db import Base
 from cardboard.events import events
@@ -51,7 +52,37 @@ class Card(Base):
     sets = association_proxy("appearances", "set")
     subtypes = association_proxy("subtype_objects", "name")
 
-    def __init__(self, name, type, casting_cost=None, abilities=None,
+    _locations = {"exile" : {"add" : attrgetter("add"),
+                             "added" : events.card.exile.entered,
+                             "get" : attrgetter("controller.exiled"),
+                             "remove" : attrgetter("remove"),
+                             "removed" : events.card.exile.left},
+
+                  "field" : {"add" : attrgetter("add"),
+                             "added" : events.card.field.entered,
+                             "get" : attrgetter("game.field"),
+                             "remove" : attrgetter("remove"),
+                             "removed" : events.card.field.left},
+
+                  "graveyard" : {"add" : attrgetter("append"),
+                                 "added" : events.card.graveyard.entered,
+                                 "get" : attrgetter("controller.graveyard"),
+                                 "remove" : attrgetter("remove"),
+                                 "removed" : events.card.graveyard.left},
+
+                  "hand" : {"add" : attrgetter("add"),
+                            "added" : events.card.hand.entered,
+                            "get" : attrgetter("controller.hand"),
+                            "remove" : attrgetter("remove"),
+                            "removed" : events.card.hand.left},
+
+                  "library" : {"add" : attrgetter("append"),
+                               "added" : events.card.library.entered,
+                               "get" : attrgetter("controller.library"),
+                               "remove" : attrgetter("remove"),
+                               "removed" : events.card.library.left}}
+
+    def __init__(self, name, type, casting_cost="", abilities=None,
                  subtypes=None):
         super(Card, self).__init__()
 
@@ -66,8 +97,14 @@ class Card(Base):
         self.subtypes = subtypes
         self.type = type
 
+        self._init_()
+
+    @reconstructor
+    def _init_(self):
         self.game = None
-        self.owner = None
+
+        self.controller = None
+        self._location = None
         self.tapped = None
 
     def __str__(self):
@@ -80,6 +117,55 @@ class Card(Base):
     def is_permanent(self):
         return self.type.lower() not in {"sorcery", "instant"}
 
+    @property
+    def location(self):
+        return self._locations[self._location]["get"](self)
+
+    @collaborate()
+    def move_to(self, to):
+        """
+        Move the card to a new location.
+
+        Arguments
+        ---------
+
+            * to: the new location (one of: {})
+
+        """.format(self._locations.keys())
+
+        if to not in self._locations:
+            raise ValueError("'{}' is not a valid location".format(to))
+        elif to == self._location:
+            return
+
+        source_info = self._locations[self._location]
+        destination_info = self._locations[to]
+
+        pool = (yield)
+        pool.update(target=self, to=to)
+
+        yield source_info["removed"]
+        yield destination_info["added"]
+        yield
+
+        if pool["to"] not in self._locations:
+            raise ValueError("'{}' is not a valid location".format(pool["to"]))
+
+        # TODO log here any unforseen error by a somehow miskept location
+        destination_info = self._locations[pool["to"]]
+
+        source = source_info["get"](self)
+        destination = destination_info["get"](self)
+
+        self._location = pool["to"]
+        source_info["remove"](source)(self)
+        destination_info["add"](destination)(self)
+
+        yield source_info["removed"]
+        yield destination_info["added"]
+
+        # TODO: Maybe untapping should be done in here if it went to the field
+
     @collaborate()
     def cast(self):
         """
@@ -87,77 +173,23 @@ class Card(Base):
 
         """
 
-        if self.is_permanent:
-            destination = methodcaller("put_into_play")
-        else:
-            destination = methodcaller("move_to_graveyard")
-
         pool = (yield)
-        pool.update(target=self, destination=destination)
+        pool.update(target=self, countered=False)
 
+        # TODO: some form of chaining pools will be needed to handle cards that
+        # do things like "whenever a card is put into play as a result of ..."
         yield events.card.cast
         yield
 
-        pool["destination"](pool["target"])
-        yield events.card.cast
+        if not pool["countered"]:
 
-    @collaborate()
-    def put_into_play(self):
-        """
-        Add a card to the play field.
+            if pool["target"].is_permanent:
+                pool["target"].move_to("field")
+                pool["target"].tapped = False
+            else:
+                pool["target"].move_to("graveyard")
 
-        """
-
-        pool = (yield)
-        pool.update(target=self, owner=self.owner, destination=self.game.field,
-                    destination_add=attrgetter("add"))
-
-        yield events.card.field.entered
-        yield
-
-        pool["destination_add"](pool["destination"])(pool["target"])
-
-        if pool["destination"] is self.game.field:
-            pool["target"].owner = pool["owner"]
-
-        yield events.card.field.entered
-
-    @collaborate()
-    def move_to_graveyard(self):
-        """
-        Move a card to the graveyard.
-
-        """
-
-        # TODO: remove from source, include in pool (also in rem_from_game)
-        pool = (yield)
-        pool.update(target=self, destination=self.owner.graveyard,
-                    destination_add=attrgetter("append"))
-
-        yield events.card.graveyard.entered
-        yield
-
-        pool["destination_add"](pool["destination"])(pool["target"])
-        yield events.card.graveyard.entered
-
-    @collaborate()
-    def remove_from_game(self):
-        """
-        Remove a card from the game.
-
-        """
-
-        pool = (yield)
-        pool.update(target=self, player=self.owner,
-                    destination=self.owner.exiled,
-                    destination_add=attrgetter("add"))
-
-        yield events.card.removed_from_game
-        yield
-
-        pool["destination_add"](pool["destination"])(pool["target"])
-        yield events.card.removed_from_game
-
+            yield events.card.cast
 
 class Deck(Base):
 
