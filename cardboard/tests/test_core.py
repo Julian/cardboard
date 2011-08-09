@@ -214,17 +214,6 @@ class TestBehavior(EventHandlerTestCase):
     def test_die_nonexisting_reason(self):
         self.assertRaises(ValueError, self.p1.die, "something")
 
-    def test_draw(self):
-        card = mock.Mock()
-        p3 = self.game.add_player(library=[card], hand_size=0)
-        p3.draw()
-        self.assertEqual(p3.hand, {card})
-
-        library = fake_library(5)
-        p4 = self.game.add_player(library=library, hand_size=0)
-        p4.draw(5)
-        self.assertEqual(p4.hand, set(library))
-
     def test_dont_die_when_drawing_zero_cards(self):
         self.assertFalse(self.p1.dead)
         self.p1.draw(0)
@@ -337,10 +326,36 @@ class TestEvents(EventHandlerTestCase):
         self.assertLastRequestedEventWasNot(events.player.life.gained)
         self.assertLastRequestedEventWasNot(events.player.life.lost)
 
-    def test_card_drawn(self):
-        self.p1.library = [1]
-        self.p1.draw()
+    def test_draw(self):
+        card = mock.Mock()
+        p3 = self.game.add_player(library=[card], life=1, hand_size=0)
+        self.game.start()
+
+        p3.draw()
+
+        card.move_to.assert_called_once_with("hand")
         self.assertLastRequestedEventWas(events.player.draw)
+
+    def test_draw_multiple(self):
+        p3 = self.game.add_player(library=fake_library(5), life=1, hand_size=0)
+        self.game.start()
+
+        library = list(p3.library)
+        for card in library:
+            card.move_to.side_effect = lambda i : p3.library.pop()
+
+        p3.draw(5)
+
+        for card in library:
+            card.move_to.assert_called_once_with("hand")
+
+        e = ((pool(request=events.player.draw),
+              pool(event=events.player.draw)) for _ in range(5))
+
+        self.assertLastEventsWere(*itertools.chain.from_iterable(e))
+
+    def test_card_drawn_from_empty_library(self):
+        self.game.start()
 
         def side_effect(*args, **kwargs):
             self.assertFalse(events.player.draw in kwargs.viewvalues(),
@@ -350,6 +365,15 @@ class TestEvents(EventHandlerTestCase):
         self.events.trigger.side_effect = side_effect
 
         self.p1.draw()
+        self.assertLastRequestedEventWas(events.player.died)
+
+    def test_cards_non_int(self):
+        self.game.start()
+        self.assertRaises(TypeError, self.p1.draw, object())
+
+    def test_cards_drawn_from_empty_library_dies_once(self):
+        self.game.start()
+        self.p1.draw(5)
         self.assertLastRequestedEventWas(events.player.died)
 
     def test_mana_changed(self):

@@ -187,33 +187,28 @@ class Player(object):
 
         """
 
-        if not cards:
+        cards = int(cards)
+
+        if cards == 0:
             return
         elif cards < 0:
             raise ValueError("Can't draw a negative number of cards.")
-
-        if not self.library:
+        elif cards > len(self.library):
             self.die(reason="library")
             return
-
-        # FIXME: We are dying multiple times here I think.
-        if cards > 1:
+        elif cards > 1:
+            # do draw 1 multiple times so that each draw triggers a draw event
             for i in range(cards):
                 self.draw()
             return
 
         pool = (yield)
-        pool.update(player=self, source=self.library,
-                    destination=self.hand,
-                    source_get=methodcaller("pop"),
-                    destination_add=attrgetter("add"))
+        pool.update(player=self, target=self.library[-1])
 
         yield events.player.draw
         yield
 
-        card = pool["source_get"](pool["source"])
-        pool["destination_add"](pool["destination"])(card)
-
+        pool["target"].move_to("hand")
         yield events.player.draw
 
 

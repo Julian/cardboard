@@ -104,8 +104,8 @@ class Card(Base):
         self.game = None
 
         self.controller = None
-        self._location = None
         self.tapped = None
+        self._location = "library"
 
     def __str__(self):
         return self.name
