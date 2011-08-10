@@ -1,13 +1,8 @@
-from operator import attrgetter, methodcaller
-
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import backref, reconstructor, relationship
 
-from cardboard import exceptions
-from cardboard.collaborate import collaborate
 from cardboard.db import Base
-from cardboard.events import events
 
 cardsubtype_table = Table("cardsubtypes", Base.metadata,
         Column("card_id", Integer, ForeignKey("cards.id"), primary_key=True),
@@ -30,7 +25,7 @@ class Ability(Base):
 
     def __repr__(self):
         # TODO: Truncate
-        return "<Ability: {}>".format(self.description)
+        return "<Ability Model: {}>".format(self.description)
 
 
 class Card(Base):
@@ -39,8 +34,11 @@ class Card(Base):
 
     id = Column(Integer, primary_key=True)
     casting_cost = Column(String)
-    name = Column(String, unique=True)
-    type = Column(String)
+    name = Column(String, nullable=False, unique=True)
+    type = Column(String, nullable=False)
+
+    base_power = Column(String(3))
+    base_toughness = Column(String(3))
 
     ability_objects = relationship("Ability", backref="card")
 
@@ -52,170 +50,24 @@ class Card(Base):
     sets = association_proxy("appearances", "set")
     subtypes = association_proxy("subtype_objects", "name")
 
-    _locations = {"exile" : {"add" : attrgetter("add"),
-                             "added" : events.card.exile.entered,
-                             "get" : attrgetter("controller.exiled"),
-                             "remove" : attrgetter("remove"),
-                             "removed" : events.card.exile.left},
-
-                  "field" : {"add" : attrgetter("add"),
-                             "added" : events.card.field.entered,
-                             "get" : attrgetter("game.field"),
-                             "remove" : attrgetter("remove"),
-                             "removed" : events.card.field.left},
-
-                  "graveyard" : {"add" : attrgetter("append"),
-                                 "added" : events.card.graveyard.entered,
-                                 "get" : attrgetter("controller.graveyard"),
-                                 "remove" : attrgetter("remove"),
-                                 "removed" : events.card.graveyard.left},
-
-                  "hand" : {"add" : attrgetter("add"),
-                            "added" : events.card.hand.entered,
-                            "get" : attrgetter("controller.hand"),
-                            "remove" : attrgetter("remove"),
-                            "removed" : events.card.hand.left},
-
-                  "library" : {"add" : attrgetter("append"),
-                               "added" : events.card.library.entered,
-                               "get" : attrgetter("controller.library"),
-                               "remove" : attrgetter("remove"),
-                               "removed" : events.card.library.left}}
-
-    def __init__(self, name, type, casting_cost="", abilities=None,
-                 subtypes=None):
+    def __init__(self, name, type, casting_cost=None, abilities=(),
+                 subtypes=(), power=None, toughness=None):
         super(Card, self).__init__()
 
-        if abilities is None:
-            abilities = []
-        if subtypes is None:
-            subtypes = []
-
-        self.abilities = abilities
+        self.abilities = list(abilities)
         self.casting_cost = casting_cost
         self.name = name
-        self.subtypes = subtypes
+        self.subtypes = list(subtypes)
         self.type = type
+
+        self.power = power
+        self.toughness = toughness
 
         self._init_()
 
-    @reconstructor
-    def _init_(self):
-        self.game = None
-
-        self.controller = None
-        self._tapped = None
-        self._location = "library"
-
-    def __str__(self):
-        return self.name
-
     def __repr__(self):
-        return "<Card: {0} ({0.type})>".format(self)
+        return "<Card Model: {.name}>".format(self)
 
-    @property
-    def is_permanent(self):
-        return self.type.lower() not in {"sorcery", "instant"}
-
-    @property
-    def location(self):
-        return self._location
-
-    @location.setter
-    @collaborate()
-    def location(self, to):
-        """
-        Move the card to a new location.
-
-        Arguments
-        ---------
-
-            * to: the new location (one of: {})
-
-        """.format(self._locations.keys())
-
-        if to not in self._locations:
-            raise ValueError("'{}' is not a valid location".format(to))
-        elif to == self.location:
-            return
-
-        source_info = self._locations[self.location]
-        destination_info = self._locations[to]
-
-        pool = (yield)
-        pool.update(target=self, to=to)
-
-        yield source_info["removed"]
-        yield destination_info["added"]
-        yield
-
-        if pool["to"] not in self._locations:
-            raise ValueError("'{}' is not a valid location".format(pool["to"]))
-
-        # TODO log here any unforseen error by a somehow miskept location
-        destination_info = self._locations[pool["to"]]
-
-        source = source_info["get"](self)
-        destination = destination_info["get"](self)
-
-        self._location = pool["to"]
-        source_info["remove"](source)(self)
-        destination_info["add"](destination)(self)
-
-        yield source_info["removed"]
-        yield destination_info["added"]
-
-        if pool["to"] == "field":
-            pool["target"].tapped = False
-
-    @property
-    def tapped(self):
-        return self._tapped
-
-    @tapped.setter
-    @collaborate()
-    def tapped(self, t):
-        if t:
-            event = events.card.tapped
-        else:
-            event = events.card.untapped
-
-        if self.location != "field":
-            raise exceptions.RuntimeError("{} is not in play.".format(self))
-
-        pool = (yield)
-        pool.update(target=self)
-
-        yield event
-        yield
-
-        self._tapped = bool(t)
-
-        yield event
-
-    @collaborate()
-    def cast(self):
-        """
-        Cast a card.
-
-        """
-
-        pool = (yield)
-        pool.update(target=self, countered=False)
-
-        # TODO: some form of chaining pools will be needed to handle cards that
-        # do things like "whenever a card is put into play as a result of ..."
-        yield events.card.cast
-        yield
-
-        if not pool["countered"]:
-
-            if pool["target"].is_permanent:
-                pool["target"].location = "field"
-            else:
-                pool["target"].location = "graveyard"
-
-            yield events.card.cast
 
 class Deck(Base):
 
@@ -233,12 +85,7 @@ class Deck(Base):
         self.cards = cards or []
 
     def __repr__(self):
-        return "<Deck: {0.name} ({0.colors})>".format(self)
-
-    @property
-    def colors(self):
-        # FIXME: return "".join({card.color for card in self.cards})
-        return "UW"
+        return "<Deck Model: {.name})>".format(self)
 
 
 class DeckAppearance(Base):
@@ -280,11 +127,8 @@ class Set(Base):
         self.name = name
         self.code = code
 
-    def __str__(self):
-        return self.name
-
     def __repr__(self):
-        return "<Set: {0}>".format(self)
+        return "<Set Model: {.name}>".format(self)
 
 
 class SetAppearance(Base):
@@ -307,40 +151,7 @@ class SetAppearance(Base):
         self.rarity = rarity
 
     def __repr__(self):
-        return "<{0.card} ({0.set.code}-{0.rarity})>".format(self)
-
-
-class Creature(Base):
-
-    __tablename__ = "creatures"
-
-    id = Column(Integer, primary_key=True)
-    card_id = Column(Integer, ForeignKey("cards.id"))
-    base_power = Column(Integer)
-    base_toughness = Column(Integer)
-
-    card = relationship("Card", backref=backref("creature", uselist=False))
-
-    def __init__(self, card, power, toughness):
-        super(Creature, self).__init__()
-
-        self.card = card
-
-        power, toughness = str(power), str(toughness)
-
-        if "*" not in power:
-            power = int(power)
-        if "*" not in toughness:
-            toughness = int(toughness)
-
-        self.base_power = power
-        self.base_toughness = toughness
-
-    def __str__(self):
-        return str(self.card)
-
-    def __repr__(self):
-        return "<{0.card.type}: {0.card}>".format(self)
+        return "<{0.card.name} ({0.set.code}-{0.rarity})>".format(self)
 
 
 class Subtype(Base):

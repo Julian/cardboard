@@ -5,7 +5,7 @@ import mock
 
 from cardboard import core as c, exceptions as exc
 from cardboard.events import events
-from cardboard.tests.util import EventHandlerTestCase, ANY, fake_library, pool
+from cardboard.tests.util import EventHandlerTestCase, ANY, request, event
 
 
 class TestManaPool(unittest.TestCase):
@@ -61,23 +61,6 @@ class TestGame(EventHandlerTestCase):
     def setUp(self):
         super(TestGame, self).setUp()
         self.game = c.Game(self.events)
-
-    def test_informs_players_library_on_add(self):
-        p1 = mock.Mock()
-        p1.library = fake_library(60)
-        self.game.add_existing_player(p1)
-
-        for card in p1.library:
-            self.assertIs(card.game, self.game)
-            self.assertIs(card.controller, p1)
-            self.assertIs(card.library, p1.library)
-
-        p2 = self.game.add_player(library=fake_library(60))
-
-        for card in p2.library:
-            self.assertIs(card.game, self.game)
-            self.assertIs(card.controller, p2)
-            self.assertIs(card.library, p2.library)
 
     def test_no_player_game(self):
         self.assertRaises(exc.RuntimeError, self.game.start)
@@ -253,6 +236,8 @@ class TestEvents(EventHandlerTestCase):
 
     def test_game_started(self):
         self.game.start()
+
+        # No pool for game started
         self.assertEqual(self.events.trigger.call_args_list[0],
                          [{"event" : events.game.started}])
 
@@ -260,32 +245,28 @@ class TestEvents(EventHandlerTestCase):
         self.game.start()
         self.game.phase = "combat"
 
-        self.assertLastEventsWere(
-
-            pool(request=events.game.phases.combat),
-            pool(event=events.game.phases.combat),
-            pool(request=events.game.phases.combat.beginning),
-            pool(event=events.game.phases.combat.beginning)
-
-        )
+        self.assertLastEventsWere(request(events.game.phases.combat),
+                                  event(events.game.phases.combat),
+                                  request(events.game.phases.combat.beginning),
+                                  event(events.game.phases.combat.beginning))
 
     def test_next_phase(self):
         self.game.start()
 
         for _ in range(2):
             for phase in events.game.phases:
-                calls = [pool(request=phase), pool(event=phase)]
+                calls = [request(phase), event(phase)]
 
                 phase = iter(phase)
                 first = next(phase, None)
 
                 if first is not None:
-                    calls.extend([pool(request=first), pool(event=first)])
+                    calls.extend([request(first), event(first)])
 
                 self.assertLastEventsWere(*calls)
 
                 for subphase in phase:
-                    calls = [pool(request=subphase), pool(event=subphase)]
+                    calls = [request(subphase), event(subphase)]
 
                     self.game.next_phase()
                     self.assertLastEventsWere(*calls)
@@ -296,16 +277,12 @@ class TestEvents(EventHandlerTestCase):
         self.game.start()
         self.game.next_turn()
 
-        self.assertLastEventsWere(
-
-            pool(request=events.game.turn.changed),
-            pool(event=events.game.turn.changed),
-            pool(request=events.game.phases.beginning),
-            pool(event=events.game.phases.beginning),
-            pool(request=events.game.phases.beginning.untap),
-            pool(event=events.game.phases.beginning.untap)
-
-        )
+        self.assertLastEventsWere(request(events.game.turn.changed),
+                                  event(events.game.turn.changed),
+                                  request(events.game.phases.beginning),
+                                  event(events.game.phases.beginning),
+                                  request(events.game.phases.beginning.untap),
+                                  event(events.game.phases.beginning.untap))
 
     def test_die(self):
         self.p1.die()
@@ -324,30 +301,42 @@ class TestEvents(EventHandlerTestCase):
         self.assertLastRequestedEventWasNot(events.player.life.lost)
 
     def test_draw(self):
-        card = mock.Mock()
+        location = mock.Mock()
+
+        class Card(mock.Mock):
+            location = property(fset=lambda *a, **kw : location(*a, **kw))
+
+        card = Card()
+
         p3 = self.game.add_player(library=[card], life=1, hand_size=0)
         self.game.start()
 
         p3.draw()
 
-        card.move_to.assert_called_once_with("hand")
+        location.assert_called_once_with(card, "hand")
         self.assertLastRequestedEventWas(events.player.draw)
 
     def test_draw_multiple(self):
-        p3 = self.game.add_player(library=fake_library(5), life=1, hand_size=0)
-        self.game.start()
+        location = mock.Mock(side_effect=lambda *a, **kw : p3.library.pop())
 
-        library = list(p3.library)
-        for card in library:
-            card.move_to.side_effect = lambda i : p3.library.pop()
+        class Card(mock.Mock):
+            location = property(fset=lambda *a, **kw : location(*a, **kw))
+
+        library = [Card() for _ in range(5)]
+        copy = list(reversed(library))
+
+        p3 = self.game.add_player(library=library, life=1, hand_size=0)
+        self.game.start()
 
         p3.draw(5)
 
-        for card in library:
-            card.move_to.assert_called_once_with("hand")
+        self.assertEqual(location.call_count, 5)
 
-        e = ((pool(request=events.player.draw),
-              pool(event=events.player.draw)) for _ in range(5))
+        for card, call in zip(copy, location.call_args_list):
+            self.assertEqual(call, [(card, "hand")])
+
+        e = ((request(events.player.draw), event(events.player.draw))
+             for _ in range(5))
 
         self.assertLastEventsWere(*itertools.chain.from_iterable(e))
 

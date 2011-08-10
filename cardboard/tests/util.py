@@ -33,12 +33,11 @@ class EventHandlerTestCase(unittest.TestCase):
         verb = "was" if len(events) == 1 else "were"
         self.fail("{} {} triggered by {}.".format(events, verb, self.events))
 
-    def assertLastRequestedEventWas(self, event):
-        self.assertLastEventsWere(pool(request=event), pool(event=event))
+    def assertLastRequestedEventWas(self, e):
+        self.assertLastEventsWere(request(e), event(e))
 
-    def assertLastRequestedEventWasNot(self, event):
-        return self.assertLastEventsWereNot(pool(request=event),
-                                            pool(event=event))
+    def assertLastRequestedEventWasNot(self, e):
+        return self.assertLastEventsWereNot(request(e), event(e))
 
     def assertLastEventsWere(self, *events):
         events = [[i] for i in events]
@@ -69,10 +68,6 @@ class _ANY(object):
 ANY = _ANY()
 
 
-def fake_library(size):
-    return [mock.Mock() for _ in range(size)]
-
-
 def last_events(game):
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger("event_logger")
@@ -81,6 +76,8 @@ def last_events(game):
         logger.debug({k : v for k, v in kwargs.iteritems() if k != "pool"})
 
 
-def pool(**kwargs):
-    kwargs["pool"] = ANY
-    return kwargs
+def request(event):
+    return {"request" : event, "pool" : ANY}
+
+def event(event):
+    return {"event" : event, "pool" : ANY}
