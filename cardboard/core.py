@@ -208,7 +208,7 @@ class Player(object):
         yield events.player.draw
         yield
 
-        pool["target"].move_to("hand")
+        pool["target"].location = "hand"
         yield events.player.draw
 
 
@@ -360,11 +360,6 @@ class Game(object):
 
         player.game = self
         self.players.append(player)
-
-        for card in player.library:
-            card.game = self
-            card.controller = player
-            card.library = player.library
 
     def next_phase(self):
         """
