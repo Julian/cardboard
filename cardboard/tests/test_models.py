@@ -16,7 +16,7 @@ def spawn_card(type, game, player):
     card.controller = player
     card.game = game
     card.library = player.library
-    card._location = "library"
+    card.location = "library"
 
     return card
 
@@ -49,35 +49,30 @@ class TestCardBehavior(unittest.TestCase):
             card = m.Card(name="Test", type=type)
             self.assertFalse(card.is_permanent)
 
-    def test_cast(self):
-        self.creature.move_to = mock.Mock()
-        self.instant.move_to = mock.Mock()
-
-        self.creature.cast()
-        self.creature.move_to.assert_called_once_with("field")
-
-        self.assertIsNotNone(self.creature.tapped)
-        self.assertFalse(self.creature.tapped)
-
-        self.instant.cast()
-        self.instant.move_to.assert_called_once_with("graveyard")
-
     def test_controller(self):
         # create a library, check that instantiating a player with that library
         # makes all the cards have that controller
         pass
 
-    def test_move_to(self):
+    def test_location(self):
         self.game.field = set()
         self.assertIn(self.creature, self.player.library)
 
-        self.creature.move_to("field")
+        self.creature.location = "field"
         self.assertIn(self.creature, self.game.field)
-        self.assertIs(self.creature.location, self.game.field)
+        self.assertEqual(self.creature.location, "field")
         self.assertNotIn(self.creature, self.player.library)
 
-    def test_move_to_nonvalid(self):
-        self.assertRaises(ValueError, self.creature.move_to, "something")
+    def test_location_nonvalid(self):
+        with self.assertRaises(ValueError):
+            self.creature.location = "something"
+
+    def test_move_to_field(self):
+        self.game.field = set()
+        self.creature.location = "field"
+
+        self.assertIsNotNone(self.creature.tapped)
+        self.assertFalse(self.creature.tapped)
 
 
 class TestCardEvents(EventHandlerTestCase):
@@ -92,46 +87,60 @@ class TestCardEvents(EventHandlerTestCase):
         self.instant = spawn_card("Instant", self.game, self.player)
 
     def test_cast_permanent(self):
-        with mock.patch.object(self.creature, "move_to"):
-            self.creature.cast()
+        with mock.patch.object(m.Card, "location") as location:
+            location.__set__ = mock.Mock()
+
+            creature = spawn_card("Creature", self.game, self.player)
+            creature.cast()
+
+            location.__set__.assert_called_with(creature, "field")
+
         self.assertLastRequestedEventWas(events.card.cast)
 
     def test_cast_nonpermanent(self):
-        with mock.patch.object(self.instant, "move_to"):
-            self.instant.cast()
+        with mock.patch.object(m.Card, "location") as location:
+            location.__set__ = mock.Mock()
+
+            instant = spawn_card("Instant", self.game, self.player)
+            instant.cast()
+
+            location.__set__.assert_called_with(instant, "graveyard")
+
         self.assertLastRequestedEventWas(events.card.cast)
 
-    def test_move_to(self):
-        self.creature.move_to("field")
+    def test_location(self):
+        self.creature.location = "field"
         self.assertLastEventsWere(pool(request=events.card.library.left),
                                   pool(request=events.card.field.entered),
                                   pool(event=events.card.library.left),
-                                  pool(event=events.card.field.entered))
+                                  pool(event=events.card.field.entered),
+                                  pool(request=events.card.untapped),
+                                  pool(event=events.card.untapped))
 
-        self.creature.move_to("graveyard")
+        self.creature.location = "graveyard"
         self.assertLastEventsWere(pool(request=events.card.field.left),
                                   pool(request=events.card.graveyard.entered),
                                   pool(event=events.card.field.left),
                                   pool(event=events.card.graveyard.entered))
 
-        self.creature.move_to("exile")
+        self.creature.location = "exile"
         self.assertLastEventsWere(pool(request=events.card.graveyard.left),
                                   pool(request=events.card.exile.entered),
                                   pool(event=events.card.graveyard.left),
                                   pool(event=events.card.exile.entered))
 
-        self.creature.move_to("hand")
+        self.creature.location = "hand"
         self.assertLastEventsWere(pool(request=events.card.exile.left),
                                   pool(request=events.card.hand.entered),
                                   pool(event=events.card.exile.left),
                                   pool(event=events.card.hand.entered))
 
-        self.creature.move_to("library")
+        self.creature.location = "library"
         self.assertLastEventsWere(pool(request=events.card.hand.left),
                                   pool(request=events.card.library.entered),
                                   pool(event=events.card.hand.left),
                                   pool(event=events.card.library.entered))
 
-    def test_move_to_nowhere(self):
-        self.creature.move_to("library")
+    def test_location_same(self):
+        self.creature.location = "library"
         self.assertLastEventsWereNot(pool(event=events.card.library.entered))

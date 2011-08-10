@@ -79,11 +79,28 @@ class TestGame(EventHandlerTestCase):
             self.assertIs(card.controller, p2)
             self.assertIs(card.library, p2.library)
 
+    def test_no_player_game(self):
+        self.assertRaises(exc.RuntimeError, self.game.start)
 
-class TestSubscribers(EventHandlerTestCase):
-    def setUp(self):
-        super(TestSubscribers, self).setUp()
-        self.game = c.Game(self.events)
+    def test_unstarted_game(self):
+        self.assertIs(self.game.ended, None)
+
+        self.assertIs(self.game.turn, None)
+        self.assertIs(self.game.phase, None)
+        self.assertIs(self.game.subphase, None)
+
+        self.assertFalse(self.game.started)
+
+        self.assertRaises(exc.RuntimeError, setattr, self.game, "phase", "foo")
+        self.assertRaises(exc.RuntimeError, setattr, self.game, "turn", "foo")
+        self.assertRaises(exc.RuntimeError, self.game.next_phase)
+        self.assertRaises(exc.RuntimeError, self.game.next_turn)
+
+    def test_end(self):
+        self.game.add_player(library=[], hand_size=0)
+        self.game.start()
+        self.game.end()
+        self.assertLastRequestedEventWas(events.game.ended)
 
     def test_end_if_dead(self):
         self.assertSubscribed(self.game.end_if_dead, event=events.player.died)
@@ -180,26 +197,6 @@ class TestBehavior(EventHandlerTestCase):
         self.assertIs(self.game.turn, self.p2)
         self.assertEqual(self.game.phase, "beginning")
         self.assertEqual(self.game.subphase, "untap")
-
-    def test_unstarted_game(self):
-        game = c.Game(mock.Mock())
-
-        self.assertIs(game.ended, None)
-
-        self.assertIs(game.turn, None)
-        self.assertIs(game.phase, None)
-        self.assertIs(game.subphase, None)
-
-        self.assertFalse(game.started)
-
-        self.assertRaises(exc.RuntimeError, setattr, game, "phase", "ending")
-        self.assertRaises(exc.RuntimeError, setattr, game, "turn", object())
-        self.assertRaises(exc.RuntimeError, game.next_phase)
-        self.assertRaises(exc.RuntimeError, game.next_turn)
-
-    def test_no_player_game(self):
-        game = c.Game(mock.Mock())
-        self.assertRaises(exc.RuntimeError, game.start)
 
     def test_life(self):
         self.assertFalse(self.p1.dead)
@@ -385,8 +382,3 @@ class TestEvents(EventHandlerTestCase):
 
         self.p1.mana_pool.red -= 1
         self.assertLastRequestedEventWas(events.player.mana.red.removed)
-
-    def test_end(self):
-        self.game.start()
-        self.game.end()
-        self.assertLastRequestedEventWas(events.game.ended)

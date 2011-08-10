@@ -104,7 +104,7 @@ class Card(Base):
         self.game = None
 
         self.controller = None
-        self.tapped = None
+        self._tapped = None
         self._location = "library"
 
     def __str__(self):
@@ -119,10 +119,11 @@ class Card(Base):
 
     @property
     def location(self):
-        return self._locations[self._location]["get"](self)
+        return self._location
 
+    @location.setter
     @collaborate()
-    def move_to(self, to):
+    def location(self, to):
         """
         Move the card to a new location.
 
@@ -135,10 +136,10 @@ class Card(Base):
 
         if to not in self._locations:
             raise ValueError("'{}' is not a valid location".format(to))
-        elif to == self._location:
+        elif to == self.location:
             return
 
-        source_info = self._locations[self._location]
+        source_info = self._locations[self.location]
         destination_info = self._locations[to]
 
         pool = (yield)
@@ -164,7 +165,33 @@ class Card(Base):
         yield source_info["removed"]
         yield destination_info["added"]
 
-        # TODO: Maybe untapping should be done in here if it went to the field
+        if pool["to"] == "field":
+            pool["target"].tapped = False
+
+    @property
+    def tapped(self):
+        return self._tapped
+
+    @tapped.setter
+    @collaborate()
+    def tapped(self, t):
+        if t:
+            event = events.card.tapped
+        else:
+            event = events.card.untapped
+
+        if self.location != "field":
+            raise exceptions.RuntimeError("{} is not in play.".format(self))
+
+        pool = (yield)
+        pool.update(target=self)
+
+        yield event
+        yield
+
+        self._tapped = bool(t)
+
+        yield event
 
     @collaborate()
     def cast(self):
@@ -184,10 +211,9 @@ class Card(Base):
         if not pool["countered"]:
 
             if pool["target"].is_permanent:
-                pool["target"].move_to("field")
-                pool["target"].tapped = False
+                pool["target"].location = "field"
             else:
-                pool["target"].move_to("graveyard")
+                pool["target"].location = "graveyard"
 
             yield events.card.cast
 

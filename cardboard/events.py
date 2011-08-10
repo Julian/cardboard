@@ -98,6 +98,8 @@ events = Event("all",
 
                {"card" : {
                           "cast" : {},
+                          "tapped" : {},
+                          "untapped" : {},
 
                           "exile" : {
                                      "entered" : {},
