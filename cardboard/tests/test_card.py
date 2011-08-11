@@ -41,24 +41,36 @@ class TestCardBehavior(unittest.TestCase):
 
     def test_location(self):
         # TODO: Test all other locations
-        self.player.game.field = set()
+        self.player.game.battlefield = set()
         self.db_card.type = "Creature"
 
         creature = c.Card(self.db_card, controller=self.player)
         self.player.library = [creature]
 
-        creature.location = "field"
-        self.assertIn(creature, self.player.game.field)
-        self.assertEqual(creature.location, "field")
+        creature.location = "battlefield"
+        self.assertIn(creature, self.player.game.battlefield)
+        self.assertEqual(creature.location, "battlefield")
         self.assertNotIn(creature, self.player.library)
 
     def test_location_nonvalid(self):
         with self.assertRaises(ValueError):
             self.card.location = "something"
 
-    def test_taps_when_goes_to_field(self):
+        # FIXME
+
+        # def invalid_location(pool, *args, **kwargs):
+        #     if kwargs.get("request") is events.card.battlefield.entered:
+        #         pool["to"] = object()
+        #     return mock.DEFAULT
+
+        # self.player.events.trigger.side_effect = invalid_location
+
+        # with self.assertRaises(TypeError):
+        #     self.card.location = "battlefield"
+
+    def test_taps_when_goes_to_battlefield(self):
         self.assertIsNone(self.card.tapped)
-        self.card.location = "field"
+        self.card.location = "battlefield"
         self.assertIsNotNone(self.card.tapped)
         self.assertFalse(self.card.tapped)
 
@@ -94,7 +106,7 @@ class TestCardEvents(EventHandlerTestCase):
             creature = c.Card(self.creature_db_card, controller=self.player)
             creature.cast()
 
-            location.__set__.assert_called_with(creature, "field")
+            location.__set__.assert_called_with(creature, "battlefield")
 
         self.assertLastRequestedEventWas(events.card.cast)
 
@@ -128,18 +140,18 @@ class TestCardEvents(EventHandlerTestCase):
                                   event(events.card.graveyard.entered))
 
     def test_location(self):
-        self.creature.location = "field"
+        self.creature.location = "battlefield"
         self.assertLastEventsWere(request(events.card.library.left),
-                                  request(events.card.field.entered),
+                                  request(events.card.battlefield.entered),
                                   event(events.card.library.left),
-                                  event(events.card.field.entered),
+                                  event(events.card.battlefield.entered),
                                   request(events.card.untapped),
                                   event(events.card.untapped))
 
         self.creature.location = "graveyard"
-        self.assertLastEventsWere(request(events.card.field.left),
+        self.assertLastEventsWere(request(events.card.battlefield.left),
                                   request(events.card.graveyard.entered),
-                                  event(events.card.field.left),
+                                  event(events.card.battlefield.left),
                                   event(events.card.graveyard.entered))
 
         self.creature.location = "exile"
@@ -166,7 +178,7 @@ class TestCardEvents(EventHandlerTestCase):
 
     def test_tap(self):
         self.game.start()
-        self.creature.location = "field"
+        self.creature.location = "battlefield"
 
         self.creature.tapped = True
         self.assertTrue(self.creature.tapped)

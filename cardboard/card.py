@@ -79,7 +79,7 @@ class Card(object):
         yield source_info["removed"]
         yield destination_info["added"]
 
-        if pool["to"] == "field":
+        if pool["to"] == "battlefield":
             pool["target"].tapped = False
 
     @property
@@ -89,7 +89,7 @@ class Card(object):
     @tapped.setter
     @collaborate()
     def tapped(self, t):
-        if self.location != "field":
+        if self.location != "battlefield":
             raise exceptions.RuntimeError("{} is not in play.".format(self))
 
         if t:
@@ -128,23 +128,23 @@ class Card(object):
             return
 
         if pool["target"].is_permanent:
-            pool["target"].location = "field"
+            pool["target"].location = "battlefield"
         else:
             pool["target"].location = "graveyard"
 
         yield events.card.cast
 
-_locations = {"exile" : {"add" : attrgetter("add"),
+_locations = {"battlefield" : {"add" : attrgetter("add"),
+                               "added" : events.card.battlefield.entered,
+                               "get" : attrgetter("game.battlefield"),
+                               "remove" : attrgetter("remove"),
+                               "removed" : events.card.battlefield.left},
+
+              "exile" : {"add" : attrgetter("add"),
                          "added" : events.card.exile.entered,
                          "get" : attrgetter("controller.exiled"),
                          "remove" : attrgetter("remove"),
                          "removed" : events.card.exile.left},
-
-              "field" : {"add" : attrgetter("add"),
-                         "added" : events.card.field.entered,
-                         "get" : attrgetter("game.field"),
-                         "remove" : attrgetter("remove"),
-                         "removed" : events.card.field.left},
 
               "graveyard" : {"add" : attrgetter("append"),
                              "added" : events.card.graveyard.entered,

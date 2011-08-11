@@ -107,9 +107,9 @@ events = Event("all",
                                      "left" : {},
                                     },
 
-                          "field" : {
-                                     "entered" : {},
-                                     "left" : {},
+                          "battlefield" : {
+                                           "entered" : {},
+                                           "left" : {},
                                     },
 
                           "graveyard" : {
