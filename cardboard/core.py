@@ -13,7 +13,7 @@ from cardboard.util.game import check_started
 from cardboard.zones import zone
 
 
-__all__ = ["Game", "Player"]
+__all__ = ["Game", "ManaPool", "Player"]
 
 
 def _make_color(name):
