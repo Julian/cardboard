@@ -102,30 +102,33 @@ events = Event("all",
                           "tapped" : {},
                           "untapped" : {},
 
-                          "exile" : {
-                                     "entered" : {},
-                                     "left" : {},
-                                    },
+                          "zones" : {
 
-                          "battlefield" : {
-                                           "entered" : {},
-                                           "left" : {},
-                                    },
+                                     "exile" : {
+                                                 "entered" : {},
+                                                 "left" : {},
+                                                 },
 
-                          "graveyard" : {
-                                         "entered" : {},
-                                         "left" : {},
-                                        },
+                                     "battlefield" : {
+                                                     "entered" : {},
+                                                     "left" : {},
+                                                 },
 
-                          "hand" : {
-                                    "entered" : {},
-                                    "left" : {},
-                                   },
+                                     "graveyard" : {
+                                                     "entered" : {},
+                                                     "left" : {},
+                                                     },
 
-                          "library" : {
-                                       "entered" : {},
-                                       "left" : {},
-                                      },
+                                     "hand" : {
+                                                 "entered" : {},
+                                                 "left" : {},
+                                             },
+
+                                     "library" : {
+                                                 "entered" : {},
+                                                 "left" : {},
+                                                 },
+                                    }
                          },
 
                 "game" : {

@@ -207,7 +207,7 @@ class Player(object):
         yield events.player.draw
         yield
 
-        pool["target"].location = "hand"
+        pool["target"].zone = "hand"
         yield events.player.draw
 
 

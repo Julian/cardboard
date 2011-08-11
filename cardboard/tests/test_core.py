@@ -300,10 +300,10 @@ class TestEvents(EventHandlerTestCase):
         self.assertLastRequestedEventWasNot(events.player.life.lost)
 
     def test_draw(self):
-        location = mock.Mock()
+        zone = mock.Mock()
 
         class Card(mock.Mock):
-            location = property(fset=lambda *a, **kw : location(*a, **kw))
+            zone = property(fset=lambda *a, **kw : zone(*a, **kw))
 
         card = Card()
 
@@ -312,14 +312,14 @@ class TestEvents(EventHandlerTestCase):
 
         p3.draw()
 
-        location.assert_called_once_with(card, "hand")
+        zone.assert_called_once_with(card, "hand")
         self.assertLastRequestedEventWas(events.player.draw)
 
     def test_draw_multiple(self):
-        location = mock.Mock(side_effect=lambda *a, **kw : p3.library.pop())
+        zone = mock.Mock(side_effect=lambda *a, **kw : p3.library.pop())
 
         class Card(mock.Mock):
-            location = property(fset=lambda *a, **kw : location(*a, **kw))
+            zone = property(fset=lambda *a, **kw : zone(*a, **kw))
 
         library = [Card() for _ in range(5)]
         copy = list(reversed(library))
@@ -329,9 +329,9 @@ class TestEvents(EventHandlerTestCase):
 
         p3.draw(5)
 
-        self.assertEqual(location.call_count, 5)
+        self.assertEqual(zone.call_count, 5)
 
-        for card, call in zip(copy, location.call_args_list):
+        for card, call in zip(copy, zone.call_args_list):
             self.assertEqual(call, [(card, "hand")])
 
         e = ((request(events.player.draw), event(events.player.draw))

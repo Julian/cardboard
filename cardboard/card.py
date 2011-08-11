@@ -6,14 +6,14 @@ from cardboard.events import events
 
 
 class Card(object):
-    def __init__(self, db_card, controller, location="library"):
+    def __init__(self, db_card, controller, zone="library"):
         super(Card, self).__init__()
 
         self.game = controller.game
 
         self.controller = controller
         self.owner = controller
-        self._location = location
+        self._zone = zone
         self._tapped = None
 
         for attr in {"name", "type", "subtypes", "casting_cost", "abilities"}:
@@ -33,29 +33,29 @@ class Card(object):
         return self.type.lower() not in {"sorcery", "instant"}
 
     @property
-    def location(self):
-        return self._location
+    def zone(self):
+        return self._zone
 
-    @location.setter
+    @zone.setter
     @collaborate()
-    def location(self, to):
+    def zone(self, to):
         """
-        Move the card to a new location.
+        Move the card to a new zone.
 
         Arguments
         ---------
 
-            * to: the new location (one of: {})
+            * to: the new zone (one of: {})
 
-        """.format(_locations.keys())
+        """.format(_zones.keys())
 
-        if to not in _locations:
-            raise ValueError("'{}' is not a valid location".format(to))
-        elif to == self.location:
+        if to not in _zones:
+            raise ValueError("'{}' is not a valid zone".format(to))
+        elif to == self.zone:
             return
 
-        source_info = _locations[self.location]
-        destination_info = _locations[to]
+        source_info = _zones[self.zone]
+        destination_info = _zones[to]
 
         pool = (yield)
         pool.update(target=self, to=to)
@@ -64,16 +64,16 @@ class Card(object):
         yield destination_info["added"]
         yield
 
-        if pool["to"] not in _locations:
-            raise ValueError("'{}' is not a valid location".format(pool["to"]))
+        if pool["to"] not in _zones:
+            raise ValueError("'{}' is not a valid zone".format(pool["to"]))
 
-        # TODO log here any unforseen error by a somehow miskept location
-        destination_info = _locations[pool["to"]]
+        # TODO log here any unforseen error by a somehow miskept zone
+        destination_info = _zones[pool["to"]]
 
         source = source_info["get"](self)
         destination = destination_info["get"](self)
 
-        self._location = pool["to"]
+        self._zone = pool["to"]
         source_info["remove"](source)(self)
         destination_info["add"](destination)(self)
 
@@ -90,7 +90,7 @@ class Card(object):
     @tapped.setter
     @collaborate()
     def tapped(self, t):
-        if self.location != "battlefield":
+        if self.zone != "battlefield":
             raise exceptions.RuntimeError("{} is not in play.".format(self))
 
         if t:
@@ -125,42 +125,42 @@ class Card(object):
 
         if pool["countered"]:
             yield events.card.countered
-            pool["target"].location = "graveyard"
+            pool["target"].zone = "graveyard"
             return
 
         if pool["target"].is_permanent:
-            pool["target"].location = "battlefield"
+            pool["target"].zone = "battlefield"
         else:
-            pool["target"].location = "graveyard"
+            pool["target"].zone = "graveyard"
 
         yield events.card.cast
 
-_locations = {"battlefield" : {"add" : attrgetter("add"),
-                               "added" : events.card.battlefield.entered,
-                               "get" : attrgetter("game.battlefield"),
-                               "remove" : attrgetter("remove"),
-                               "removed" : events.card.battlefield.left},
+_zones = {"battlefield" : {"add" : attrgetter("add"),
+                          "added" : events.card.zones.battlefield.entered,
+                          "get" : attrgetter("game.battlefield"),
+                          "remove" : attrgetter("remove"),
+                          "removed" : events.card.zones.battlefield.left},
 
-              "exile" : {"add" : attrgetter("add"),
-                         "added" : events.card.exile.entered,
-                         "get" : attrgetter("controller.exiled"),
-                         "remove" : attrgetter("remove"),
-                         "removed" : events.card.exile.left},
+          "exile" : {"add" : attrgetter("add"),
+                      "added" : events.card.zones.exile.entered,
+                      "get" : attrgetter("controller.exiled"),
+                      "remove" : attrgetter("remove"),
+                      "removed" : events.card.zones.exile.left},
 
-              "graveyard" : {"add" : attrgetter("append"),
-                             "added" : events.card.graveyard.entered,
-                             "get" : attrgetter("controller.graveyard"),
-                             "remove" : attrgetter("remove"),
-                             "removed" : events.card.graveyard.left},
+          "graveyard" : {"add" : attrgetter("append"),
+                          "added" : events.card.zones.graveyard.entered,
+                          "get" : attrgetter("controller.graveyard"),
+                          "remove" : attrgetter("remove"),
+                          "removed" : events.card.zones.graveyard.left},
 
-              "hand" : {"add" : attrgetter("add"),
-                        "added" : events.card.hand.entered,
-                        "get" : attrgetter("controller.hand"),
-                        "remove" : attrgetter("remove"),
-                        "removed" : events.card.hand.left},
+          "hand" : {"add" : attrgetter("add"),
+                  "added" : events.card.zones.hand.entered,
+                  "get" : attrgetter("controller.hand"),
+                  "remove" : attrgetter("remove"),
+                  "removed" : events.card.zones.hand.left},
 
-              "library" : {"add" : attrgetter("append"),
-                           "added" : events.card.library.entered,
-                           "get" : attrgetter("controller.library"),
-                           "remove" : attrgetter("remove"),
-                           "removed" : events.card.library.left}}
+          "library" : {"add" : attrgetter("append"),
+                      "added" : events.card.zones.library.entered,
+                      "get" : attrgetter("controller.library"),
+                      "remove" : attrgetter("remove"),
+                      "removed" : events.card.zones.library.left}}
