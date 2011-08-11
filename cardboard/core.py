@@ -6,10 +6,11 @@ Cardboard core
 from operator import attrgetter, methodcaller
 import itertools
 
+from cardboard import exceptions
 from cardboard.collaborate import collaborate
 from cardboard.events import events
 from cardboard.util.game import check_started
-from cardboard import exceptions
+from cardboard.zones import zone
 
 
 __all__ = ["Game", "Player"]
@@ -101,15 +102,13 @@ class Player(object):
         self.game = None  # set when a Game adds the player
 
         self.dead = False
+        self.hand_size = hand_size
         self._life = int(life)
 
-        self.hand = set()
-        self.hand_size = hand_size
-
-        self.library = list(library)
-
-        self.exiled = set()
-        self.graveyard = []
+        self.exiled = zone("Exile")
+        self.graveyard = zone("Graveyard", ordered=True)
+        self.hand = zone("Hand")
+        self.library = zone("Library", library, ordered=True)
 
         self.mana_pool = ManaPool(self)
 

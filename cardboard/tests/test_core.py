@@ -50,8 +50,7 @@ class TestPlayer(unittest.TestCase):
         library = [object(), object(), object()]
         p1 = c.Player(library=library, name="Test")
 
-        self.assertIsNot(p1.library, library)
-        self.assertEqual(p1.library, library)
+        self.assertEqual(list(p1.library), list(library))
 
         for card, original in zip(p1.library, library):
             self.assertIs(card, original)
