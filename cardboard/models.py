@@ -24,8 +24,8 @@ class Ability(Base):
         self.description = description
 
     def __repr__(self):
-        # TODO: Truncate
-        return "<Ability Model: {}>".format(self.description)
+        elip = " ... " if len(self.description) > 50 else ""
+        return "<Ability Model: {}{}>".format(self.description[:50], elip)
 
 
 class Card(Base):
@@ -47,7 +47,7 @@ class Card(Base):
 
     abilities = association_proxy("ability_objects", "description")
     decks = association_proxy("deck_appearances", "deck")
-    sets = association_proxy("appearances", "set")
+    sets = association_proxy("set_appearances", "set")
     subtypes = association_proxy("subtype_objects", "name")
 
     def __init__(self, name, type, casting_cost=None, abilities=(),
@@ -63,8 +63,6 @@ class Card(Base):
         self.power = power
         self.toughness = toughness
 
-        self._init_()
-
     def __repr__(self):
         return "<Card Model: {.name}>".format(self)
 
@@ -78,14 +76,14 @@ class Deck(Base):
 
     cards = association_proxy("card_appearances", "card")
 
-    def __init__(self, name, cards=None):
+    def __init__(self, name, cards=()):
         super(Deck, self).__init__()
 
         self.name = name
-        self.cards = cards or []
+        self.cards = list(cards)
 
     def __repr__(self):
-        return "<Deck Model: {.name})>".format(self)
+        return "<Deck Model: {.name}>".format(self)
 
 
 class DeckAppearance(Base):
@@ -108,7 +106,7 @@ class DeckAppearance(Base):
         self.quantity = quantity
 
     def __repr__(self):
-        return "<{0.deck.name} {0.card} ({0.quantity})>".format(self)
+        return "<{0.deck.name}: {0.card.name} ({0.quantity})>".format(self)
 
 
 class Set(Base):
@@ -119,13 +117,14 @@ class Set(Base):
     name = Column(String, nullable=False, unique=True)
     code = Column(String(2), nullable=False, unique=True)
 
-    cards = association_proxy("appearances", "card")
+    cards = association_proxy("card_appearances", "card")
 
-    def __init__(self, name, code):
+    def __init__(self, name, code, cards=()):
         super(Set, self).__init__()
 
         self.name = name
         self.code = code
+        self.card_appearances = [SetAppearance(c, self, r) for c, r in cards]
 
     def __repr__(self):
         return "<Set Model: {.name}>".format(self)
@@ -140,10 +139,10 @@ class SetAppearance(Base):
     card_id = Column(Integer, ForeignKey("cards.id"), primary_key=True)
     set_id = Column(Integer, ForeignKey("sets.id"), primary_key=True)
 
-    card = relationship("Card", backref="appearances")
-    set = relationship("Set", backref="appearances")
+    card = relationship("Card", backref="set_appearances")
+    set = relationship("Set", backref="card_appearances")
 
-    def __init__(self, card=None, set=None, rarity=None):
+    def __init__(self, card, set, rarity=None):
         super(SetAppearance, self).__init__()
 
         self.card = card
@@ -167,6 +166,7 @@ class Subtype(Base):
         self.name = name
 
     def __repr__(self):
-        return "<{0.__class__.__name__}: {0.name}>".format(self)
+        return "<Subtype Model: {0.name}>".format(self)
+
 
 Base.metadata.create_all()
