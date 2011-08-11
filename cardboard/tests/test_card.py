@@ -20,6 +20,10 @@ class TestCardBehavior(unittest.TestCase):
         self.assertEqual(repr(card), "<Card: Testing 123>")
         self.assertEqual(str(card), "Testing 123")
 
+    def test_init(self):
+        self.assertIs(self.card.owner, self.player)
+        self.assertIs(self.card.controller, self.player)
+
     def test_is_permanent(self):
         controller = mock.Mock()
 

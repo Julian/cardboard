@@ -12,6 +12,7 @@ class Card(object):
         self.game = controller.game
 
         self.controller = controller
+        self.owner = controller
         self._location = location
         self._tapped = None
 
