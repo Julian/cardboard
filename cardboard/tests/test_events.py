@@ -11,7 +11,7 @@ class TestEvent(unittest.TestCase):
 
     def test_contains(self):
         s = e.Event(foo={})
-        f = s.foo
+        f = s["foo"]
         self.assertIn(f, s)
 
     def test_len(self):
@@ -23,8 +23,22 @@ class TestEvent(unittest.TestCase):
         self.assertEqual(repr(s), "<Event: s>")
         self.assertEqual(str(s), "s")
 
-        self.assertEqual(repr(s.t), "<Event: s.t>")
-        self.assertEqual(str(s.t), "t")
+        self.assertEqual(repr(s["t"]), "<Event: s['t']>")
+        self.assertEqual(str(s["t"]), "t")
+
+    def test_setattr(self):
+        s = e.Event("s")
+        s["t"] = {}
+        self.assertIsInstance(s["t"], e.Event)
+        self.assertEquals(s["t"].name, "t")
+
+    def test_eq(self):
+        s = e.Event(subevents={"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
+        t = e.Event(subevents={"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
+        self.assertEqual(s, t)
+
+        s = e.Event("s")
+        self.assertNotEqual(s, t)
 
     def test_name(self):
         s = e.Event("s")
@@ -32,12 +46,12 @@ class TestEvent(unittest.TestCase):
 
     def test_kwargs(self):
         s = e.Event("s", foo={})
-        self.assertIsInstance(s.foo, e.Event)
-        self.assertEqual(s.foo.name, "foo")
+        self.assertIsInstance(s["foo"], e.Event)
+        self.assertEqual(s["foo"].name, "foo")
 
         s = e.Event("s", {"foo" : {}}, bar={})
-        self.assertEqual(s.foo.name, "foo")
-        self.assertEqual(s.bar.name, "bar")
+        self.assertEqual(s["foo"].name, "foo")
+        self.assertEqual(s["bar"].name, "bar")
 
     def test_subevent_names(self):
         s = e.Event("s", {"foo" : {}, "bar" : {}})
@@ -46,17 +60,17 @@ class TestEvent(unittest.TestCase):
     def test_set_subevents(self):
         s = e.Event(subevents={"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
 
-        self.assertIsInstance(s.a, e.Event)
-        self.assertIsInstance(s.a.b, e.Event)
-        self.assertIsInstance(s.a.c, e.Event)
-        self.assertEqual(s.a.name, "a")
-        self.assertEqual(s.a.b.name, "b")
-        self.assertEqual(s.a.c.name, "c")
+        self.assertIsInstance(s["a"], e.Event)
+        self.assertIsInstance(s["a"]["b"], e.Event)
+        self.assertIsInstance(s["a"]["c"], e.Event)
+        self.assertEqual(s["a"].name, "a")
+        self.assertEqual(s["a"]["b"].name, "b")
+        self.assertEqual(s["a"]["c"].name, "c")
 
-        self.assertIsInstance(s.b, e.Event)
-        self.assertIsInstance(s.b.a, e.Event)
-        self.assertEqual(s.b.name, "b")
-        self.assertEqual(s.b.a.name, "a")
+        self.assertIsInstance(s["b"], e.Event)
+        self.assertIsInstance(s["b"]["a"], e.Event)
+        self.assertEqual(s["b"].name, "b")
+        self.assertEqual(s["b"]["a"].name, "a")
 
         self.assertRaises(AttributeError, getattr, s, "d")
 

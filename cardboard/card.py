@@ -1,20 +1,21 @@
 from operator import attrgetter
 
-from cardboard import exceptions
-from cardboard.collaborate import collaborate
+from cardboard import exceptions, models
 from cardboard.events import events
+from cardboard.db import Session
 
 
 class Card(object):
-    def __init__(self, db_card, controller, zone="library"):
+
+    def __init__(self, db_card, controller):
         super(Card, self).__init__()
 
         self.game = controller.game
 
         self.controller = controller
         self.owner = controller
-        self._zone = zone
         self._tapped = None
+        self._zone = self.controller.library
 
         for attr in {"name", "type", "subtypes", "casting_cost", "abilities"}:
             setattr(self, attr, getattr(db_card, attr))
@@ -37,7 +38,6 @@ class Card(object):
         return self._zone
 
     @zone.setter
-    @collaborate()
     def zone(self, to):
         """
         Move the card to a new zone.
@@ -45,122 +45,66 @@ class Card(object):
         Arguments
         ---------
 
-            * to: the new zone (one of: {})
+            * to: valid zones are the battlefield, or the controller's exile,
+                  hand, graveyard or library
 
-        """.format(_zones.keys())
+        """
 
-        if to not in _zones:
+        if to not in [self.game.battlefield, self.controller.hand,
+                      self.controller.exile, self.controller.graveyard,
+                      self.controller.library]:
             raise ValueError("'{}' is not a valid zone".format(to))
         elif to == self.zone:
             return
 
-        source_info = _zones[self.zone]
-        destination_info = _zones[to]
+        self._zone.remove(self)
 
-        pool = (yield)
-        pool.update(target=self, to=to)
+        event = events["card"]["zones"][self._zone.name]["left"]
+        self.game.events.trigger(event=event)
 
-        yield source_info["removed"]
-        yield destination_info["added"]
-        yield
+        self._zone = to
 
-        if pool["to"] not in _zones:
-            raise ValueError("'{}' is not a valid zone".format(pool["to"]))
+        event = events["card"]["zones"][self._zone.name]["entered"]
+        self.game.events.trigger(event=event)
 
-        # TODO log here any unforseen error by a somehow miskept zone
-        destination_info = _zones[pool["to"]]
+        self._zone.add(self)
 
-        source = source_info["get"](self)
-        destination = destination_info["get"](self)
+        if to == self.game.battlefield:
+            self.tapped = False
 
-        self._zone = pool["to"]
-        source_info["remove"](source)(self)
-        destination_info["add"](destination)(self)
+    @classmethod
+    def load(cls, name, controller, session=None):
+        if session is None:
+            session = Session()
 
-        yield source_info["removed"]
-        yield destination_info["added"]
-
-        if pool["to"] == "battlefield":
-            pool["target"].tapped = False
+        db_card = session.query(models.Card).filter_by(name=name).one()
+        return cls(db_card, controller)
 
     @property
     def tapped(self):
         return self._tapped
 
     @tapped.setter
-    @collaborate()
     def tapped(self, t):
-        if self.zone != "battlefield":
+        if self.zone != self.game.battlefield:
             raise exceptions.RuntimeError("{} is not in play.".format(self))
-
-        if t:
-            event = events.card.tapped
-        else:
-            event = events.card.untapped
-
-        pool = (yield)
-        pool.update(target=self)
-
-        yield event
-        yield
 
         self._tapped = bool(t)
 
-        yield event
+        if t:
+            self.game.events.trigger(event=events["card"]["tapped"])
+        else:
+            self.game.events.trigger(event=events["card"]["untapped"])
 
-    @collaborate()
     def cast(self):
         """
         Cast a card.
 
         """
 
-        pool = (yield)
-        pool.update(target=self, countered=False)
-
-        # TODO: some form of chaining pools will be needed to handle cards that
-        # do things like "whenever a card is put into play as a result of ..."
-        yield events.card.cast
-        yield
-
-        if pool["countered"]:
-            yield events.card.countered
-            pool["target"].zone = "graveyard"
-            return
-
-        if pool["target"].is_permanent:
-            pool["target"].zone = "battlefield"
+        if self.is_permanent:
+            self.zone = self.game.battlefield
         else:
-            pool["target"].zone = "graveyard"
+            self.zone = self.controller.graveyard
 
-        yield events.card.cast
-
-_zones = {"battlefield" : {"add" : attrgetter("add"),
-                          "added" : events.card.zones.battlefield.entered,
-                          "get" : attrgetter("game.battlefield"),
-                          "remove" : attrgetter("remove"),
-                          "removed" : events.card.zones.battlefield.left},
-
-          "exile" : {"add" : attrgetter("add"),
-                      "added" : events.card.zones.exile.entered,
-                      "get" : attrgetter("controller.exiled"),
-                      "remove" : attrgetter("remove"),
-                      "removed" : events.card.zones.exile.left},
-
-          "graveyard" : {"add" : attrgetter("append"),
-                          "added" : events.card.zones.graveyard.entered,
-                          "get" : attrgetter("controller.graveyard"),
-                          "remove" : attrgetter("remove"),
-                          "removed" : events.card.zones.graveyard.left},
-
-          "hand" : {"add" : attrgetter("add"),
-                  "added" : events.card.zones.hand.entered,
-                  "get" : attrgetter("controller.hand"),
-                  "remove" : attrgetter("remove"),
-                  "removed" : events.card.zones.hand.left},
-
-          "library" : {"add" : attrgetter("append"),
-                      "added" : events.card.zones.library.entered,
-                      "get" : attrgetter("controller.library"),
-                      "remove" : attrgetter("remove"),
-                      "removed" : events.card.zones.library.left}}
+        self.game.events.trigger(event=events["card"]["cast"])

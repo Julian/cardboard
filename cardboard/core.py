@@ -7,7 +7,6 @@ from operator import attrgetter, methodcaller
 import itertools
 
 from cardboard import exceptions
-from cardboard.collaborate import collaborate
 from cardboard.events import events
 from cardboard.util.game import check_started
 from cardboard.zones import zone
@@ -20,14 +19,13 @@ def _make_color(name):
 
     _color = "_" + name
     negative_error = "{} mana pool would be negative.".format(name.title())
-    color_events = getattr(events.player.mana, name)
+    color_events = events["player"]["mana"][name]
 
     @property
     def color(self):
         return getattr(self, _color)
 
     @color.setter
-    @collaborate()
     def color(self, amount):
         """
         Set the number of mana in the {color} mana pool.
@@ -41,18 +39,12 @@ def _make_color(name):
         elif amount == current:
             return
 
-        pool = (yield)
-        pool.update(amount=amount, color=name)
+        setattr(self, "_" + name, amount)
 
         if amount > current:
-            event = color_events.added
+            self.game.events.trigger(event=color_events["added"])
         else:
-            event = color_events.removed
-
-        yield event
-        yield
-        setattr(self, "_" + pool["color"], pool["amount"])
-        yield event
+            self.game.events.trigger(event=color_events["removed"])
 
     return color
 
@@ -126,7 +118,6 @@ class Player(object):
         return self._life
 
     @life.setter
-    @collaborate()
     def life(self, amount):
         """
         Set the player's life total.
@@ -136,24 +127,16 @@ class Player(object):
         if amount == self.life:
             return
 
-        pool = (yield)
-        pool.update(player=self, amount=amount)
-
         if amount > self.life:
-            event = events.player.life.gained
+            self.game.events.trigger(event=events["player"]["life"]["gained"])
         else:
-            event = events.player.life.lost
+            self.game.events.trigger(event=events["player"]["life"]["lost"])
 
-        yield event
-        yield
+        self._life = amount
 
-        pool["player"]._life = amount
-        yield event
+        if self.life <= 0:
+            self.die()
 
-        if pool["player"].life <= 0:
-            pool["player"].die()
-
-    @collaborate()
     def die(self, reason="life"):
         """
         End the player's sorrowful life.
@@ -169,16 +152,9 @@ class Player(object):
         if reason not in {"life", "library", "poison"}:
             raise ValueError("You can't die from '{}'.".format(reason))
 
-        pool = (yield)
-        pool.update(player=self, reason=reason)
-
-        yield events.player.died
-        yield
-
         self.dead = True
-        yield events.player.died
+        self.game.events.trigger(event=events["player"]["died"])
 
-    @collaborate()
     def draw(self, cards=1):
         """
         Draw cards from the library.
@@ -201,14 +177,9 @@ class Player(object):
                 self.draw()
             return
 
-        pool = (yield)
-        pool.update(player=self, target=self.library[-1])
-
-        yield events.player.draw
-        yield
-
-        pool["target"].zone = "hand"
-        yield events.player.draw
+        # FIXME
+        self.library[-1].zone = "hand"
+        self.game.events.trigger(event=events["player"]["draw"])
 
 
 class Game(object):
@@ -219,7 +190,7 @@ class Game(object):
 
     _subscriptions = {
 
-        "end_if_dead" : {"event" : events.player.died, "needs" : ["pool"]},
+        "end_if_dead" : {"event" : events["player"]["died"]},
 
     }
 
@@ -236,7 +207,7 @@ class Game(object):
         for method, subscription_opts in self._subscriptions.iteritems():
             self.events.subscribe(getattr(self, method), **subscription_opts)
 
-        self._phases = itertools.cycle(p.name for p in events.game.phases)
+        self._phases = itertools.cycle(p.name for p in events["game"]["phases"])
         self._subphases = iter([])  # Default value for first advance
 
         self._phase = None
@@ -258,7 +229,6 @@ class Game(object):
             return self._phase.name
 
     @phase.setter
-    @collaborate()
     @check_started
     def phase(self, new):
         """
@@ -266,21 +236,17 @@ class Game(object):
 
         """
 
-        phase = getattr(events.game.phases, str(new), None)
+        phase = events["game"]["phases"].get(new)
 
         if phase is None:
             raise ValueError("No phase named {}".format(new))
-
-        pool = (yield)
-        yield phase
-        yield
 
         while next(self._phases) != phase.name:
             pass
 
         self._phase = phase
 
-        yield phase
+        self.events.trigger(event=phase)
 
         self._subphases = iter(s.name for s in phase)
         self.subphase = next(self._subphases, None)
@@ -291,7 +257,6 @@ class Game(object):
             return self._subphase.name
 
     @subphase.setter
-    @collaborate()
     @check_started
     def subphase(self, new):
         """
@@ -303,22 +268,15 @@ class Game(object):
             self._subphase = None
             return
 
-        subphase = getattr(self._phase, str(new))
-
-        pool = (yield)
-        yield subphase
-        yield
-
+        subphase = self._phase[new]
         self._subphase = subphase
-
-        yield subphase
+        self.events.trigger(event=subphase)
 
     @property
     def turn(self):
         return self._turn
 
     @turn.setter
-    @collaborate()
     @check_started
     def turn(self, player):
         """
@@ -329,15 +287,8 @@ class Game(object):
         if player not in self.players:
             raise ValueError("{} has no player '{}'".format(self, player))
 
-        pool = (yield)
-        pool.update(player=player)
-
-        yield events.game.turn.changed
-        yield
-
         self._turn = player
-
-        yield events.game.turn.changed
+        self.events.trigger(event=events["game"]["turn"]["changed"])
 
         self.phase = "beginning"
 
@@ -398,7 +349,7 @@ class Game(object):
             raise exceptions.RuntimeError("Starting the game requires at least"
                                           " one player.")
 
-        self.events.trigger(event=events.game.started)
+        self.events.trigger(event=events["game"]["started"])
 
         self._turns = itertools.cycle(self.players)
         self.ended = False
@@ -408,7 +359,7 @@ class Game(object):
 
         self.next_turn()
 
-    # @subscribed to: events.player.died
+    # @subscribed to: events["player"]["died"]
     def end_if_dead(self, pangler=None, pool=None):
         """
         End the game if there is only one living player left.
@@ -418,18 +369,12 @@ class Game(object):
         if sum(1 for player in self.players if not player.dead) <= 1:
             self.end()
 
-    @collaborate()
     def end(self):
         """
         End the game unconditionally.
 
         """
 
-        # TODO: Stop all other events
-        pool = (yield)
-
-        yield events.game.ended
-        yield
-
         self.ended = True
-        yield events.game.ended
+        # TODO: Stop all other events
+        self.events.trigger(event=events["game"]["ended"])

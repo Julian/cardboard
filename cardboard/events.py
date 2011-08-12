@@ -29,22 +29,27 @@ class Event(object):
             subevents = {}
 
         if _parent is not None:
-            _parent = ".".join([_parent.fully_qualified_name, name])
+            _parent = "{.fully_qualified_name}['{}']".format(_parent, name)
 
         self.fully_qualified_name = _parent or name
 
-        all_events = chain(subevents.iteritems(), kwsubevents.iteritems())
-        events = ((k, Event(k, v, _parent=self)) for k, v in all_events)
-        self._subevents = subevents.__class__(events)
+        self._subevents = subevents.__class__()
+
+        for k, v in chain(subevents.iteritems(), kwsubevents.iteritems()):
+            self[k] = v
 
     def __contains__(self, event):
         return event in self._subevents.viewvalues()
 
-    def __getattr__(self, attr):
-        try:
-            return self._subevents[attr]
-        except KeyError:
-            return object.__getattribute__(self, attr)
+    def __eq__(self, other):
+        return (isinstance(other, Event) and self.name == other.name and
+                self._subevents == other._subevents)
+
+    def __getitem__(self, k):
+        return self._subevents[k]
+
+    def __setitem__(self, k, v):
+        self._subevents[k] = Event(k, v, _parent=self)
 
     def __iter__(self):
         return iter(self._subevents.viewvalues())
@@ -60,11 +65,14 @@ class Event(object):
 
     @property
     def name(self):
-        return self.fully_qualified_name.rpartition(".")[2]
+        return self.fully_qualified_name.rstrip("']").rpartition("['")[2]
 
     @property
     def subevent_names(self):
         return self._subevents.viewkeys()
+
+    def get(self, k):
+        return self._subevents.get(k)
 
 
 phases = OrderedDict([

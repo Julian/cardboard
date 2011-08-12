@@ -37,8 +37,8 @@ class Card(Base):
     name = Column(String, nullable=False, unique=True)
     type = Column(String, nullable=False)
 
-    base_power = Column(String(3))
-    base_toughness = Column(String(3))
+    power = Column(String(3))
+    toughness = Column(String(3))
 
     ability_objects = relationship("Ability", backref="card")
 
