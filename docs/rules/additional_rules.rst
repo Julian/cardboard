@@ -1,3 +1,5 @@
+.. _additional:
+
 ****************
 Additional Rules
 ****************

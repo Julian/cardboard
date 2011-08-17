@@ -1,3 +1,5 @@
+.. _card-parts:
+
 ***************
 Parts of a Card
 ***************
@@ -167,7 +169,7 @@ The type line is printed directly below the illustration. It contains the card's
 
 Card Types
 
-    a. The card types are artifact, creature, enchantment, instant, land, plane, planeswalker, scheme, sorcery, tribal, and vanguard. See section 3, Card Types.
+    a. The card types are artifact, creature, enchantment, instant, land, plane, planeswalker, scheme, sorcery, tribal, and vanguard. See section 3, :ref:`card-types`.
     b. Some objects have more than one card type (for example, an artifact creature). Such objects satisfy the criteria for any effect that applies to any of their card types.
     c. Tokens have card types even though they aren't cards. The same is true of copies of spells and copies of cards.
 
@@ -250,7 +252,7 @@ Players may include cards from any printing in their constructed decks if those 
 205.5
 -----
 
-The full list of expansions and expansion symbols can be found in the Magic Products section <http://www.wizards.com/Magic/TCG/Article.aspx?x=mtg/tcg/products/allproducts)> of the Wizards of the Coast website.
+The full list of expansions and expansion symbols can be found in the `Magic Products section <http://www.wizards.com/Magic/TCG/Article.aspx?x=mtg/tcg/products/allproducts)>`_ of the Wizards of the Coast website.
 
 Text Box
 ========

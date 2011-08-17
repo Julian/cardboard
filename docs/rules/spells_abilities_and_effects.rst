@@ -1,3 +1,5 @@
+.. _spells-abilities-effects:
+
 ******************************
 Spells, Abilities, and Effects
 ******************************

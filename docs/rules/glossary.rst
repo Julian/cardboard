@@ -1,3 +1,5 @@
+.. _glossary:
+
 ********
 Glossary
 ********
@@ -9,7 +11,7 @@ Glossary
 
     Ability
         1. Text on an object that explains what that object does or can do.
-        2. An activated or triggered ability on the stack. This kind of ability is an object.  See rule 112, "Abilities," and section 6, "Spells, Abilities, and Effects."
+        2. An activated or triggered ability on the stack. This kind of ability is an object.  See rule 112, "Abilities," and section 6, :ref:`spells-abilities-effects`.
 
     Ability Word
         An italicized word with no rules meaning that ties together abilities on different cards that have similar functionality. See rule 206.2c.
@@ -170,7 +172,7 @@ Glossary
         The standard component of the game: a *Magic* card with a *Magic* card front and a *Magic* card back. Cards may be traditional or nontraditional.  Tokens aren't considered cards. In the text of spells or abilities, the term "card" is used only to refer to a card that's not on the battlefield or on the stack, such as a creature card in a player's hand. See rule 108, "Cards."
 
     Card Type
-        A characteristic. Except for abilities on the stack, each object has a card type, even if that object isn't a card. Each card type has its own rules. See rule 204, "Type Line," and section 3, "Card Types."
+        A characteristic. Except for abilities on the stack, each object has a card type, even if that object isn't a card. Each card type has its own rules. See rule 204, "Type Line," and section 3, :ref:`card-types`.
 
     Cascade
         A keyword ability that may let a player cast a random extra spell for no cost. See rule 702.83, "Cascade."
@@ -453,11 +455,11 @@ Glossary
         A turn created by an effect of a spell or ability. See rule 500.7.  For rules about extra turns in a multiplayer game using the shared team turns option, see 805.8. For rules about extra turns in a Grand Melee game, see rule 807.4.
 
     Face Down
-        1. A card is "face down" if it's physically positioned so the card back is showing. Cards in some zones are normally kept face down. See section 4, Zones.
+        1. A card is "face down" if it's physically positioned so the card back is showing. Cards in some zones are normally kept face down. See section 4, :ref:`zones`.
         2. A status a permanent may have. See rule 110.6 and rule 702.35, "Morph." 3. Face-down spells have additional rules. See rule 707, "Face-Down Spells and Permanents," and rule 702.35, "Morph."
 
     Face Up
-        1. A card is "face up" if it's physically positioned so the card front is showing. Cards in some zones are normally kept face up. See section 4, Zones.
+        1. A card is "face up" if it's physically positioned so the card front is showing. Cards in some zones are normally kept face up. See section 4, :ref:`zones`.
         2. A default status a permanent may have. See rule 110.6 and rule 702.35, "Morph."
 
     Fading
@@ -801,7 +803,7 @@ Glossary
         Multikicker is a variant of the kicker keyword ability. It represents an optional additional cost that may be paid any number of times.  See rule 702.31, "Kicker." See also Kicker.
 
     Multiplayer Game
-        A game that begins with more than two players. See section 8, Multiplayer Rules.
+        A game that begins with more than two players. See section 8, :ref:`multiplayer`.
 
     Name
         A characteristic, and part of a card. A card's name is printed in its upper left corner. See rule 201, "Name."
@@ -870,7 +872,7 @@ Glossary
         A keyword ability that can return a creature from the graveyard to the battlefield. See rule 702.77, "Persist."
 
     Phase
-        1. A subsection of a turn. See section 5, Turn Structure.
+        1. A subsection of a turn. See section 5, :ref:`turn-structure`.
         2. A permanent "phases in" when its status changes from phased out to phased in. A permanent "phases out" when its status changes from phased in to phased out.  See rule 702.24, "Phasing."
 
     Phased In, Phased Out
@@ -1161,7 +1163,7 @@ Glossary
         The physical state of a permanent. See rule 110.6.
 
     Step
-        A subsection of a phase. See section 5, Turn Structure.
+        A subsection of a phase. See section 5, :ref:`turn-structure`.
 
     Storm
         A keyword ability that creates copies of a spell. See rule 702.38, "Storm."
@@ -1297,7 +1299,7 @@ Glossary
         A multiplayer variant played among two-player teams that each have a shared life total and take a simultaneous turn. See rule 810, "Two-Headed Giant Variant."
 
     Type
-        1. An object's card type or, more broadly, its card type, subtype, and/or supertype. See rule 204, "Type Line," and section 3, "Card Types."
+        1. An object's card type or, more broadly, its card type, subtype, and/or supertype. See rule 204, "Type Line," and section 3, :ref:`card-types`.
         2. An attribute mana has. See rule 106, "Mana."
 
     Type Icon
@@ -1386,7 +1388,7 @@ Glossary
         Words that refer to an object's controller, its would-be controller (if a player is attempting to cast or activate it), or its owner (if it has no controller). See rule 109.5.
 
     Zone
-        A place where objects can be during a game. See section 4, Zones.
+        A place where objects can be during a game. See section 4, :ref:`zones`.
 
     Zone-Change Triggers
         Trigger events that involve objects changing zones. See rule 603.6.

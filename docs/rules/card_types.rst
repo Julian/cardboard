@@ -1,3 +1,5 @@
+.. _card-types:
+
 **********
 Card Types
 **********

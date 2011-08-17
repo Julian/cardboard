@@ -1,3 +1,5 @@
+.. _game-concepts:
+
 *************
 Game Concepts
 *************
@@ -11,7 +13,7 @@ General
 These *Magic* rules apply to any *Magic* game with two or more players, including two-player games and multiplayer games.
 
     a. A two-player game is a game that begins with only two players.
-    b. A multiplayer game is a game that begins with more than two players. See section 8, Multiplayer Rules.
+    b. A multiplayer game is a game that begins with more than two players. See section 8, :ref:`multiplayer`.
 
 100.2
 -----
@@ -24,7 +26,7 @@ To play, each player needs his or her own deck of traditional *Magic* cards, sma
 100.3
 -----
 
-Some casual variants require additional items, such as specially designated cards, nontraditional *Magic* cards, and dice. See section 9, Casual Variants.
+Some casual variants require additional items, such as specially designated cards, nontraditional *Magic* cards, and dice. See section 9, :ref:`casual`.
 
 100.4
 -----
@@ -448,7 +450,7 @@ Use the *Oracle*\ ™ card :ref:erence when determining a card's wording. A card
 
 When a rule or text on a card :ref:ers to a "card," it means only a *Magic* card. This includes both traditional *Magic* cards, which measure approximately 2.5 inches (6.3 cm) by 3.5 inches (8.8 cm) and have a "Deckmaster" back, and nontraditional *Magic* cards, which are oversized and have different backs. Tokens aren't considered cards -- even a card that represents a token isn't considered a card for rules purposes.
 
-    a. In the text of spells or abilities, the term "card" is used only to :ref:er to a card that's not on the battlefield or on the stack, such as a creature card in a player's hand. For more information, see section 4, Zones.
+    a. In the text of spells or abilities, the term "card" is used only to :ref:er to a card that's not on the battlefield or on the stack, such as a creature card in a player's hand. For more information, see section 4, :ref:`zones`.
 
 108.3
 -----
@@ -473,7 +475,7 @@ Nontraditional *Magic* cards can't start the game in any zone other than the com
 108.6
 -----
 
-For more information about cards, see section 2, Parts of a Card.
+For more information about cards, see section 2, :ref:`card-parts`.
 
 Objects
 =======
@@ -535,7 +537,7 @@ A nontoken permanent's characteristics are the same as those printed on its card
 110.4
 -----
 
-There are five permanent types: artifact, creature, enchantment, land, and planeswalker. Instant and sorcery cards can't enter the battlefield and thus can't be permanents. Some tribal cards can enter the battlefield and some can't, depending on their other card types. See section 3, Card Types.
+There are five permanent types: artifact, creature, enchantment, land, and planeswalker. Instant and sorcery cards can't enter the battlefield and thus can't be permanents. Some tribal cards can enter the battlefield and some can't, depending on their other card types. See section 3, :ref:`card-types`.
 
     a. The term "permanent card" is used to :ref:er to a card that could be put onto the battlefield. Specifically, it means an artifact, creature, enchantment, land, or planeswalker card.
     b. The term "permanent spell" is used to :ref:er to a spell that will enter the battlefield as a permanent as part of its resolution. Specifically, it means an artifact, creature, enchantment, or planeswalker spell.
@@ -580,7 +582,7 @@ Spells
 111.1
 -----
 
-A spell is a card on the stack. As the first step of being cast (see rule 601, "Casting Spells"), the card becomes a spell and is moved to the top of the stack from the zone it was in, which is usually its owner's hand. (See rule 405, "Stack.") A spell remains on the stack as a spell until it resolves (see rule 608, "Resolving Spells and Abilities"), is countered (see rule 701.5), or otherwise leaves the stack. For more information, see section 6, Spells, Abilities, and Effects.
+A spell is a card on the stack. As the first step of being cast (see rule 601, "Casting Spells"), the card becomes a spell and is moved to the top of the stack from the zone it was in, which is usually its owner's hand. (See rule 405, "Stack.") A spell remains on the stack as a spell until it resolves (see rule 608, "Resolving Spells and Abilities"), is countered (see rule 701.5), or otherwise leaves the stack. For more information, see section 6, :ref:`spells-abilities-effects`.
 
     a. A copy of a spell is also a spell, even if it has no card associated with it. See rule 706.9.
     b. Some effects allow a player to cast a copy of a card; if the player does, that copy is a spell as well. See rule 706.11.
@@ -613,7 +615,7 @@ Abilities
 An ability can be one of two things:
 
     a. An ability is a characteristic an object has that lets it affect the game. An object's abilities are defined by its rules text or by the effect that created it. Abilities can also be granted to objects by rules or effects.  (Effects that do so use the words "has," "have," "gains," or "gain.") Abilities generate effects. (See rule 609, "Effects.")
-    b. An ability can be an activated or triggered ability on the stack. This kind of ability is an object. (See section 6, Spells, Abilities, and Effects.)
+    b. An ability can be an activated or triggered ability on the stack. This kind of ability is an object. (See section 6, :ref:`spells-abilities-effects`.)
 
 112.2
 -----

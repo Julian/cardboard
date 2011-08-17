@@ -1,3 +1,5 @@
+.. _multiplayer:
+
 *****************
 Multiplayer Rules
 *****************
