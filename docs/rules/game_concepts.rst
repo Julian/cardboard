@@ -6,6 +6,8 @@
 Game Concepts
 *************
 
+.. _concepts-general:
+
 General
 =======
 
@@ -53,6 +55,8 @@ Most *Magic* tournaments (organized play activities where players compete agains
     a. Tournaments usually consist of a series of matches. A two-player match usually involves playing until one player has won two games. A multiplayer match usually consists of only one game.
     b. Players can use the `Magic Store & Event Locator <http://www.wizards.com/locator>`_ to find tournaments in their area.
 
+.. _golden-rules:
+
 The Magic Golden Rules
 ======================
 
@@ -91,6 +95,8 @@ If multiple players would make choices and/or take actions at the same time, the
     c. If a player would make more than one choice at the same time, the player makes the choices in the order written, or in the order he or she chooses if the choices aren't ordered.
     d. If a choice made by a nonactive player causes the active player, or a different nonactive player earlier in the turn order, to have to make a choice, APNAP order is restarted for all outstanding choices.
 
+.. _players:
+
 Players
 =======
 
@@ -108,6 +114,8 @@ In a two-player game, a player's opponent is the other player.
 -----
 
 In a multiplayer game between teams, a player's teammates are the other players on his or her team, and the player's opponents are all players not on his or her team.
+
+.. _starting-game:
 
 Starting the Game
 =================
@@ -170,6 +178,8 @@ The starting player takes his or her first turn.
     b. In a Two-Headed Giant game, the team who plays first skips the draw step of their first turn.
     c. In all other multiplayer games, no player skips the draw step of his or her first turn.
 
+.. _ending-game:
+
 Ending the Game
 ===============
 
@@ -230,6 +240,8 @@ If a player loses the game, he or she leaves the game. If the game is a draw for
 
 One card (Karn Liberated) restarts the game. All players still in the game when it restarts then immediately begin a new game. See rule 713, "Restarting the Game."
 
+.. _colors:
+
 Colors
 ======
 
@@ -256,6 +268,8 @@ Effects may change an object's color or give a color to a colorless object. If a
 -----
 
 If a player is asked to choose a color, he or she must choose one of the five colors. "Multicolored" is not a color. Neither is "colorless."
+
+.. _mana:
 
 Mana
 ====
@@ -331,6 +345,8 @@ To "tap a permanent for mana" is to activate a mana ability of that permanent th
 ------
 
 One card (Drain Power) puts all mana from one player's mana pool into another player's mana pool. (Note that these may be the same player.) This empties the former player's mana pool and causes the mana emptied this way to be put into the latter player's mana pool. Which permanents, spells, and/or abilities produced that mana are unchanged, as are any restrictions or additional effects associated with any of that mana.
+
+.. _numbers:
 
 Numbers and Symbols
 ===================
@@ -439,6 +455,8 @@ The Planeswalker symbol is |PW|. It appears on one face of the planar die used i
 
 The chaos symbol is |C|. It appears on one face of the planar die used in the Planechase casual variant, as well as in triggered abilities that :ref:er to the results of rolling the planar die. See rule 901, "Planechase."
 
+.. _cards:
+
 Cards
 =====
 
@@ -479,6 +497,8 @@ Nontraditional *Magic* cards can't start the game in any zone other than the com
 
 For more information about cards, see section 2, :ref:`card-parts`.
 
+.. _objects:
+
 Objects
 =======
 
@@ -515,6 +535,8 @@ Only objects on the stack or on the battlefield have a controller.  Objects that
 -----
 
 The words "you" and "your" on an object :ref:er to the object's controller, its would-be controller (if a player is attempting to play, cast, or activate it), or its owner (if it has no controller). For a static ability, this is the current controller of the object it's on. For an activated ability, this is the player who activated the ability. For a triggered ability, this is the controller of the object when the ability triggered, unless it's a delayed triggered ability. To determine the controller of a delayed triggered ability, see rules 603.7d-f.
+
+.. _permanents:
 
 Permanents
 ==========
@@ -578,6 +600,8 @@ A permanent's status is its physical state. There are four status categories, ea
 
     d. Only permanents have status. Cards not on the battlefield do not.  Although an exiled card may be face down, this has no correlation to the face-down status of a permanent. Similarly, cards not on the battlefield are neither tapped nor untapped, regardless of their physical state.
 
+.. _spells:
+
 Spells
 ======
 
@@ -607,6 +631,8 @@ If an effect changes any characteristics of a permanent spell, the effect contin
 .. admonition:: Example
 
     If an effect changes a black creature spell to white, the creature is white when it enters the battlefield and remains white for the duration of the effect changing its color.
+
+.. _abilities:
 
 Abilities
 =========
@@ -711,6 +737,8 @@ Effects can add or remove abilities of objects. An effect that adds an ability w
 
 An effect that sets an object's characteristic, or simply states a quality of that object, is different from an ability granted by an effect. When an object "gains" or "has" an ability, that ability can be removed by another effect. If an effect defines a characteristic of the object ("[permanent] is [characteristic value]"), it's not granting an ability. (See rule 604.3.) Similarly, if an effect states a quality of that object ("[permanent]" is indestructible" or "[creature] is unblockable," for example), it's neither granting an ability nor setting a characteristic. (See rules 700.4 and 700.5.) Example: Muraganda Petroglyphs reads, "Creatures with no abilities get +2/+2." A Runeclaw Bear (a creature with no abilities) enchanted by an Aura that says "Enchanted creature has flying" would not get +2/+2. A Runeclaw Bear enchanted by an Aura that says "Enchanted creature is red" or "Enchanted creature is indestructible" would get +2/+2.
 
+.. _emblems:
+
 Emblems
 =======
 
@@ -738,6 +766,8 @@ Abilities of emblems function in the command zone.
 -----
 
 An emblem is neither a card nor a permanent. Emblem isn't a card type.
+
+.. _targets:
 
 Targets
 =======
@@ -810,6 +840,8 @@ Spells and abilities can affect objects and players they don't target.  In gener
     a. Just because an object or player is being affected by a spell or ability doesn't make that object or player a target of that spell or ability. Unless that object or player is identified by the word "target" in the text of that spell or ability, or the rule for that keyword ability, it's not a target.
     b. In particular, the word "you" in an object's text doesn't indicate a target.
 
+.. _special-actions:
+
 Special Actions
 ===============
 
@@ -834,6 +866,8 @@ There are six special actions:
 -----
 
 If a player takes a special action, that player receives priority afterward.
+
+.. _timing:
 
 Timing and Priority
 ===================
@@ -888,6 +922,8 @@ In a multiplayer game using the shared team turns option, teams rather than indi
 -----
 
 If a player with priority casts a spell or activates an activated ability while another spell or ability is already on the stack, the new spell or ability has been cast or activated "in response to" the earlier spell or ability. The new spell or ability will resolve first. See rule 608, "Resolving Spells and Abilities."
+
+.. _costs:
 
 Costs
 =====
@@ -993,6 +1029,8 @@ Some spells, activated abilities, and triggered abilities read, "[Do something].
 
     a. Some spells, activated abilities, and triggered abilities read, "[Do something] unless you [do something else]." This means the same thing as "You may [do something else]. If you don't, [do something]."
 
+.. _life:
+
 Life
 ====
 
@@ -1051,6 +1089,8 @@ Some triggered abilities are written, "Whenever [a player] gains life, .  . . ."
 .. admonition:: Example
 
     A player controls Ajani's Pridemate, which reads "Whenever you gain life, you may put a +1/+1 counter on Ajani's Pridemate," and two creatures with lifelink. The creatures with lifelink deal combat damage simultaneously. Ajani's Pridemate's ability triggers twice.
+
+.. _damage:
 
 Damage
 ======
@@ -1123,6 +1163,8 @@ The source of damage is the object that dealt it. If an effect requires a player
 
 If a source would deal 0 damage, it does not deal damage at all. That means abilities that trigger on damage being dealt won't trigger. It also means that replacement effects that would increase the damage dealt by that source, or would have that source deal that damage to a different object or player, have no event to replace, so they have no effect.
 
+.. _drawing:
+
 Drawing a Card
 ==============
 
@@ -1169,6 +1211,8 @@ Some effects replace card draws.
 -----
 
 Some replacement effects and prevention effects result in multiple card draws. In such a case, any parts of the original event that haven't been replaced by the effect occur first, then the card draws happen one at a time.
+
+.. _counters:
 
 Counters
 ========

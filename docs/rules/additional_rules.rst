@@ -66,6 +66,8 @@ If an attacking creature is unblockable, no creature can legally block it. (See 
 
 The term dies means "is put into a graveyard from the battlefield." It is used only when referring to creatures.
 
+.. _keyword-actions:
+
 Keyword Actions
 ===============
 
@@ -292,6 +294,8 @@ Proliferate
     a. To proliferate means to choose any number of permanents and/or players that have a counter, then give each exactly one additional counter of a kind that permanent or player already has.
     b. If a permanent or player chosen this way has more than one kind of counter, the player who is proliferating chooses which kind of counter to add.
     c. To proliferate in a Two-Headed Giant game means to choose any number of permanents and/or teams that have a counter, then give each exactly one additional counter of a kind that permanent or team already has. See rule 810, 810.
+
+.. _keyword-abilities:
 
 Keyword Abilities
 =================
@@ -1168,6 +1172,8 @@ Living Weapon
 
     a. Living weapon is a triggered ability. "Living weapon" means "When this Equipment enters the battlefield, put a 0/0 black Germ creature token onto the battlefield, then attach this Equipment to it."
 
+.. _turn-based-actions:
+
 Turn-Based Actions
 ==================
 
@@ -1209,6 +1215,8 @@ The turn-based actions are as follows:
     n. Immediately after the active player has discarded cards (if necessary) during the cleanup step, all damage is removed from permanents and all "until end of turn" and "this turn" effects end. These actions happen simultaneously.  See rule 514.2.
 
     p. When each step or phase ends, any unused mana left in a player's mana pool empties. See rule 500.4.
+
+.. _state-based-actions:
 
 State-Based Actions
 ===================
@@ -1277,6 +1285,8 @@ If multiple state-based actions would have the same result at the same time, a s
 
     You control Lich's Mirror, which says "If you would lose the game, instead shuffle your hand, your graveyard, and all permanents you own into your library, then draw seven cards and your life total becomes 20." There's one card in your library and your life total is 1. A spell causes you to draw two cards and lose 2 life. The next time state-based actions are checked, you'd lose the game due to rule 704.5a and rule 704.5b. Instead, Lich's Mirror replaces that game loss and you keep playing.
 
+.. _coin:
+
 Flipping a Coin
 ===============
 
@@ -1294,6 +1304,8 @@ To flip a coin for an object that cares whether the coin comes up heads or tails
 -----
 
 A coin used in a flip must be a two-sided object with easily distinguished sides and equal likelihood that either side lands face up. If the coin that's being flipped doesn't have an obvious "heads" or "tails," designate one side to be "heads," and the other side to be "tails." Other methods of randomization may be substituted for flipping a coin as long as there are two possible outcomes of equal likelihood and all players agree to the substitution. For example, the player may roll an even-sided die and call "odds" or "evens," or roll an even-sided die and designate that "odds" means "heads" and "evens" means "tails."
+
+.. _copying:
 
 Copying Objects
 ===============
@@ -1436,6 +1448,8 @@ If an effect refers to a permanent by name, the effect still tracks that permane
 
 An effect that instructs a player to "cast a copy" of an object follows the rules for casting spells, except that the copy is cast while another spell or ability is resolving. Casting a copy of an object follows steps 601.2a-g of rule 601, 601. and then the copy becomes cast. The cast copy is a spell on the stack, and just like any other spell it can resolve or be countered.
 
+.. _face-down:
+
 Face-Down Spells and Permanents
 ===============================
 
@@ -1496,6 +1510,8 @@ If a face-down permanent becomes a copy of another permanent, its copiable value
 
 If a face-down permanent would have an "As [this permanent] is turned face up . . ." ability after it's turned face up, that ability is applied while that permanent is being turned face up, not afterward.
 
+.. _split:
+
 Split Cards
 ===========
 
@@ -1548,6 +1564,8 @@ Some effects perform comparisons involving characteristics of one or more split 
 
 If an effect instructs a player to name a card and the player wants to name a split card, the player must name both halves of the split card. An object has the chosen name if it has at least one of the two names chosen this way.
 
+.. _flip:
+
 Flip Cards
 ==========
 
@@ -1584,6 +1602,8 @@ Flipping a permanent is a one-way process. Once a permanent is flipped, it's imp
 
 If an effect instructs a player to name a card and the player wants to name a flip card's alternative name, the player may do so.
 
+.. _leveler:
+
 Leveler Cards
 =============
 
@@ -1619,6 +1639,8 @@ If the number of level counters on a leveler creature is less than N1 (the first
 -----
 
 In every zone other than the battlefield, a leveler card has the power and toughness denoted by its uppermost power/toughness box.
+
+.. _controlling:
 
 Controlling Another Player
 ==========================
@@ -1695,6 +1717,8 @@ A player who controls another player also continues to make his or her own choic
 
 A player may gain control of himself or herself. That player will make his or her own decisions and choices as normal.
 
+.. _ending-turn:
+
 Ending the Turn
 ===============
 
@@ -1716,6 +1740,8 @@ No player gets priority during this process, so triggered abilities are not put 
 -----
 
 Even though the turn ends, "at the beginning of the end step" triggered abilities don't trigger because the end step is skipped.
+
+.. _restarting:
 
 Restarting the Game
 ===================
@@ -1762,6 +1788,8 @@ If a *Magic* subgame (see rule 714) is restarted, the main game is unaffected. M
 -----
 
 If a multiplayer game using the limited range of influence option (see rule 801, Limited Range of Influence Option) is restarted, all players in the game are involved, regardless of the range of influence of the player who controls the ability that restarted the game.
+
+.. _subgames:
 
 Subgames
 ========
@@ -1813,6 +1841,8 @@ At the end of a subgame, each player takes all cards he or she owns that are in 
 -----
 
 A subgame can be created within a subgame. The existing subgame becomes the main game in relation to the new subgame.
+
+.. _shortcuts:
 
 Taking Shortcuts
 ================
@@ -1871,6 +1901,8 @@ No player can be forced to perform an action that would end a loop other than ac
 -----
 
 If a loop contains an effect that says "[A] unless [B]," where [A] and [B] are each actions, no player can be forced to perform [B] to break the loop.  If no player chooses to perform [B], the loop will continue as though [A] were mandatory.
+
+.. _illegal-actions:
 
 Handling Illegal Actions
 ========================

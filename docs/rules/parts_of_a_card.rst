@@ -26,6 +26,8 @@ Some parts of a card are also characteristics of the object that has them. See r
 
 Some objects that aren't cards (tokens, copies of cards, and copies of spells) have some of the parts of a card, but only the ones that are also characteristics. See rule 110.5 and rule 706.
 
+.. _name:
+
 Name
 ====
 
@@ -79,6 +81,8 @@ If an ability of an object uses a phrase such as "this [something]" to identify 
 .. admonition:: Example
 
     An ability reads "Target creature gets +2/+2 until end of turn.  Destroy that creature at the beginning of the next end step." The ability will destroy the object it gave +2/+2 to even if that object isn't a creature at the beginning of the next end step.
+
+.. _mana-cost:
 
 Mana Cost and Color
 ===================
@@ -139,6 +143,8 @@ The converted mana cost of an object is a number equal to the total amount of ma
 
 Any additional cost listed in an object's rules text or imposed by an effect isn't part of the mana cost. (See rule 601, "Casting Spells.") Such costs are paid at the same time as the spell's other costs.
 
+.. _illustration:
+
 Illustration
 ============
 
@@ -146,6 +152,8 @@ Illustration
 -----
 
 The illustration is printed on the upper half of a card and has no effect on game play. For example, a creature doesn't have the flying ability unless stated in its rules text, even if it's depicted as flying.
+
+.. _type-line:
 
 Type Line
 =========
@@ -228,6 +236,8 @@ Supertypes
     f. Any permanent with the supertype "snow" is a snow permanent. Any permanent that doesn't have this supertype is a nonsnow permanent, regardless of its name.
     g. Any scheme card with the supertype "ongoing" is exempt from the state-based action for schemes (see rule 704.5w).
 
+.. _expansion-symbol:
+
 Expansion Symbol
 ================
 
@@ -256,6 +266,8 @@ Players may include cards from any printing in their constructed decks if those 
 
 The full list of expansions and expansion symbols can be found in the `Magic Products section <http://www.wizards.com/Magic/TCG/Article.aspx?x=mtg/tcg/products/allproducts)>`_ of the Wizards of the Coast website.
 
+.. _text-box:
+
 Text Box
 ========
 
@@ -283,6 +295,8 @@ A guild icon appears in the text box of many *Ravnica*® block cards.  These car
 
 The chaos symbol |C| appears in the text box of each plane card to the left of a triggered ability that triggers whenever |C| is rolled on the planar die. The symbol itself has no special rules meaning.
 
+.. _power-toughness:
+
 Power/Toughness
 ===============
 
@@ -309,6 +323,8 @@ Rather than a fixed number, some creature cards have power and/or toughness that
 
 A noncreature permanent has no power or toughness, even if it's a card with a power and toughness printed on it (such as a Licid that's become an Aura).
 
+.. _loyalty:
+
 Loyalty
 =======
 
@@ -322,6 +338,8 @@ Each planeswalker card has a loyalty number printed in its lower right corner. T
 
 An activated ability with a loyalty symbol in its cost is a loyalty ability. Loyalty abilities follow special rules: A player may activate a loyalty ability of a permanent he or she controls any time he or she has priority and the stack is empty during a main phase of his or her turn, but only if none of that permanent's loyalty abilities have been activated that turn. See rule 606, "Loyalty Abilities."
 
+.. _hand-modifier:
+
 Hand Modifier
 =============
 
@@ -330,6 +348,8 @@ Hand Modifier
 
 Each vanguard card has a hand modifier printed in its lower left corner.  This is a number preceded by a plus sign, a number preceded by a minus sign, or a zero. This modifier is applied to the maximum hand size of the vanguard card's owner (normally seven) to determine both how many cards that player draws at the beginning of the game and his or her maximum hand size.
 
+.. _life-modifier:
+
 Life Modifier
 =============
 
@@ -337,6 +357,8 @@ Life Modifier
 -----
 
 Each vanguard card has a life modifier printed in its lower right corner. This is a number preceded by a plus sign, a number preceded by a minus sign, or a zero. This modifier is applied to the starting life total of the vanguard card's owner (normally 20) to determine how much life that player begins the game with.
+
+.. _below-text-box:
 
 Information Below the Text Box
 ==============================

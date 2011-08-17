@@ -66,6 +66,8 @@ Some effects can cause a step, phase, or turn to be skipped. To skip a step, pha
 
 No game events can occur between turns, phases, or steps.
 
+.. _beginning-phase:
+
 Beginning Phase
 ===============
 
@@ -73,6 +75,8 @@ Beginning Phase
 -----
 
 The beginning phase consists of three steps, in this order: untap, upkeep, and draw.
+
+.. _untap-step:
 
 Untap Step
 ==========
@@ -92,6 +96,8 @@ Second, the active player determines which permanents he or she controls will un
 
 No player receives priority during the untap step, so no spells can be cast or resolve and no abilities can be activated or resolve. Any ability that triggers during this step will be held until the next time a player would receive priority, which is usually during the upkeep step. (See rule 503, "Upkeep Step.")
 
+.. _upkeep-step:
+
 Upkeep Step
 ===========
 
@@ -104,6 +110,8 @@ First, any abilities that trigger at the beginning of the upkeep step and any ab
 -----
 
 Second, the active player gets priority. Players may cast spells and activate abilities.
+
+.. _draw-step:
 
 Draw Step
 =========
@@ -122,6 +130,8 @@ Second, any abilities that trigger at the beginning of the draw step and any oth
 -----
 
 Third, the active player gets priority. Players may cast spells and activate abilities.
+
+.. _main-phase:
 
 Main Phase
 ==========
@@ -155,6 +165,8 @@ Third, the active player gets priority. Players may cast spells and activate abi
 
     a. The main phase is the only phase in which a player can normally cast artifact, creature, enchantment, planeswalker, and sorcery spells. Only the active player may cast these spells.
     b. During either main phase, the active player may play one land card from his or her hand if the stack is empty, if the player has priority, and if he or she hasn't yet taken this special action this turn. (See rule 305, "Lands.") This action doesn't use the stack. Neither the land nor the action of playing the land is a spell or ability, so it can't be countered, and players can't respond to it with instants or activated abilities.
+
+.. _combat-phase:
 
 Combat Phase
 ============
@@ -210,6 +222,8 @@ Some spells state that they may be cast "only [before/after] [a particular point
     f. If a spell states that it may be cast "only during combat after blockers are declared," but the declare blockers step is skipped that combat phase (see rule 508.6), then the spell may not be cast during that combat phase.
     g. Rules 506.6 and 506.6a-f apply to abilities that state that they may be activated only at certain times with respect to combat just as they apply to spells that state that they may be cast only at certain times with respect to combat.
 
+.. _beginning-combat-step:
+
 Beginning of Combat Step
 ========================
 
@@ -227,6 +241,8 @@ Second, any abilities that trigger at the beginning of combat go on the stack. (
 -----
 
 Third, the active player gets priority. Players may cast spells and activate abilities.
+
+.. _declare-attackers-step:
 
 Declare Attackers Step
 ======================
@@ -291,6 +307,8 @@ If an ability of an attacking creature :ref:ers to a defending player, or a spel
 -----
 
 If no creatures are declared as attackers or put onto the battlefield attacking, skip the declare blockers and combat damage steps.
+
+.. _declare-blockers-step:
 
 Declare Blockers Step
 =====================
@@ -374,6 +392,8 @@ If a creature is put onto the battlefield blocking, its controller chooses which
 
     Lumengrid Warden is blocked by Runeclaw Bear. The defending player casts Flash Foliage, which puts a Saproling token onto the battlefield blocking the Lumengrid Warden. Lumengrid Warden's controller announces the Lumengrid Warden's damage assignment order as the Saproling token, then Runeclaw Bear.
 
+.. _combat-damage-step:
+
 Combat Damage Step
 ==================
 
@@ -429,6 +449,8 @@ Fourth, the active player gets priority. Players may cast spells and activate ab
 
 If at least one attacking or blocking creature has first strike (see rule 702.7) or double strike (see rule 702.4) as the combat damage step begins, the only creatures that assign combat damage in that step are those with first strike or double strike. After that step, instead of proceeding to the end of combat step, the phase gets a second combat damage step. The only creatures that assign combat damage in that step are the remaining attackers and blockers that had neither first strike nor double strike as the first combat damage step began, as well as the remaining attackers and blockers that currently have double strike. After that step, the phase proceeds to the end of combat step.
 
+.. _end-combat-step:
+
 End of Combat Step
 ==================
 
@@ -447,6 +469,8 @@ Second, the active player gets priority. Players may cast spells and activate ab
 
 As soon as the end of combat step ends, all creatures and planeswalkers are removed from combat. After the end of combat step ends, the combat phase is over and the postcombat main phase begins (see rule 505).
 
+.. _ending-phase:
+
 Ending Phase
 ============
 
@@ -454,6 +478,8 @@ Ending Phase
 -----
 
 The ending phase consists of two steps: end and cleanup.
+
+.. _end-step:
 
 End Step
 ========
@@ -474,6 +500,8 @@ Second, the active player gets priority. Players may cast spells and activate ab
 -----
 
 If a permanent with an ability that triggers "at the beginning of the end step" enters the battlefield during this step, that ability won't trigger until the next turn's end step. Likewise, if a delayed triggered ability that triggers "at the beginning of the next end step" is created during this step, that ability won't trigger until the next turn's end step. In other words, the step doesn't "back up" so those abilities can go on the stack. This rule applies only to triggered abilities; it doesn't apply to continuous effects whose durations say "until end of turn" or "this turn." (See rule 514, "Cleanup Step.")
+
+.. _cleanup-step:
 
 Cleanup Step
 ============

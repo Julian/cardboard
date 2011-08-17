@@ -78,6 +78,8 @@ In a multiplayer game other than a Two-Headed Giant game, the starting player do
 
 In a multiplayer game not using the limited range of influence option (see rule 801, Limited Range of Influence Option), if an effect states that a player wins the game, all of that player's opponents lose the game instead.
 
+.. _lroi:
+
 Limited Range of Influence Option
 =================================
 
@@ -264,6 +266,8 @@ Effects that restart the game (see rule 713) are exempt from the limited range o
 
 In multiplayer Planechase games other than Grand Melee games, plane cards are exempt from the limited range of influence option. Their abilities, and the effects of those abilities, affect all applicable objects and players in the game. See rule 901, "Planechase."
 
+.. _amp:
+
 Attack Multiple Players Option
 ==============================
 
@@ -309,6 +313,8 @@ After blockers have been declared, if any creatures are blocking multiple creatu
 
 Combat damage is assigned in APNAP order. Other than that, the combat damage step proceeds just as in a two-player game. See rule 510, "Combat Damage Step."
 
+.. _alar:
+
 Attack Left and Attack Right Options
 ====================================
 
@@ -319,6 +325,8 @@ Some multiplayer games use the optional attack left or attack right rules.
 
     a. If the attack left option is used, a player can attack only an opponent seated immediately to his or her left. If a player's nearest opponent to the left is more than one seat away, the player can't attack.
     b. If the attack right option is used, a player can attack only an opponent seated immediately to his or her right. If a player's nearest opponent to the right is more than one seat away, the player can't attack.
+
+.. _dc:
 
 Deploy Creatures Option
 =======================
@@ -332,6 +340,8 @@ The Emperor variant always uses the deploy creatures option, and it can be used 
 -----
 
 Each creature has the ability "|T|: Target teammate gains control of this creature. Activate this ability only any time you could cast a sorcery."
+
+.. _stt:
 
 Shared Team Turns Option
 ========================
@@ -393,6 +403,8 @@ If an effect gives a player an extra turn or adds a phase or step to that player
 
 Any ability that :ref:ers to the "active player" refers to one specific active player, not to all of the active players. The ability's controller chooses which one the ability refers to at the time its effect is applied.
 
+.. _ffa:
+
 Free-for-All Variant
 ====================
 
@@ -414,6 +426,8 @@ Any multiplayer options used are determined before play begins. The Free-for-All
 -----
 
 The players are randomly seated around the table.
+
+.. _gm:
 
 Grand Melee Variant
 ===================
@@ -470,6 +484,8 @@ Rather than having a single stack, Grand Melee games contain multiple stacks. Ea
     a. A player gets priority for a particular turn marker's stack only if the turn marker is within his or her range of influence or an object on that stack is controlled by a player within his or her range of influence.
     b. If a player has priority for multiple stacks and casts a spell, activates an ability, or a triggered ability he or she controls triggers, the player must specify which one of those stacks the spell or ability is put on.  If an object on one of those stacks caused the triggered ability to trigger, the player must put it on that stack. If a resolving spell or ability on one of those stacks causes a player to cast a spell or create a copy of a spell, the new spell must be put on the same stack. If a spell or ability targets an object on one of those stacks, it must be put on the same stack as its target; it can't target objects on multiple stacks.
 
+.. _tvt:
+
 Team vs. Team Variant
 =====================
 
@@ -500,6 +516,8 @@ To determine which player goes first, randomly choose a team. If that team has a
 -----
 
 In the Team vs. Team variant, a team's resources (cards in hand, mana, and so on) are not shared. Teammates may review each other's hands and discuss strategies at any time. Teammates can't manipulate each other's cards or permanents.
+
+.. _emperor:
 
 Emperor Variant
 ===============
@@ -556,6 +574,8 @@ The Emperor variant can also be played with any number of equally sized teams. I
 -----
 
 In the Emperor variant, a team's resources (cards in hand, mana, and so on) are not shared. Teammates may review each other's hands and discuss strategies at any time. Teammates can't manipulate each other's cards or permanents.
+
+.. _thg:
 
 Two-Headed Giant Variant
 ========================
@@ -690,6 +710,8 @@ Effects that cause players to get poison counters happen to each player individu
 ------
 
 The Two-Headed Giant variant can also be played with equally sized teams of more than two players. For each player a team has beyond the second, that team's starting life total is increased by 15 and the number of poison counters required for the team to lose is increased by five. (These variants are called Three-Headed Giant, Four-Headed Giant, and so on.)
+
+.. _at:
 
 Alternating Teams Variant
 =========================

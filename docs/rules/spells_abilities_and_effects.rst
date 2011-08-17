@@ -11,6 +11,8 @@ Spells, Abilities, and Effects
 General
 =======
 
+.. _casting-spells:
+
 Casting Spells
 ==============
 
@@ -59,6 +61,8 @@ Casting a spell that alters costs won't affect spells and abilities that are alr
 A player can't begin to cast a spell that's prohibited from being cast.
 
     a. If an effect allows a card that's prohibited from being cast to be cast face down, and the face-down spell would not be prohibited, that spell can be cast face down. See rule 707, "Face-Down Spells and Permanents."
+
+.. _activating:
 
 Activating Activated Abilities
 ==============================
@@ -109,6 +113,8 @@ A player can't begin to activate an ability that's prohibited from being activat
     c. If an object acquires an activated ability with a restriction on its use from another object, that restriction applies only to that ability as acquired from that object. It doesn't apply to other, identically worded abilities.
     d. Activated abilities that read "Activate this ability only any time you could cast a sorcery" mean the player must follow the timing rules for casting a sorcery spell, though the ability isn't actually a sorcery. The player doesn't actually need to have a sorcery card that he or she could cast.
     e. Activated abilities that read "Activate this ability only any time you could cast an instant" mean the player must follow the timing rules for casting an instant spell, though the ability isn't actually an instant. The player doesn't actually need to have an instant card that he or she could cast.
+
+.. _handling-triggered:
 
 Handling Triggered Abilities
 ============================
@@ -230,6 +236,8 @@ Some objects have a static ability that's linked to a triggered ability. (See ru
 
     An ability that reads "Reveal the first card you draw each turn. Whenever you reveal a basic land card this way, draw a card" is a static ability linked to a triggered ability.
 
+.. _handling-static:
+
 Handling Static Abilities
 =========================
 
@@ -269,6 +277,8 @@ Some static abilities apply while a card is in any zone that you could cast or p
 -----
 
 Unlike spells and other kinds of abilities, static abilities can't use an object's last known information for purposes of determining how their effects are applied.
+
+.. _mana-abilities:
 
 Mana Abilities
 ==============
@@ -317,6 +327,8 @@ Abilities that don't meet the criteria specified in rules 605.1a-b and spells ar
     a. An ability with a target is not a mana ability, even if it could put mana into a player's mana pool when it resolves. The same is true for a triggered ability that could produce mana but triggers from an event other than activating a mana ability, or a triggered ability that triggers from activating a mana ability but couldn't produce mana. These follow the normal rules for activated or triggered abilities, as appropriate.
     b. A spell can never be a mana ability, even if it could put mana into a player's mana pool when it resolves. It's cast and resolves just like any other spell. Some older cards were printed with the card type "mana source"; these cards have received errata in the Oracle card :ref:erence and are now instants.
 
+.. _loyalty-abilities:
+
 Loyalty Abilities
 =================
 
@@ -344,6 +356,8 @@ The cost to activate a loyalty ability of a permanent is to put on or remove fro
 -----
 
 A loyalty ability with a negative loyalty cost can't be activated unless the permanent has at least that many loyalty counters on it.
+
+.. _linked-abilities:
 
 Linked Abilities
 ================
@@ -389,6 +403,8 @@ If an object acquires a pair of linked abilities as part of the same effect, the
 .. admonition:: Example
 
     Arc-Slogger has the ability "|R|, Exile the top ten cards of your library: Arc-Slogger deals 2 damage to target creature or player." Sisters of Stone Death has the ability "|B|\ |G|: Exile target creature blocking or blocked by Sisters of Stone Death" and the ability "|2|\ |B|: Put a creature card exiled with Sisters of Stone Death onto the battlefield under your control." Quicksilver Elemental has the ability "|U|: Quicksilver Elemental gains all activated abilities of target creature until end of turn." If a player has Quicksilver Elemental gain Arc-Slogger's ability, activates it, then has Quicksilver Elemental gain Sisters of Stone Death's abilities, activates the exile ability, and then activates the return-to-the-battlefield ability, only the creature card Quicksilver Elemental exiled with Sisters of Stone Death's ability can be returned to the battlefield. Creature cards Quicksilver Elemental exiled with Arc-Slogger's ability can't be returned.
+
+.. _resolving:
 
 Resolving Spells and Abilities
 ==============================
@@ -446,6 +462,8 @@ If the object that's resolving is a permanent spell, its resolution involves a s
 
             Worms of the Earth says "If a land would enter the battlefield, instead it doesn't." Clone says "You may have Clone enter the battlefield as a copy of any creature on the battlefield." If a player casts Clone and chooses to copy Dryad Arbor (a land creature) while Worms of the Earth is on the battlefield, Clone can't enter the battlefield from the stack. It's put into its owner's graveyard.
 
+.. _effects:
+
 Effects
 =======
 
@@ -502,6 +520,8 @@ Some effects apply to damage from a source -- for example, "The next time a red 
     b. Some effects from resolved spells and abilities prevent or replace damage from sources with certain properties, such as a creature or a source of a particular color. When the source would deal damage, the "shield" rechecks the source's properties. If the properties no longer match, the damage isn't prevented or replaced. If for any reason the shield prevents no damage or replaces no damage, the shield isn't used up.
     c. Some effects from static abilities prevent or replace damage from sources with certain properties. For these effects, the prevention or replacement applies to sources that are permanents with that property and to any sources that aren't on the battlefield that have that property.
 
+.. _one-shot-effects:
+
 One-Shot Effects
 ================
 
@@ -514,6 +534,8 @@ A one-shot effect does something just once and doesn't have a duration.  Example
 -----
 
 Some one-shot effects create a delayed triggered ability, which instructs a player to do something later in the game (usually at a specific time) rather than as the spell or ability that's creating the one-shot effect resolves. See rule 603.7.
+
+.. _continuous-effects:
 
 Continuous Effects
 ==================
@@ -565,6 +587,8 @@ A continuous effect may be generated by the static ability of an object.
 
             A permanent with the static ability "All white creatures get +1/+1" is on the battlefield. A creature spell that would normally create a 1/1 white creature instead creates a 2/2 white creature. The creature doesn't enter the battlefield as 1/1 and then change to 2/2.
 
+.. _text-changing-effects:
+
 Text-Changing Effects
 =====================
 
@@ -594,6 +618,8 @@ A token's subtypes and rules text are defined by the spell or ability that creat
 -----
 
 One card (Volrath's Shapeshifter) states that an object has the "full text" of another object. This changes not just the text that appears in the object's text box and type line, but also changes the text that represents its name, mana cost, expansion symbol, power, and toughness.
+
+.. _interaction-continuous:
 
 Interaction of Continuous Effects
 =================================
@@ -714,6 +740,8 @@ Some continuous effects affect players rather than objects. For example, an effe
 
 Some continuous effects affect game rules rather than objects. For example, effects may modify a player's maximum hand size, or say that a creature is indestructible. These effects are applied after all other continuous effects have been applied. Continuous effects that affect the costs of spells or abilities are applied according to the order specified in rule 601.2e. All other such effects are applied in timestamp order. See also the rules for timestamp order and dependency (rules 613.6 and 613.7).
 
+.. _replacement-effects:
+
 Replacement Effects
 ===================
 
@@ -830,6 +858,8 @@ An object may have one ability printed on it that generates a replacement effect
 
 Some replacement effects are not continuous effects. Rather, they are an effect of a resolving spell or ability that replace part or all of that spell or ability's own effect(s). Such effects are called self-replacement effects. When applying replacement effects to an event, self-replacement effects are applied before other replacement effects.
 
+.. _prevention:
+
 Prevention Effects
 ==================
 
@@ -903,6 +933,8 @@ Some prevention effects prevent the next N damage that would be dealt to each of
 Some effects state that damage "can't be prevented." If unpreventable damage would be dealt, any applicable prevention effects are still applied to it. Those effects won't prevent any damage, but any additional effects they have will take place.
 
     a. A prevention effect is applied to any particular unpreventable damage event just once. It won't invoke itself repeatedly trying to prevent that damage.
+
+.. _interaction-replacement:
 
 Interaction of Replacement and/or Prevention Effects
 ====================================================

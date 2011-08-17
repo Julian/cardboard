@@ -80,6 +80,8 @@ An object is outside the game if it isn't in any of the game's zones.  Outside t
 
 Some effects instruct a player to do something to a zone (such as "Shuffle your hand into your library"). That action is performed on all cards in that zone. The zone itself is not affected.
 
+.. _library:
+
 Library
 =======
 
@@ -123,6 +125,8 @@ If an effect causes a player to play with the top card of his or her library rev
 
 If an effect causes a player to put a card into a library "Nth from the top," and that library has fewer than N cards in it, the player puts that card on the bottom of that library.
 
+.. _hand:
+
 Hand
 ====
 
@@ -140,6 +144,8 @@ Each player has a maximum hand size, which is normally seven cards. A player may
 -----
 
 A player may arrange his or her hand in any convenient fashion and look at it as much as he or she wishes. A player can't look at the cards in another player's hand but may count those cards at any time.
+
+.. _battlefield:
 
 Battlefield
 ===========
@@ -169,6 +175,8 @@ Whenever a permanent enters the battlefield, it becomes a new object and has no 
 
 Previously, the battlefield was called the "in-play zone." Cards that were printed with text that contains the phrases "in play," "from play," "into play," or the like are :ref:erring to the battlefield. Cards that were printed with that text have received errata in the Oracle card reference.
 
+.. _graveyard:
+
 Graveyard
 =========
 
@@ -186,6 +194,8 @@ Each graveyard is kept in a single face-up pile. A player can examine the cards 
 -----
 
 If an effect or rule puts two or more cards into the same graveyard at the same time, the owner of those cards may arrange them in any order.
+
+.. _stack:
 
 Stack
 =====
@@ -229,6 +239,8 @@ Some things that happen during the game don't use the stack.
     g. A player may concede the game at any time. That player leaves the game immediately. See rule 104.3a.
     h. If a player leaves a multiplayer game, objects may leave the game, cease to exist, change control, or be exiled as a result. These actions happen immediately. See rule 800.4a.
 
+.. _exile:
+
 Exile
 =====
 
@@ -267,6 +279,8 @@ If an object in the exile zone becomes exiled, it doesn't change zones, but it b
 
 Previously, the exile zone was called the "removed-from-the-game zone." Cards that were printed with text that "removes [an object] from the game" exiles that object. The same is true for cards printed with text that "sets [an object] aside." Cards that were printed with that text have received errata in the Oracle card :ref:erence.
 
+.. _ante:
+
 Ante
 ====
 
@@ -289,6 +303,8 @@ A few cards have the text "Remove [this card] from your deck before playing if y
 -----
 
 To ante an object is to put that object into the ante zone from whichever zone it's currently in. The owner of an object is the only person who can ante that object.
+
+.. _command:
 
 Command
 =======
