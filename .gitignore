@@ -1,9 +1,10 @@
 *.pyc
 *.pyo
 .DS_Store
-/build
-/dist
-/MANIFEST
-/.coverage
-/coverage
-/htmlcov
+_build
+build
+dist
+MANIFEST
+.coverage
+coverage
+htmlcov
