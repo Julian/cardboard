@@ -170,6 +170,8 @@ A triggered ability may read "When/Whenever/At [trigger event], if [condition], 
 
 Some triggered abilities' effects are optional (they contain "may," as in "At the beginning of your upkeep, you may draw a card"). These abilities go on the stack when they trigger, regardless of whether their controller intends to exercise the ability's option or not. The choice is made when the ability resolves. Likewise, triggered abilities that have an effect "unless" something is true or a player chooses to do something will go on the stack normally; the "unless" part of the ability is dealt with when the ability resolves.
 
+.. _zone-change-triggers:
+
 603.6
 -----
 
@@ -250,6 +252,8 @@ Static abilities do something all the time rather than being activated or trigge
 -----
 
 Static abilities create continuous effects, some of which are prevention effects or replacement effects. These effects are active as long as the permanent with the ability remains on the battlefield and has the ability, or as long as the object with the ability remains in the appropriate zone, as described in rule 112.6.
+
+.. _sacda:
 
 604.3
 -----
@@ -858,7 +862,7 @@ An object may have one ability printed on it that generates a replacement effect
 
 Some replacement effects are not continuous effects. Rather, they are an effect of a resolving spell or ability that replace part or all of that spell or ability's own effect(s). Such effects are called self-replacement effects. When applying replacement effects to an event, self-replacement effects are applied before other replacement effects.
 
-.. _prevention:
+.. _prevention-effects:
 
 Prevention Effects
 ==================

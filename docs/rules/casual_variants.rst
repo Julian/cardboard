@@ -21,6 +21,8 @@ This section contains additional optional rules that can be used for certain cas
 
 The casual variants detailed here use supplemental zones, rules, cards, and other game implements not used in traditional *Magic* games.
 
+.. _planechase:
+
 Planechase
 ==========
 
@@ -32,12 +34,18 @@ In the Planechase variant, plane cards add additional abilities and randomness t
 901.2
 -----
 
-A Planechase game may be a two-player game or a multiplayer game. The default multiplayer setup is the Free-for-All variant with the attack multiple players option and without the limited range of influence option. See rule 806, "Free-for-All Variant."
+A Planechase game may be a two-player game or a multiplayer game. The default multiplayer setup is the Free-for-All variant with the attack multiple players option and without the limited range of influence option.
+
+.. seealso::
+    :ref:`ffa`
 
 901.3
 -----
 
-In addition to the normal game materials, each player needs a planar deck of at least ten plane cards and the game needs one planar die. Each card in a planar deck must have a different English name. (See rule 309, "Planes.")
+In addition to the normal game materials, each player needs a planar deck of at least ten plane cards and the game needs one planar die. Each card in a planar deck must have a different English name.
+
+    .. seealso::
+        :ref:`planes`
 
     a. A planar die is a six-sided die. One face has the Planeswalker symbol |PW|. One face has the chaos symbol |C|. The other faces are blank.
 
@@ -49,7 +57,10 @@ At the start of the game, each player shuffles his or her planar deck so that th
 901.5
 -----
 
-Once all players have kept their opening hands and used the abilities of cards that allow them to start the game with those cards on the battlefield, the starting player moves the top card of his or her planar deck off that planar deck and turns it face up. (See rule 103.6.) No abilities of that card trigger as a result.
+Once all players have kept their opening hands and used the abilities of cards that allow them to start the game with those cards on the battlefield, the starting player moves the top card of his or her planar deck off that planar deck and turns it face up. No abilities of that card trigger as a result.
+
+.. seealso::
+    :ref:`Rule 103.6 <planechase-face-up>`
 
 901.6
 -----
@@ -66,25 +77,45 @@ Any abilities of a face-up plane card in the command zone function from that zon
 901.8
 -----
 
-Any time the active player has priority and the stack is empty, but only during a main phase of his or her turn, that player may roll the planar die.  Taking this action costs a player an amount of mana equal to the number of times he or she has previously taken this action on that turn. This is a special action and doesn't use the stack. (See rule 115.2f.)
+Any time the active player has priority and the stack is empty, but only during a main phase of his or her turn, that player may roll the planar die.  Taking this action costs a player an amount of mana equal to the number of times he or she has previously taken this action on that turn. This is a special action and doesn't use the stack.
+
+    .. seealso::
+        :ref:`Rule 115.2f <rolling-planar-die>`
 
     a. If the die roll is a blank face, nothing happens. The active player gets priority.
     b. If the die roll is the chaos symbol |C|, any ability of the plane that starts "When you roll |C|" triggers and is put on the stack. The active player gets priority.
     c. If the die roll is the Planeswalker symbol |PW|, the plane's "planeswalking ability" triggers and is put on the stack. The active player gets priority.
 
+.. _player-left-game:
+
 901.9
 -----
 
-When a player leaves the game, all objects owned by that player leave the game. (See rule 800.4a.) If that includes the face-up plane card, the planar controller turns the top card of his or her planar deck face up. This is not a state-based action. It happens as soon as the player leaves the game.
+When a player leaves the game, all objects owned by that player leave the game.
+
+.. seealso::
+    :ref:`Rule 800.4a <multiplayer-left-game>`
+
+If that includes the face-up plane card, the planar controller turns the top card of his or her planar deck face up. This is not a state-based action. It happens as soon as the player leaves the game.
 
     a. If a plane leaves the game while a "planeswalking ability" for which it was the source is on the stack, that ability ceases to exist.
 
 901.10
 ------
 
-After the game has started, if a player moves the top card of his or her planar deck off that planar deck and turns it face up, that player has "planeswalked." Continuous effects with durations that last until a player planeswalks end. Abilities that trigger when a player planeswalks trigger. See rule 701.20.
+After the game has started, if a player moves the top card of his or her planar deck off that planar deck and turns it face up, that player has "planeswalked." Continuous effects with durations that last until a player planeswalks end. Abilities that trigger when a player planeswalks trigger.
 
-    a. A player may planeswalk as the result of the "planeswalking ability" (see rule 309.6) or because the owner of the face-up plane card leaves the game (see rule 901.9).
+    .. seealso::
+        :ref:`Rule 701.20: Planeswalk <planeswalk>`
+
+    a. A player may planeswalk as the result of the "planeswalking ability" or because the owner of the face-up plane card leaves the game.
+
+        .. seealso::
+
+            :ref:`Rule 309.6: Planeswalking Ability <planeswalking>`
+
+            :ref:`Rule 901.9: <player-left-game>`
+
     b. The plane card that's turned face up is the plane the player planeswalks to. The plane card that's turned face down, or that leaves the game, is the plane the player planeswalks away from.
 
 901.11
@@ -100,7 +131,10 @@ A Two-Headed Giant Planechase game uses all the rules for the Two-Headed Giant m
 901.12
 ------
 
-In multiplayer formats other than Grand Melee, plane cards are exempt from the limited range of influence option. Their abilities, and the effects of those abilities, affect all applicable objects and players in the game. (See rule 801, "Limited Range of Influence Option.")
+In multiplayer formats other than Grand Melee, plane cards are exempt from the limited range of influence option. Their abilities, and the effects of those abilities, affect all applicable objects and players in the game.
+
+.. seealso::
+    :ref:`lroi`
 
 901.13
 ------
@@ -118,6 +152,8 @@ Single Planar Deck Option
     a. As an alternative option, a Planechase game may be played with just a single communal planar deck. In that case, the number of cards in the planar deck must be at least forty or at least ten times the number of players in the game, whichever is smaller. Each card in the planar deck must have a different English name.
     b. In a Planechase game using the single planar deck option, the planar controller is considered to be the owner of all the plane cards.
     c. If any rule or ability :ref:ers to a player's planar deck, the communal planar deck is used.
+
+.. _vanguard:
 
 Vanguard
 ========
@@ -168,6 +204,8 @@ The owner of a vanguard card is the player who started the game with it in the c
 
 Any abilities of a face-up vanguard card in the command zone function from that zone. The card's static abilities affect the game, its triggered abilities may trigger, and its activated abilities may be activated.
 
+.. _commander:
+
 Commander
 =========
 
@@ -179,7 +217,10 @@ In the Commander variant, each deck is led by a legendary creature designated as
 903.2
 -----
 
-A Commander game may be a two-player game or a multiplayer game. The default multiplayer setup is the Free-for-All variant with the attack multiple players option and without the limited range of influence option. See rule 806, "Free-for-All Variant."
+A Commander game may be a two-player game or a multiplayer game. The default multiplayer setup is the Free-for-All variant with the attack multiple players option and without the limited range of influence option.
+
+.. seealso::
+    :ref:`ffa`
 
 903.3
 -----
@@ -193,14 +234,20 @@ Each deck has a legendary creature card designated as its commander.  This desig
 903.4
 -----
 
-The color identity of a deck's commander is the color or colors of any mana symbols in that card's mana cost or rules text, plus any colors defined by its characteristic-defining abilities (see rule 604.3).
+The color identity of a deck's commander is the color or colors of any mana symbols in that card's mana cost or rules text, plus any colors defined by its characteristic-defining abilities.
 
     .. admonition:: Example
 
         Bosh, Iron Golem is a legendary artifact creature with mana cost |8| and the ability "|3|\ |R|, Sacrifice an artifact: Bosh, Iron Golem deals damage equal to the sacrificed artifact's converted mana cost to target creature or player." Bosh's color identity is red.
 
+    .. seealso::
+        :ref:`Rule 604.3 <sacda>`
+
     a. Color identity is established before the game begins.
-    b. Reminder text is ignored when determining a commander's color identity.  See rule 206.2.
+    b. Reminder text is ignored when determining a commander's color identity.
+    
+        .. seealso:
+            :ref:`Rule 206.2 <no-func-text-box>`
 
 903.5
 -----
@@ -264,9 +311,17 @@ If a card is put into the exile zone face down from anywhere, and a player is al
 903.14
 ------
 
-The Commander variant includes the following specification for winning and losing the game. All other rules for ending the game also apply. (See rule 104.)
+The Commander variant includes the following specification for winning and losing the game. All other rules for ending the game also apply.
 
-    a. A player that's been dealt 21 or more combat damage by the same commander over the course of the game loses the game. (This is a state-based action. See rule 704.)
+    .. seealso:
+        :ref:`ending-game`
+
+    a. A player that's been dealt 21 or more combat damage by the same commander over the course of the game loses the game. (This is a state-based action.)
+
+        .. seealso:
+            :ref:`state-based-actions`
+
+.. _archenemy:
 
 Archenemy
 =========
@@ -279,7 +334,15 @@ In the Archenemy variant, a team of players faces off against a single opponent 
 904.2
 -----
 
-The default setup for an Archenemy game is the Team vs. Team multiplayer variant (see rule 808) involving exactly two teams. The attack multiple players option (see rule 802) and the shared team turns option (see rule 805) are used; no other multiplayer options are used.
+The default setup for an Archenemy game is the Team vs. Team multiplayer variant involving exactly two teams. The attack multiple players option and the shared team turns option are used; no other multiplayer options are used.
+
+    .. seealso::
+
+        :ref:`tvt`
+
+        :ref:`amp`
+
+        :ref:`stt`
 
     a. One of the teams consists of exactly one player, who is designated the archenemy.
     b. The other team consists of any number of players.
@@ -287,7 +350,10 @@ The default setup for an Archenemy game is the Team vs. Team multiplayer variant
 904.3
 -----
 
-In addition to the normal game materials, the archenemy needs a scheme deck of at least twenty scheme cards. A scheme deck may contain no more than two of any card with a particular English name. (See rule 311, "Schemes.")
+In addition to the normal game materials, the archenemy needs a scheme deck of at least twenty scheme cards. A scheme deck may contain no more than two of any card with a particular English name.
+
+    .. seealso::
+        :ref:`schemes`
 
 904.4
 -----
@@ -317,23 +383,36 @@ Any abilities of a face-up scheme card in the command zone function from that zo
 904.9
 -----
 
-Immediately after the archenemy's precombat main phase begins during each of his or her turns, that player moves the top card of his or her scheme deck off that scheme deck and turns it face up. This is called "setting that scheme in motion." (See rule 701.21.) This turn-based action doesn't use the stack. Abilities of that scheme card that trigger "When you set this scheme in motion" trigger.
+Immediately after the archenemy's precombat main phase begins during each of his or her turns, that player moves the top card of his or her scheme deck off that scheme deck and turns it face up. This is called "setting that scheme in motion." This turn-based action doesn't use the stack. Abilities of that scheme card that trigger "When you set this scheme in motion" trigger.
+
+.. seealso::
+    :ref:`Set in Motion <set-in-motion>`
 
 904.10
 ------
 
-If a non-ongoing scheme card is face up in the command zone, and it isn't the source of a triggered ability that has triggered but not yet left the stack, that scheme card is turned face down and put on the bottom of its owner's scheme deck the next time a player would receive priority. (This is a state-based action. See rule 704.)
+If a non-ongoing scheme card is face up in the command zone, and it isn't the source of a triggered ability that has triggered but not yet left the stack, that scheme card is turned face down and put on the bottom of its owner's scheme deck the next time a player would receive priority. (This is a state-based action.)
+
+.. seealso::
+    :ref:`state-based-actions`
 
 904.11
 ------
 
-Once an ongoing scheme card is set in motion, it remains face up in the command zone until an ability causes it to be abandoned (see rule 701.22).
+Once an ongoing scheme card is set in motion, it remains face up in the command zone until an ability causes it to be abandoned.
+
+.. seealso::
+    :ref:`Abandon <abandon>`
 
 904.12
 ------
 
 Supervillain Rumble Option
 
-    a. As an alternative option, players may play a Free-for-All game in which each player has his or her own scheme deck. The attack multiple players option (see rule 802) is used; no other multiplayer options are used.
+    a. As an alternative option, players may play a Free-for-All game in which each player has his or her own scheme deck. The attack multiple players option is used; no other multiplayer options are used.
+
+        .. seealso::
+            :ref:`amp`
+
     b. Each player in this game is an archenemy.
     c. As in a normal Free-for-All game, the starting player is randomly determined. All other rules that apply to the archenemy in an Archenemy game apply to each player in a Supervillain Rumble game.

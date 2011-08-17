@@ -263,12 +263,16 @@ Clash
 701.20
 ------
 
+.. _planeswalk:
+
 Planeswalk
 
     a. A player may planeswalk only during a Planechase game. Only the planar controller may planeswalk. See rule 901, 901.
     b. To planeswalk is to put the face-up plane card on the bottom of its owner's planar deck face down, then move the top card of your planar deck off that planar deck and turn it face up.
     c. A player may planeswalk as the result of the "planeswalking ability" (see rule 309.6) or because the owner of the face-up plane card leaves the game (see rule 901.9).
     d. The plane card that's turned face up is the plane the player planeswalks to. The plane card that's turned face down, or that leaves the game, is the plane the player planeswalks away from.
+
+.. _set-in-motion:
 
 701.21
 ------
@@ -280,6 +284,8 @@ Set in Motion
 
 701.22
 ------
+
+.. _abandon:
 
 Abandon
 
@@ -503,6 +509,8 @@ Vigilance
 
 702.20
 ------
+
+.. _banding:
 
 Banding
 
@@ -1261,8 +1269,16 @@ The state-based actions are as follows:
     g. If a creature has toughness greater than 0, and the total damage marked on it is greater than or equal to its toughness, that creature has been dealt lethal damage and is destroyed. Regeneration can replace this event.
     h. If a creature has toughness greater than 0, and it's been dealt damage by a source with deathtouch since the last time state-based actions were checked, that creature is destroyed. Regeneration can replace this event.
     i. If a planeswalker has loyalty 0, it's put into its owner's graveyard.
+
+    .. _planeswalker-uniqueness-rule:
+
     j. If two or more planeswalkers that share a planeswalker type are on the battlefield, all are put into their owners' graveyards. This is called the "planeswalker uniqueness rule."
+
+    .. _legend-rule:
+
     k. If two or more legendary permanents with the same name are on the battlefield, all are put into their owners' graveyards. This is called the "legend rule." If only one of those permanents is legendary, this rule doesn't apply.
+
+    .. _world-rule:
 
     m. If two or more permanents have the supertype world, all except the one that has been a permanent with the world supertype on the battlefield for the shortest amount of time are put into their owners' graveyards. In the event of a tie for the shortest amount of time, all are put into their owners' graveyards. This is called the "world rule."
     n. If an Aura is attached to an illegal object or player, or is not attached to an object or player, that Aura is put into its owner's graveyard.

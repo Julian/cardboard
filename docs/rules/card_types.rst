@@ -24,6 +24,8 @@ Some objects have more than one card type (for example, an artifact creature). S
     a. An object that's both a land and another card type (for example, an artifact land) can only be played as a land. It can't be cast as a spell.
     b. Each tribal card has another card type. Casting and resolving a tribal card follow the rules for casting and resolving a card of the other card type.
 
+.. _artifacts:
+
 Artifacts
 =========
 
@@ -66,6 +68,8 @@ Some artifacts have the subtype "Fortification." A Fortification can be attached
 -----
 
 If a non-Equipment permanent has an ability that :ref:ers to the "equipped creature," that phrase doesn't refer to any creature. Similarly, a non-Fortification permanent that has an ability that refers to the "fortified land" doesn't refer to any land.
+
+.. _creatures:
 
 Creatures
 =========
@@ -113,6 +117,8 @@ A creature's activated ability with the tap symbol or the untap symbol in its ac
 
 Damage dealt to a creature by a source with neither wither nor infect is marked on that creature (see rule 119.3). If the total damage marked on that creature is greater than or equal to its toughness, that creature has been dealt lethal damage and is destroyed as a state-based action (see rule 704, "State-Based Actions").  All damage marked on a creature is removed when it regenerates (see rule 701.11, "Regenerate") and during the cleanup step (see rule 514.2).
 
+.. _enchantments:
+
 Enchantments
 ============
 
@@ -146,6 +152,8 @@ Some enchantments have the subtype "Aura." An Aura enters the battlefield attach
     h. If an effect attempts to attach an Aura on the battlefield to an object or player, that object or player must be able to be enchanted by it. If the object or player can't be, the Aura doesn't move.
     i. If a non-Aura permanent has an ability that :ref:ers to the "enchanted [object or player]" that phrase doesn't refer to any object or player.
 
+.. _instants:
+
 Instants
 ========
 
@@ -173,6 +181,8 @@ Instants can't enter the battlefield. If an instant would enter the battlefield,
 -----
 
 If text states that a player may do something "any time he or she could cast an instant," it means only that the player must have priority. The player doesn't need to have an instant he or she could actually cast. Effects that would prevent that player from casting a spell or casting an instant don't affect the player's capability to perform that action (unless the action is actually casting a spell or casting an instant).
+
+.. _lands:
 
 Lands
 =====
@@ -225,6 +235,8 @@ Any land with the supertype "basic" is a basic land. Any land that doesn't have 
 -----
 
 If an object is both a land and another card type, it can be played only as a land. It can't be cast as a spell.
+
+.. _planeswalkers:
 
 Planeswalkers
 =============
@@ -279,6 +291,8 @@ Damage dealt to a planeswalker results in that many loyalty counters being remov
 
 If a planeswalker's loyalty is 0, it's put into its owner's graveyard.  (This is a state-based action. See rule 704, "State-Based Actions.")
 
+.. _sorceries:
+
 Sorceries
 =========
 
@@ -309,6 +323,8 @@ If a spell, ability, or effect states that a player can do something only "any t
 
     a. Similarly, if an effect checks to see if a spell was cast "any time a sorcery couldn't have been cast," it's checking only whether the spell's controller cast it without having priority, during a phase other than his or her main phase, or while another object was on the stack.
 
+.. _tribals:
+
 Tribals
 =======
 
@@ -321,6 +337,8 @@ Each tribal card has another card type. Casting and resolving a tribal card foll
 -----
 
 Tribal subtypes are always a single word and are listed after a long dash: "Tribal Enchantment -- Merfolk." The set of tribal subtypes is the same as the set of creature subtypes; these subtypes are called creature types.  Tribals may have multiple subtypes. See rule 204.3k for the complete list of creature types.
+
+.. _planes:
 
 Planes
 ======
@@ -345,10 +363,14 @@ Plane subtypes are listed after a long dash, and may be multiple words: "Plane -
 
 A plane card may have any number of static, triggered, and/or activated abilities. As long as a plane card is face up in the command zone, its static abilities affect the game, its triggered abilities may trigger, and its activated abilities may be activated.
 
+.. _plane-controller:
+
 309.5
 -----
 
 The controller of a face-up plane card is the player designated as the planar controller. Normally, the planar controller is whoever the active player is. However, if the current planar controller would leave the game, instead the next player in turn order that wouldn't leave the game becomes the planar controller, then the old planar controller leaves the game. The new planar controller retains that designation until he or she leaves the game or a different player becomes the active player, whichever comes first.
+
+.. _planeswalking:
 
 309.6
 -----
@@ -359,6 +381,8 @@ A plane card is treated as if its text box included "When you roll |PW|, put thi
 -----
 
 Each plane card has a triggered ability that triggers "Whenever you roll |C|." These are called "chaos abilities." Each one is indicated by a |C| to its left, though the symbol itself has no special rules meaning.
+
+.. _vanguards:
 
 Vanguards
 =========
@@ -397,6 +421,8 @@ Each vanguard card has a hand modifier printed in its lower left corner.  This i
 -----
 
 Each vanguard card has a life modifier printed in its lower right corner. This is a number preceded by a plus sign, a number preceded by a minus sign, or a zero. This modifier is applied to the starting life total of the vanguard card's owner (normally 20) to determine how much life that player begins the game with.
+
+.. _schemes:
 
 Schemes
 =======

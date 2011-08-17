@@ -81,6 +81,8 @@ When a rule or effect allows or directs something to happen, and another effect 
 
 Any part of an instruction that's impossible to perform is ignored. (In many cases the card will specify consequences for this; if it doesn't, there's no effect.)
 
+.. _apnap:
+
 101.4
 -----
 
@@ -145,6 +147,8 @@ Once the starting player has been determined, each player sets his or her life t
     c. In a Commander game, each player sets his or her life total to 40.
     d. In an Archenemy game, the archenemy sets his or her life total to 40.
 
+.. _mulligan:
+
 103.4
 -----
 
@@ -164,10 +168,14 @@ Some cards allow a player to take actions with them from his or her opening hand
     b. If a card allows a player to reveal it from his or her opening hand, the player taking this action does so. The card remains revealed until the first turn begins. Each card may be revealed this way only once.
     c. In a multiplayer game using the shared team turns option, first each player on the starting team, in whatever order that team likes, may take such actions. Teammates may consult while making their decisions. Then each player on each other team in turn order does the same.
 
+.. _planechase-face-up:
+
 103.6
 -----
 
 In a Planechase game, the starting player moves the top card of his or her planar deck off that planar deck and turns it face up. (See rule 901, "Planechase.")
+
+.. _starting-turn:
 
 103.7
 -----
@@ -860,6 +868,9 @@ There are six special actions:
     c. Some effects allow a player to take an action at a later time, usually to end a continuous effect or to stop a delayed triggered ability from triggering. Doing so is a special action. A player can take such an action any time he or she has priority, but only if the ability or effect allows it.
     d. Some effects from static abilities allow a player to take an action to ignore the effect from that ability for a duration. Doing so is a special action. A player can take such an action any time he or she has priority.
     e. A player who has a card with suspend in his or her hand may exile that card. This is a special action. A player can take this action any time he or she has priority, but only if he or she could begin to cast that card by putting it onto the stack. See rule 702.60, "Suspend."
+
+    .. _rolling-planar-die:
+
     f. In a Planechase game, rolling the planar die is a special action. A player can take this action any time he or she has priority and the stack is empty during a main phase of his or her turn. Taking this action costs a player an amount of mana equal to the number of times he or she has previously taken this action on that turn. See rule 901, "Planechase."
 
 115.3

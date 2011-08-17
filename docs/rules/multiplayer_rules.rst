@@ -24,14 +24,16 @@ These rules consist of a series of options that can be added to a multiplayer ga
 800.3
 -----
 
-Many multiplayer *Magic* tournaments have additional rules not included here, including rules for deck construction. See the most current Magic: The Gathering Tournament Rules <http://www.wizards.com/WPN/Events/Rules.aspx> for more information.
+Many multiplayer *Magic* tournaments have additional rules not included here, including rules for deck construction. See the most current `Magic: The Gathering Tournament Rules <http://www.wizards.com/WPN/Events/Rules.aspx>`_ for more information.
 
 800.4
 -----
 
 Unlike two-player games, multiplayer games can continue after one or more players have left the game.
 
-    a. When a player leaves the game, all objects (see rule 109) owned by that player leave the game, any effects which give that player control of any objects or players end, and all spells and abilities controlled by that player on the stack cease to exist. Then, if there are any objects still controlled by that player, those objects are exiled. This is not a state-based action. It happens as soon as the player leaves the game. If the player who left the game had priority at the time he or she left, priority passes to the next player in turn order who's still in the game.
+    .. _multiplayer-left-game:
+
+    a. When a player leaves the game, all objects owned by that player leave the game, any effects which give that player control of any objects or players end, and all spells and abilities controlled by that player on the stack cease to exist. Then, if there are any objects still controlled by that player, those objects are exiled. This is not a state-based action. It happens as soon as the player leaves the game. If the player who left the game had priority at the time he or she left, priority passes to the next player in turn order who's still in the game.
 
         .. admonition:: Example
 
@@ -49,6 +51,9 @@ Unlike two-player games, multiplayer games can continue after one or more player
 
             Alex controls Genesis Chamber, which reads, "Whenever a nontoken creature enters the battlefield, if Genesis Chamber is untapped, that creature's controller puts a 1/1 colorless Myr artifact creature token onto the battlefield." If Alex leaves the game, all such Myr tokens that entered the battlefield under Alex's control leave the game, and all such Myr tokens that entered the battlefield under any other player's control remain in the game.
 
+        .. seealso::
+            :ref:`objects`
+
     b. If an object would change to the control of a player who has left the game, it doesn't. If a token would enter the battlefield under the control of a player who has left the game, no token is created. If a player would be controlled by a player who has left the game, he or she isn't.
     c. If an object that would be owned by a player who has left the game would be created in any zone, it isn't created. If a triggered ability that would be controlled by a player who has left the game would be put onto the stack, it isn't put on the stack.
 
@@ -60,8 +65,15 @@ Unlike two-player games, multiplayer games can continue after one or more player
     e. If an object requires a player who has left the game to make a choice, the controller of the object chooses another player to make that choice. If the original choice was to be made by an opponent of the controller of the object, that player chooses another opponent if possible.
     f. If an effect requires information about a specific player, the effect uses the current information about that player if he or she is still in the game; otherwise, the effect uses the last known information about that player before he or she left the game.
     g. If a player leaves the game during his or her turn, that turn continues to its completion without an active player. If the active player would receive priority, instead the next player in turn order receives priority, or the top object on the stack resolves, or the phase or step ends, whichever is appropriate.
-    h. When a player leaves the game, objects that player owns in the ante zone do not leave the game. This is an exception to rule 800.4a. See rule 407, "Ante."
-    i. In a Planechase game, if the player designated as the planar controller would leave the game, instead the next player in turn order that wouldn't leave the game becomes the planar controller, then the old planar controller leaves the game. See rule 309.5.
+    h. When a player leaves the game, objects that player owns in the ante zone do not leave the game. This is an exception to :ref:`rule 800.4a <multiplayer-left-game>`.
+
+        .. seealso::
+            :ref:`ante`
+
+    i. In a Planechase game, if the player designated as the planar controller would leave the game, instead the next player in turn order that wouldn't leave the game becomes the planar controller, then the old planar controller leaves the game.
+    
+        .. seealso::
+            :ref:`Rule 309.5 <plane-controller>`
 
 800.5
 -----
@@ -71,12 +83,19 @@ In a multiplayer game, the first time a player takes a mulligan, he or she draws
 800.6
 -----
 
-In a multiplayer game other than a Two-Headed Giant game, the starting player doesn't skip the draw step of his or her first turn. In a Two-Headed Giant game, the team who plays first skips the draw step of their first turn.  See rule 103.7.
+In a multiplayer game other than a Two-Headed Giant game, the starting player doesn't skip the draw step of his or her first turn. In a Two-Headed Giant game, the team who plays first skips the draw step of their first turn.
+
+.. seealso::
+    :ref:`Rule 103.7 <starting-turn>`
+
 
 800.7
 -----
 
-In a multiplayer game not using the limited range of influence option (see rule 801, Limited Range of Influence Option), if an effect states that a player wins the game, all of that player's opponents lose the game instead.
+In a multiplayer game not using the limited range of influence option, if an effect states that a player wins the game, all of that player's opponents lose the game instead.
+
+.. seealso::
+    :ref:`lroi`
 
 .. _lroi:
 
@@ -86,7 +105,10 @@ Limited Range of Influence Option
 801.1
 -----
 
-Limited range of influence is an option that can be applied to most multiplayer games. It's always used in the Emperor variant (see rule 809), and it's often used for games involving five or more players.
+Limited range of influence is an option that can be applied to most multiplayer games. It's always used in the Emperor variant, and it's often used for games involving five or more players.
+
+.. seealso::
+    :ref:`emperor`
 
 801.2
 -----
@@ -159,21 +181,30 @@ A triggered ability doesn't trigger unless its trigger event happens entirely wi
 
         In a game in which all players have range of influence 1, Alex is seated to the left of Rob. Rob controls two Auras attached to Alex's Runeclaw Bear: One with the trigger condition "Whenever enchanted creature becomes blocked," and one with the trigger condition "Whenever enchanted creature becomes blocked by a creature." Alex's Runeclaw Bear attacks the player to Alex's left and becomes blocked. The ability of Rob's first Aura triggers because the entire event (Runeclaw Bear becomes blocked) happens within Rob's range of influence. The ability of Rob's second Aura doesn't trigger, however, because that event includes the blocking creature, which is out of Rob's range.
 
-    a. If a trigger event includes an object moving out of or into a player's range of influence, use the game state before or after the event as appropriate to determine whether the triggered ability will trigger. See rule 603.6.
+    a. If a trigger event includes an object moving out of or into a player's range of influence, use the game state before or after the event as appropriate to determine whether the triggered ability will trigger.
 
         .. admonition:: Example
 
             Carissa and Alex are outside each other's range of influence. Carissa controls a Runeclaw Bear owned by Alex and they each control an Extractor Demon, a creature which reads, in part, "Whenever another creature leaves the battlefield, you may have target player put the top two cards of his or her library into his or her graveyard." The Runeclaw Bear is destroyed and is put into Alex's graveyard. The ability of Alex's Extractor Demon doesn't trigger because the leaves-the-battlefield event was outside Alex's range of influence.  The ability of Carissa's Extractor Demon does trigger, even though the creature is going to a graveyard outside her range, because the leaves-the-battlefield event was within her range.
 
+        .. seealso::
+            :ref:`Rule 603.6 <zone-change-triggers>`
+
 801.8
 -----
 
-An Aura can't enchant an object or player outside its controller's range of influence. If an Aura is attached to an illegal object or player, the Aura is put into its owner's graveyard as a state-based action. See rule 704.
+An Aura can't enchant an object or player outside its controller's range of influence. If an Aura is attached to an illegal object or player, the Aura is put into its owner's graveyard as a state-based action.
+
+.. seealso::
+    :ref:`state-based-actions`
 
 801.9
 -----
 
-An Equipment can't equip an object outside its controller's range of influence, and a Fortification can't fortify an object outside its controller's range of influence. If an Equipment or Fortification is attached to an illegal permanent, it becomes unattached from that permanent but remains on the battlefield. This is a state-based action. See rule 704.
+An Equipment can't equip an object outside its controller's range of influence, and a Fortification can't fortify an object outside its controller's range of influence. If an Equipment or Fortification is attached to an illegal permanent, it becomes unattached from that permanent but remains on the battlefield. This is a state-based action.
+
+.. seealso::
+    :ref:`state-based-actions`
 
 801.10
 ------
@@ -200,26 +231,41 @@ If a spell or ability requires information from the game, it gets only informati
 801.12
 ------
 
-The "legend rule" (see rule 704.5k) applies to a permanent only if other legendary permanents with the same name are within its controller's range of influence.
+The "legend rule" applies to a permanent only if other legendary permanents with the same name are within its controller's range of influence.
 
 .. admonition:: Example
 
     Alex has range of influence 1, and Carissa has range of influence 2. Rob sits between them. If Alex controls a legendary permanent and Carissa puts a legendary permanent with the same name onto the battlefield, only the one controlled by Carissa will be put into a graveyard.
 
+.. seealso::
+    :ref:`Legend Rule <legend-rule>`
+
 801.13
 ------
 
-The "world rule" (see rule 704.5m) applies to a permanent only if other world permanents are within its controller's range of influence.
+The "world rule" applies to a permanent only if other world permanents are within its controller's range of influence.
+
+.. seealso::
+    :ref:`World Rule <world-rule>`
 
 801.14
 ------
 
-The "planeswalker uniqueness rule" (see rule 704.5j) applies to a planeswalker only if other planeswalkers with the same planeswalker type are within its controller's range of influence.
+The "planeswalker uniqueness rule" applies to a planeswalker only if other planeswalkers with the same planeswalker type are within its controller's range of influence.
+
+.. seealso::
+    :ref:`Planeswalker Uniqueness Rule <planeswalker-uniqueness-rule>`
 
 801.15
 ------
 
-Replacement and prevention effects watch for a particular event to happen and then completely or partially replace that event. The limited range of influence option can cause the modified event to contain instructions that can't be carried out, in which case the player simply ignores the impossible instructions. See rule 614, "Replacement Effects," and rule 615, "Prevention Effects."
+Replacement and prevention effects watch for a particular event to happen and then completely or partially replace that event. The limited range of influence option can cause the modified event to contain instructions that can't be carried out, in which case the player simply ignores the impossible instructions.
+
+    .. seealso::
+
+        :ref:`replacement-effects`
+
+        :ref:`prevention-effects`
 
     a. If a replacement effect tries to cause a spell or ability to affect an object or player outside its controller's range of influence, that portion of the event does nothing.
 
@@ -259,12 +305,18 @@ If the game somehow enters a "loop" of mandatory actions, repeating a sequence o
 801.19
 ------
 
-Effects that restart the game (see rule 713) are exempt from the limited range of influence option. All players in the game will be involved in the new game.
+Effects that restart the game are exempt from the limited range of influence option. All players in the game will be involved in the new game.
+
+.. seealso::
+    :ref:`restarting`
 
 801.20
 ------
 
-In multiplayer Planechase games other than Grand Melee games, plane cards are exempt from the limited range of influence option. Their abilities, and the effects of those abilities, affect all applicable objects and players in the game. See rule 901, "Planechase."
+In multiplayer Planechase games other than Grand Melee games, plane cards are exempt from the limited range of influence option. Their abilities, and the effects of those abilities, affect all applicable objects and players in the game.
+
+.. seealso::
+    :ref:`planechase`
 
 .. _amp:
 
@@ -290,15 +342,31 @@ As the combat phase starts, the attacking player doesn't choose an opponent to b
 802.3
 -----
 
-As the attacking player declares each attacking creature, he or she chooses a defending player or a planeswalker controlled by a defending player for it to attack. See rule 508, "Declare Attackers Step."
+As the attacking player declares each attacking creature, he or she chooses a defending player or a planeswalker controlled by a defending player for it to attack.
 
-    a. Restrictions and requirements that don't apply to attacking a specific player are evaluated based on the entire group of attacking creatures.  Restrictions and requirements that apply to attacking a specific player apply only to creatures attacking that player. The entire group of attacking creatures must still be legal. See rule 508.1.
-    b. Creatures in a band can't attack different players. See rule 702.20, "Banding."
+    .. seealso::
+        :ref:`declare-attackers-step`
+
+    a. Restrictions and requirements that don't apply to attacking a specific player are evaluated based on the entire group of attacking creatures.  Restrictions and requirements that apply to attacking a specific player apply only to creatures attacking that player. The entire group of attacking creatures must still be legal.
+
+        .. seealso::
+            :ref:`Rule 508.1 <first-das>`
+
+    b. Creatures in a band can't attack different players.
+
+        .. seealso::
+            :ref:`Banding <banding>`
 
 802.4
 -----
 
-If more than one player is being attacked or controls a planeswalker that's being attacked, each defending player in APNAP order declares blockers as the declare blockers step begins. (See rule 101.4 and rule 509, "Declare Blockers Step.") The first defending player declares all his or her blocks, then the second defending player, and so on.
+If more than one player is being attacked or controls a planeswalker that's being attacked, each defending player in APNAP order declares blockers as the declare blockers step begins. The first defending player declares all his or her blocks, then the second defending player, and so on.
+
+    .. seealso::
+
+        :ref:`Rule 101.4 <apnap>`
+
+        :ref:`declare-blockers-step`
 
     a. A defending player can block only with creatures he or she controls.  Those creatures can block only creatures attacking that player or a planeswalker that player controls.
     b. When determining whether a defending player's blocks are legal, ignore any creatures attacking other players and any blocking creatures controlled by other players.
@@ -306,12 +374,18 @@ If more than one player is being attacked or controls a planeswalker that's bein
 802.5
 -----
 
-After blockers have been declared, if any creatures are blocking multiple creatures, each defending player in APNAP order announces the damage assignment order among the attacking creatures for each blocking creature he or she controls. See rule 510, "Combat Damage Step."
+After blockers have been declared, if any creatures are blocking multiple creatures, each defending player in APNAP order announces the damage assignment order among the attacking creatures for each blocking creature he or she controls.
+
+.. seealso::
+    :ref:`combat-damage-step`
 
 802.6
 -----
 
-Combat damage is assigned in APNAP order. Other than that, the combat damage step proceeds just as in a two-player game. See rule 510, "Combat Damage Step."
+Combat damage is assigned in APNAP order. Other than that, the combat damage step proceeds just as in a two-player game.
+
+.. seealso::
+    :ref:`combat-damage-step`
 
 .. _alar:
 
@@ -349,7 +423,13 @@ Shared Team Turns Option
 805.1
 -----
 
-Some multiplayer games between teams use the shared team turns option.  It's always used in the Two-Headed Giant variant (see rule 810) and the Archenemy casual variant (see rule 811). It can be used only if the members of each team are sitting in adjacent seats.
+Some multiplayer games between teams use the shared team turns option.  It's always used in the Two-Headed Giant variant and the Archenemy casual variant. It can be used only if the members of each team are sitting in adjacent seats.
+
+.. seealso::
+
+    :ref:`thg`
+
+    :ref:`archenemy`
 
 805.2
 -----
@@ -361,7 +441,11 @@ Within each team, the player seated in the rightmost seat from that team's persp
 
 The methods described in rule 103.2 are used to determine which team will take the first turn. The team determined this way is the starting team.
 
-    a. The process for handling mulligans is altered accordingly. First, each player on the starting team, in whatever order that team likes, declares whether or not he or she will take a mulligan. Then the players on each other team in turn order do the same. Teammates may consult while making their decisions. Then all mulligans are taken at the same time. A player may take a mulligan even after his or her teammate has decided to keep his or her opening hand. See rule 103.4.
+    a. The process for handling mulligans is altered accordingly. First, each player on the starting team, in whatever order that team likes, declares whether or not he or she will take a mulligan. Then the players on each other team in turn order do the same. Teammates may consult while making their decisions. Then all mulligans are taken at the same time. A player may take a mulligan even after his or her teammate has decided to keep his or her opening hand.
+
+        .. seealso::
+            :ref:`Mulligan <mulligan>`
+
     b. The process for handling cards that allow a player to begin the game with them on the battlefield is altered accordingly. First, each player on the starting team, in whatever order that team likes, may put any or all such cards onto the battlefield from his or her opening hand. Teammates may consult while making their decisions. Then each player on each other team in turn order does the same.
 
 805.4
@@ -384,7 +468,10 @@ Teams have priority, not individual players.
 805.6
 -----
 
-The Active Player, Nonactive Player order rule (see rule 101.4) is modified if the shared team turns option is used. If multiple teams would make choices and/or take actions at the same time, first the active team makes any choices required, then each nonactive team in turn order makes any choices required. If multiple players would make choices and/or take actions at the same time, first each player on the active team makes any choices required in whatever order they like, then the players on each nonactive team in turn order do the same. Once all choices have been made, the actions happen simultaneously.
+The Active Player, Nonactive Player order rule is modified if the shared team turns option is used. If multiple teams would make choices and/or take actions at the same time, first the active team makes any choices required, then each nonactive team in turn order makes any choices required. If multiple players would make choices and/or take actions at the same time, first each player on the active team makes any choices required in whatever order they like, then the players on each nonactive team in turn order do the same. Once all choices have been made, the actions happen simultaneously.
+
+    .. seealso::
+        :ref:`Rule 101.4 <apnap>`
 
     a. If an effect instructs more than one player to draw cards in a game that's using the shared team turns option, first each player on the active team, in whatever order that team likes, performs his or her draws, then each player on each nonactive team in turn order does the same.
 

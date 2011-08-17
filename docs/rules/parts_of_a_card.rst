@@ -276,6 +276,8 @@ Text Box
 
 The text box is printed on the lower half of the card. It usually contains rules text defining the card's abilities.
 
+.. _no-func-text-box:
+
 206.2
 -----
 

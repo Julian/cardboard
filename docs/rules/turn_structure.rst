@@ -247,6 +247,8 @@ Third, the active player gets priority. Players may cast spells and activate abi
 Declare Attackers Step
 ======================
 
+.. _first-das:
+
 508.1
 -----
 
