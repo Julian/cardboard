@@ -25,12 +25,27 @@ Anything that happens in a game is an event. Multiple events may take place duri
 
 A spell or ability is modal if it has two or more options preceded by "Choose one  -- ," "Choose two  -- ," "Choose one or both  -- ," or "[a specified player] chooses one  -- ." Each of those options is a mode.
 
-    a. The controller of a modal spell or activated ability chooses the mode(s) as part of casting that spell or activating that ability. If one of the modes would be illegal (due to an inability to choose legal targets, for example), that mode can't be chosen. (See rule 601.2b.)
-    b. The controller of a modal triggered ability chooses the mode(s) as part of putting that ability on the stack. If one of the modes would be illegal (due to an inability to choose legal targets, for example), that mode can't be chosen. If no mode can be chosen, the ability is removed from the stack. (See rule 603.3c.)
-    c. If a spell or ability targets one or more targets only if a particular mode is chosen for it, its controller will need to choose those targets only if he or she chose that mode. Otherwise, the spell or ability is treated as though it did not have those targets. (See rule 601.2c.)
+    a. The controller of a modal spell or activated ability chooses the mode(s) as part of casting that spell or activating that ability. If one of the modes would be illegal (due to an inability to choose legal targets, for example), that mode can't be chosen.
+
+        .. seealso::
+            :ref:`Rule 601.2b <modal-spell>`
+
+    b. The controller of a modal triggered ability chooses the mode(s) as part of putting that ability on the stack. If one of the modes would be illegal (due to an inability to choose legal targets, for example), that mode can't be chosen. If no mode can be chosen, the ability is removed from the stack.
+
+        .. seealso::
+            :ref:`Rule 603.3c <modal-triggered>`
+
+    c. If a spell or ability targets one or more targets only if a particular mode is chosen for it, its controller will need to choose those targets only if he or she chose that mode. Otherwise, the spell or ability is treated as though it did not have those targets.
+
+        .. seealso::
+            :ref:`Rule 601.2c <choose-targets>`
+
     d. Some spells and abilities specify that a player other than their controller chooses a mode for it. In that case, the other player does so when the spell or ability's controller normally would do so. If there is more than one other player who could make such a choice, the spell or ability's controller decides which of those players will make the choice.
     e. Modal spells and abilities may have different targeting requirements for each mode. Changing a spell or ability's target can't change its mode.
-    f. A copy of a modal spell or ability copies the mode(s) chosen for it. The controller of the copy can't choose a different mode. (See rule 706.9.)
+    f. A copy of a modal spell or ability copies the mode(s) chosen for it. The controller of the copy can't choose a different mode.
+
+        .. seealso::
+            :ref:`Rule 706.9 <copy-spell>`
 
 700.3
 -----
@@ -1432,6 +1447,8 @@ Copy effects may include modifications or exceptions to the copying process.
         .. admonition:: Example
 
             Quicksilver Gargantuan is a creature that reads, "You may have Quicksilver Gargantuan enter the battlefield as a copy of any creature on the battlefield, except it's still 7/7." Quicksilver Gargantuan enters the battlefield as a copy of Tarmogoyf, which has a characteristic-defining ability that defines its power and toughness. Quicksilver Gargantuan does not have that ability. It will be 7/7.
+
+.. _copy-spell:
 
 706.9
 -----

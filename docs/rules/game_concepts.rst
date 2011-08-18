@@ -1174,7 +1174,7 @@ The source of damage is the object that dealt it. If an effect requires a player
 
 If a source would deal 0 damage, it does not deal damage at all. That means abilities that trigger on damage being dealt won't trigger. It also means that replacement effects that would increase the damage dealt by that source, or would have that source deal that damage to a different object or player, have no event to replace, so they have no effect.
 
-.. _drawing:
+.. _draw:
 
 Drawing a Card
 ==============
