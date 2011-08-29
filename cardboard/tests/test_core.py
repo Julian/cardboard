@@ -297,6 +297,50 @@ class TestGame(GameTestCase):
                                                self.p2 : self.p2.frontend})
 
 
+class TestStateBasedEffects(GameTestCase):
+    def test_no_life(self):
+        """
+        A player with 0 or less life loses.
+
+        .. seealso::
+            :ref:`no-life`
+
+        """
+
+        self.p1.life -= 20
+        self.game._check_state_based_actions()
+        self.assertTrue(self.p1.dead)
+        self.assertEqual(self.p1.death_by, "life")
+
+    def test_draw(self):
+        """
+        A player that drew from an empty library dies.
+
+        .. seealso::
+            :ref:`no-library`
+
+        """
+
+        self.p1.draw(100)
+        self.game._check_state_based_actions()
+        self.assertTrue(self.p1.dead)
+        self.assertEqual(self.p1.death_by, "library")
+
+    def test_poison(self):
+        """
+        A player with 10 or more poison counters is dead.
+
+        .. seealso::
+            :ref:`too-much-poison`
+
+        """
+
+        self.p1.poison = 10
+        self.game._check_state_based_actions()
+        self.assertTrue(self.p1.dead)
+        self.assertEqual(self.p1.death_by, "poison")
+
+
 class TestTurnManager(GameTestCase):
     def test_initialize_turn_and_phase(self):
         self.game.start()
