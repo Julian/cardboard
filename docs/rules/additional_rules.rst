@@ -1280,8 +1280,16 @@ Unlike triggered abilities, state-based actions pay no attention to what happens
 
 The state-based actions are as follows:
 
+    .. _no-life:
+
     a. If a player has 0 or less life, he or she loses the game.
+
+    .. _no-library:
+
     b. If a player attempted to draw a card from a library with no cards in it since the last time state-based actions were checked, he or she loses the game.
+
+    .. _too-much-poison:
+
     c. If a player has ten or more poison counters, he or she loses the game.  Ignore this rule in Two-Headed Giant games; see rule 704.5u instead.
     d. If a token is phased out, or is in a zone other than the battlefield, it ceases to exist.
     e. If a copy of a spell is in a zone other than the stack, it ceases to exist. If a copy of a card is in any zone other than the stack or the battlefield, it ceases to exist.
