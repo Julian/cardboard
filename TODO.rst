@@ -9,6 +9,17 @@ Minor
 
 * Loser goes first / add multiple game sequence (:ref:`first-turn`)
 
+Mana
+====
+
+Major
+-----
+
+Minor
+-----
+
+* Restricted-use mana (:ref:`restricted-mana`)
+
 Player
 ======
 

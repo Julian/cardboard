@@ -92,7 +92,7 @@ Any part of an instruction that's impossible to perform is ignored. (In many cas
 101.4
 -----
 
-If multiple players would make choices and/or take actions at the same time, the active player (the player whose turn it is) makes any choices required, then the next player in turn order (usually the player seated to the active player's left) makes any choices required, followed by the remaining nonactive players in turn order. Then the actions happen simultaneously. This rule is often :ref:erred to as the "Active Player, Nonactive Player (APNAP) order" rule.
+If multiple players would make choices and/or take actions at the same time, the active player (the player whose turn it is) makes any choices required, then the next player in turn order (usually the player seated to the active player's left) makes any choices required, followed by the remaining nonactive players in turn order. Then the actions happen simultaneously. This rule is often referred to as the "Active Player, Nonactive Player (APNAP) order" rule.
 
     .. admonition:: Example
 
@@ -348,6 +348,8 @@ Mana is represented by mana symbols (see rule 107.4). Mana symbols also represen
 
 Mana is produced by the effects of mana abilities (see rule 605). It may also be produced by the effects of spells, as well as by the effects of abilities that aren't mana abilities.
 
+.. _mana-produced:
+
 106.4
 -----
 
@@ -363,6 +365,8 @@ If an ability would produce one or more mana of an undefined type, it produces n
 .. admonition:: Example
 
     Meteor Crater has the ability "|T|: Choose a color of a permanent you control. Add one mana of that color to your mana pool." If you control no colored permanents, activating Meteor Crater's mana ability produces no mana.
+
+.. _restricted-mana:
 
 106.6
 -----
@@ -509,7 +513,7 @@ The Planeswalker symbol is |PW|. It appears on one face of the planar die used i
 107.12
 ------
 
-The chaos symbol is |C|. It appears on one face of the planar die used in the Planechase casual variant, as well as in triggered abilities that :ref:er to the results of rolling the planar die. See rule 901, "Planechase."
+The chaos symbol is |C|. It appears on one face of the planar die used in the Planechase casual variant, as well as in triggered abilities that refer to the results of rolling the planar die. See rule 901, "Planechase."
 
 .. _cards:
 
@@ -519,14 +523,14 @@ Cards
 108.1
 -----
 
-Use the *Oracle*\ ™ card :ref:erence when determining a card's wording. A card's Oracle text can be found using the `Gatherer card database <http://gatherer.wizards.com>`_.
+Use the *Oracle*\ ™ card reference when determining a card's wording. A card's Oracle text can be found using the `Gatherer card database <http://gatherer.wizards.com>`_.
 
 108.2
 -----
 
-When a rule or text on a card :ref:ers to a "card," it means only a *Magic* card. This includes both traditional *Magic* cards, which measure approximately 2.5 inches (6.3 cm) by 3.5 inches (8.8 cm) and have a "Deckmaster" back, and nontraditional *Magic* cards, which are oversized and have different backs. Tokens aren't considered cards -- even a card that represents a token isn't considered a card for rules purposes.
+When a rule or text on a card refers to a "card," it means only a *Magic* card. This includes both traditional *Magic* cards, which measure approximately 2.5 inches (6.3 cm) by 3.5 inches (8.8 cm) and have a "Deckmaster" back, and nontraditional *Magic* cards, which are oversized and have different backs. Tokens aren't considered cards -- even a card that represents a token isn't considered a card for rules purposes.
 
-    a. In the text of spells or abilities, the term "card" is used only to :ref:er to a card that's not on the battlefield or on the stack, such as a creature card in a player's hand. For more information, see section 4, :ref:`zones`.
+    a. In the text of spells or abilities, the term "card" is used only to refer to a card that's not on the battlefield or on the stack, such as a creature card in a player's hand. For more information, see section 4, :ref:`zones`.
 
 108.3
 -----
@@ -590,7 +594,7 @@ Only objects on the stack or on the battlefield have a controller.  Objects that
 109.5
 -----
 
-The words "you" and "your" on an object :ref:er to the object's controller, its would-be controller (if a player is attempting to play, cast, or activate it), or its owner (if it has no controller). For a static ability, this is the current controller of the object it's on. For an activated ability, this is the player who activated the ability. For a triggered ability, this is the controller of the object when the ability triggered, unless it's a delayed triggered ability. To determine the controller of a delayed triggered ability, see rules 603.7d-f.
+The words "you" and "your" on an object refer to the object's controller, its would-be controller (if a player is attempting to play, cast, or activate it), or its owner (if it has no controller). For a static ability, this is the current controller of the object it's on. For an activated ability, this is the player who activated the ability. For a triggered ability, this is the controller of the object when the ability triggered, unless it's a delayed triggered ability. To determine the controller of a delayed triggered ability, see rules 603.7d-f.
 
 .. _permanents:
 
@@ -619,8 +623,8 @@ A nontoken permanent's characteristics are the same as those printed on its card
 
 There are five permanent types: artifact, creature, enchantment, land, and planeswalker. Instant and sorcery cards can't enter the battlefield and thus can't be permanents. Some tribal cards can enter the battlefield and some can't, depending on their other card types. See section 3, :ref:`card-types`.
 
-    a. The term "permanent card" is used to :ref:er to a card that could be put onto the battlefield. Specifically, it means an artifact, creature, enchantment, land, or planeswalker card.
-    b. The term "permanent spell" is used to :ref:er to a spell that will enter the battlefield as a permanent as part of its resolution. Specifically, it means an artifact, creature, enchantment, or planeswalker spell.
+    a. The term "permanent card" is used to refer to a card that could be put onto the battlefield. Specifically, it means an artifact, creature, enchantment, land, or planeswalker card.
+    b. The term "permanent spell" is used to refer to a spell that will enter the battlefield as a permanent as part of its resolution. Specifically, it means an artifact, creature, enchantment, or planeswalker spell.
     c. If a permanent somehow loses all its permanent types, it remains on the battlefield. It's still a permanent.
 
 110.5
@@ -648,6 +652,7 @@ Some effects put tokens onto the battlefield. A token is a marker used to repres
         .. seealso::
             :ref:`state-based-action`
 
+.. _status-categories:
 
 110.6
 -----
@@ -721,7 +726,7 @@ Abilities can affect the objects they're on. They can also affect other objects 
             "[This creature] can't block" is an ability.
 
     b. An additional cost or alternative cost to cast a card is an ability of the card.
-    c. An object may have multiple abilities. If the object is represented by a card, then aside from certain defined abilities that may be strung together on a single line (see rule 702, "Keyword Abilities"), each paragraph break in a card's text marks a separate ability. If the object is not represented by a card, the effect that created it may have given it multiple abilities. An object may also be granted additional abilities by a spell or ability. If an object has multiple instances of the same ability, each instance functions independently. This may or may not produce more effects than a single instance; :ref:er to the specific ability for more information.
+    c. An object may have multiple abilities. If the object is represented by a card, then aside from certain defined abilities that may be strung together on a single line (see rule 702, "Keyword Abilities"), each paragraph break in a card's text marks a separate ability. If the object is not represented by a card, the effect that created it may have given it multiple abilities. An object may also be granted additional abilities by a spell or ability. If an object has multiple instances of the same ability, each instance functions independently. This may or may not produce more effects than a single instance; refer to the specific ability for more information.
     d. Abilities can generate one-shot effects or continuous effects. Some continuous effects are replacement effects or prevention effects. See rule 609, "Effects."
 
 112.3
@@ -779,7 +784,7 @@ Abilities of an instant or sorcery spell usually function only while that object
 
 The source of an ability is the object that generated it. The source of an activated ability on the stack is the object whose ability was activated.  The source of a triggered ability (other than a delayed triggered ability) on the stack, or one that has triggered and is waiting to be put on the stack, is the object whose ability triggered. To determine the source of a delayed triggered ability, see rules 603.7d-f.
 
-    a. Once activated or triggered, an ability exists on the stack independently of its source. Destruction or removal of the source after that time won't affect the ability. Note that some abilities cause a source to do something (for example, "Prodigal Sorcerer deals 1 damage to target creature or player") rather than the ability doing anything directly. In these cases, any activated or triggered ability that :ref:erences information about the source because the effect needs to be divided checks that information when the ability is put onto the stack. Otherwise, it will check that information when it resolves. In both instances, if the source is no longer in the zone it's expected to be in at that time, its last known information is used. The source can still perform the action even though it no longer exists.
+    a. Once activated or triggered, an ability exists on the stack independently of its source. Destruction or removal of the source after that time won't affect the ability. Note that some abilities cause a source to do something (for example, "Prodigal Sorcerer deals 1 damage to target creature or player") rather than the ability doing anything directly. In these cases, any activated or triggered ability that references information about the source because the effect needs to be divided checks that information when the ability is put onto the stack. Otherwise, it will check that information when it resolves. In both instances, if the source is no longer in the zone it's expected to be in at that time, its last known information is used. The source can still perform the action even though it no longer exists.
 
 112.8
 -----
@@ -1242,7 +1247,7 @@ Damage marked on a creature remains until the cleanup step, even if that permane
 119.7
 -----
 
-The source of damage is the object that dealt it. If an effect requires a player to choose a source of damage, he or she may choose a permanent; a spell on the stack (including a permanent spell); any object :ref:erred to by an object on the stack, by a prevention or replacement effect that's waiting to apply, or by a delayed triggered ability that's waiting to trigger (even if that object is no longer in the zone it used to be in); or, in certain casual variant games, a face-up card in the command zone. A source doesn't need to be capable of dealing damage to be a legal choice. See rule 609.7, "Sources of Damage."
+The source of damage is the object that dealt it. If an effect requires a player to choose a source of damage, he or she may choose a permanent; a spell on the stack (including a permanent spell); any object referred to by an object on the stack, by a prevention or replacement effect that's waiting to apply, or by a delayed triggered ability that's waiting to trigger (even if that object is no longer in the zone it used to be in); or, in certain casual variant games, a face-up card in the command zone. A source doesn't need to be capable of dealing damage to be a legal choice. See rule 609.7, "Sources of Damage."
 
 119.8
 -----
@@ -1354,4 +1359,4 @@ If an effect says to "move" a counter, it means to take that counter from the ob
 121.6
 -----
 
-If a spell or ability :ref:ers to a counter being "placed" on a permanent, it means putting a counter on that permanent while it's on the battlefield, or that permanent entering the battlefield with a counter on it as the result of a replacement effect (see rule 614.1c).
+If a spell or ability refers to a counter being "placed" on a permanent, it means putting a counter on that permanent while it's on the battlefield, or that permanent entering the battlefield with a counter on it as the result of a replacement effect (see rule 614.1c).
