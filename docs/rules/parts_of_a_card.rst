@@ -44,20 +44,20 @@ Two objects have the same name if the English versions of their names are identi
 201.3
 -----
 
-If an effect instructs a player to name a card, the player must choose the name of a card that exists in the Oracle card :ref:erence (see rule 108.1) and is legal in the format of the game the player is playing. (See rule 100.6.) If the player wants to name a split card, the player must name both halves of the split card. (See rule 708.) If the player wants to name a flip card's alternative name, the player may do so. (See rule 709.) A player may not choose the name of a token unless it's also the name of a card.
+If an effect instructs a player to name a card, the player must choose the name of a card that exists in the Oracle card reference (see rule 108.1) and is legal in the format of the game the player is playing. (See rule 100.6.) If the player wants to name a split card, the player must name both halves of the split card. (See rule 708.) If the player wants to name a flip card's alternative name, the player may do so. (See rule 709.) A player may not choose the name of a token unless it's also the name of a card.
 
 201.4
 -----
 
-Text that :ref:ers to the object it's on by name means just that particular object and not any other objects with that name, regardless of any name changes caused by game effects.
+Text that refers to the object it's on by name means just that particular object and not any other objects with that name, regardless of any name changes caused by game effects.
 
-    a. If an ability's effect grants another ability to an object, and that second ability :ref:ers to that first ability's source by name, the name refers only to the specific object that is that first ability's source, not to any other object with the same name.
+    a. If an ability's effect grants another ability to an object, and that second ability refers to that first ability's source by name, the name refers only to the specific object that is that first ability's source, not to any other object with the same name.
 
         .. admonition:: Example
 
             Saproling Burst has an ability that reads "Remove a fade counter from Saproling Burst: Put a green Saproling creature token onto the battlefield. It has 'This creature's power and toughness are each equal to the number of fade counters on Saproling Burst.'" The ability granted to the token only looks at the Saproling Burst that created the token, not at any other Saproling Burst on the battlefield.
 
-    b. If an ability of an object :ref:ers to that object by name, and an object with a different name gains that ability, all instances of the first name in the gained ability should be treated as the second name.
+    b. If an ability of an object refers to that object by name, and an object with a different name gains that ability, all instances of the first name in the gained ability should be treated as the second name.
 
         .. admonition:: Example
 
@@ -71,12 +71,12 @@ Text that :ref:ers to the object it's on by name means just that particular obje
 
             Dimir Doppelganger says "|1|\ |U|\ |B|: Exile target creature card from a graveyard. Dimir Doppelganger becomes a copy of that card and gains this ability." Dimir Doppelganger's ability is activated targeting a Runeclaw Bear card. The Doppelganger becomes a copy of Runeclaw Bear and gains an ability that should be treated as saying "|1|\ |U|\ |B|: Exile target creature card from a graveyard. Runeclaw Bear becomes a copy of that card and gains this ability."
 
-    c. Text printed on some legendary cards :ref:ers to that card by a shortened version of its name. This occurs only on a second reference or later; first references always use the card's full name. Instances of a card's shortened name used in this manner are treated as though they used the card's full name.
+    c. Text printed on some legendary cards refers to that card by a shortened version of its name. This occurs only on a second reference or later; first references always use the card's full name. Instances of a card's shortened name used in this manner are treated as though they used the card's full name.
 
 201.5
 -----
 
-If an ability of an object uses a phrase such as "this [something]" to identify an object, where [something] is a characteristic, it is :ref:erring to that particular object, even if it isn't the appropriate characteristic at the time.
+If an ability of an object uses a phrase such as "this [something]" to identify an object, where [something] is a characteristic, it is referring to that particular object, even if it isn't the appropriate characteristic at the time.
 
 .. admonition:: Example
 
@@ -179,7 +179,11 @@ The type line is printed directly below the illustration. It contains the card's
 
 Card Types
 
-    a. The card types are artifact, creature, enchantment, instant, land, plane, planeswalker, scheme, sorcery, tribal, and vanguard. See section 3, :ref:`card-types`.
+    a. The card types are artifact, creature, enchantment, instant, land, plane, planeswalker, scheme, sorcery, tribal, and vanguard.
+
+        .. _seealso::
+            :ref:`card-types`
+
     b. Some objects have more than one card type (for example, an artifact creature). Such objects satisfy the criteria for any effect that applies to any of their card types.
     c. Tokens have card types even though they aren't cards. The same is true of copies of spells and copies of cards.
 
@@ -207,13 +211,13 @@ Subtypes
 
             When choosing a creature type, "Merfolk" or "Wizard" is acceptable, but "Merfolk Wizard" is not. Words like "artifact," "opponent," "Swamp," or "truck" can't be chosen because they aren't creature types.
 
-    e. Many cards were printed with subtypes that are now obsolete. Many cards have retroactively received subtypes. Use the Oracle card :ref:erence to determine what a card's subtypes are. (See rule 108.1.)
+    e. Many cards were printed with subtypes that are now obsolete. Many cards have retroactively received subtypes. Use the Oracle card reference to determine what a card's subtypes are. (See rule 108.1.)
     f. Artifacts have their own unique set of subtypes; these subtypes are called artifact types. The artifact types are Contraption, Equipment (see rule 301.5), and Fortification (see rule 301.6).
     g. Enchantments have their own unique set of subtypes; these subtypes are called enchantment types. The enchantment types are Aura (see rule 303.4), and Shrine.
     h. Lands have their own unique set of subtypes; these subtypes are called land types. The land types are Desert, Forest, Island, Lair, Locus, Mine, Mountain, Plains, Power-Plant, Swamp, Tower, and Urza's.  Of that list, Forest, Island, Mountain, Plains, and Swamp are the basic land types. See rule 305.6.
     i. Planeswalkers have their own unique set of subtypes; these subtypes are called planeswalker types. The planeswalker types are Ajani, Bolas, Chandra, Elspeth, Garruk, Gideon, Jace, Karn, Koth, Liliana, Nissa, Sarkhan, Sorin, Tezzeret, and Venser.  If two or more planeswalkers that share a planeswalker type are on the battlefield, all are put into their owners' graveyards. This "planeswalker uniqueness rule" is a state-based action. See rule 704, "State-Based Actions."
     j. Instants and sorceries share their lists of subtypes; these subtypes are called spell types. The spell types are Arcane and Trap.
-    k. Creatures and tribals share their lists of subtypes; these subtypes are called creature types. The creature types are Advisor, Ally, Angel, Anteater, Antelope, Ape, Archer, Archon, Artificer, Assassin, Assembly-Worker, Atog, Aurochs, Avatar, Badger, Barbarian, Basilisk, Bat, Bear, Beast, Beeble, Berserker, Bird, Blinkmoth, Boar, Bringer, Brushwagg, Camarid, Camel, Caribou, Carrier, Cat, Centaur, Cephalid, Chimera, Citizen, Cleric, Cockatrice, Construct, Coward, Crab, Crocodile, Cyclops, Dauthi, Demon, Deserter, Devil, Djinn, Dragon, Drake, Dreadnought, Drone, Druid, Dryad, Dwarf, Efreet, Elder, Eldrazi, Elemental, Elephant, Elf, Elk, Eye, Faerie, Ferret, Fish, Flagbearer, Fox, Frog, Fungus, Gargoyle, Germ, Giant, Gnome, Goat, Goblin, Golem, Gorgon, Graveborn, Gremlin, Griffin, Hag, Harpy, Hellion, Hippo, Hippogriff, Homarid, Homunculus, Horror, Horse, Hound, Human, Hydra, Hyena, Illusion, Imp, Incarnation, Insect, Jellyfish, Juggernaut, Kavu, Kirin, Kithkin, Knight, Kobold, Kor, Kraken, Lammasu, Leech, Leviathan, Lhurgoyf, Licid, Lizard, Manticore, Masticore, Mercenary, Merfolk, Metathran, Minion, Minotaur, Monger, Mongoose, Monk, Moonfolk, Mutant, Myr, Mystic, Nautilus, Nephilim, Nightmare, Nightstalker, Ninja, Noggle, Nomad, Octopus, Ogre, Ooze, Orb, Orc, Orgg, Ouphe, Ox, Oyster, Pegasus, Pentavite, Pest, Phelddagrif, Phoenix, Pincher, Pirate, Plant, Praetor, Prism, Rabbit, Rat, Rebel, :ref:lection, Rhino, Rigger, Rogue, Salamander, Samurai, Sand, Saproling, Satyr, Scarecrow, Scorpion, Scout, Serf, Serpent, Shade, Shaman, Shapeshifter, Sheep, Siren, Skeleton, Slith, Sliver, Slug, Snake, Soldier, Soltari, Spawn, Specter, Spellshaper, Sphinx, Spider, Spike, Spirit, Splinter, Sponge, Squid, Squirrel, Starfish, Surrakar, Survivor, Tetravite, Thalakos, Thopter, Thrull, Treefolk, Triskelavite, Troll, Turtle, Unicorn, Vampire, Vedalken, Viashino, Volver, Wall, Warrior, Weird, Whale, Wizard, Wolf, Wolverine, Wombat, Worm, Wraith, Wurm, Yeti, Zombie, and Zubera.
+    k. Creatures and tribals share their lists of subtypes; these subtypes are called creature types. The creature types are Advisor, Ally, Angel, Anteater, Antelope, Ape, Archer, Archon, Artificer, Assassin, Assembly-Worker, Atog, Aurochs, Avatar, Badger, Barbarian, Basilisk, Bat, Bear, Beast, Beeble, Berserker, Bird, Blinkmoth, Boar, Bringer, Brushwagg, Camarid, Camel, Caribou, Carrier, Cat, Centaur, Cephalid, Chimera, Citizen, Cleric, Cockatrice, Construct, Coward, Crab, Crocodile, Cyclops, Dauthi, Demon, Deserter, Devil, Djinn, Dragon, Drake, Dreadnought, Drone, Druid, Dryad, Dwarf, Efreet, Elder, Eldrazi, Elemental, Elephant, Elf, Elk, Eye, Faerie, Ferret, Fish, Flagbearer, Fox, Frog, Fungus, Gargoyle, Germ, Giant, Gnome, Goat, Goblin, Golem, Gorgon, Graveborn, Gremlin, Griffin, Hag, Harpy, Hellion, Hippo, Hippogriff, Homarid, Homunculus, Horror, Horse, Hound, Human, Hydra, Hyena, Illusion, Imp, Incarnation, Insect, Jellyfish, Juggernaut, Kavu, Kirin, Kithkin, Knight, Kobold, Kor, Kraken, Lammasu, Leech, Leviathan, Lhurgoyf, Licid, Lizard, Manticore, Masticore, Mercenary, Merfolk, Metathran, Minion, Minotaur, Monger, Mongoose, Monk, Moonfolk, Mutant, Myr, Mystic, Nautilus, Nephilim, Nightmare, Nightstalker, Ninja, Noggle, Nomad, Octopus, Ogre, Ooze, Orb, Orc, Orgg, Ouphe, Ox, Oyster, Pegasus, Pentavite, Pest, Phelddagrif, Phoenix, Pincher, Pirate, Plant, Praetor, Prism, Rabbit, Rat, Rebel, Reflection, Rhino, Rigger, Rogue, Salamander, Samurai, Sand, Saproling, Satyr, Scarecrow, Scorpion, Scout, Serf, Serpent, Shade, Shaman, Shapeshifter, Sheep, Siren, Skeleton, Slith, Sliver, Slug, Snake, Soldier, Soltari, Spawn, Specter, Spellshaper, Sphinx, Spider, Spike, Spirit, Splinter, Sponge, Squid, Squirrel, Starfish, Surrakar, Survivor, Tetravite, Thalakos, Thopter, Thrull, Treefolk, Triskelavite, Troll, Turtle, Unicorn, Vampire, Vedalken, Viashino, Volver, Wall, Warrior, Weird, Whale, Wizard, Wolf, Wolverine, Wombat, Worm, Wraith, Wurm, Yeti, Zombie, and Zubera.
 
     m. Planes have their own unique set of subtypes; these subtypes are called planar types. The planar types are Alara, Arkhos, Bolas's Meditation Realm, Dominaria, Equilor, Iquatana, Ir, Kaldheim, Kamigawa, Karsus, Kinshala, Lorwyn, Luvion, Mercadia, Mirrodin, Moag, Muraganda, Phyrexia, Pyrulea, Rabiah, Rath, Ravnica, Segovia, Serra's Realm, Shadowmoor, Shandalar, Ulgrotha, Valla, Wildfire, and Zendikar.
     n. Neither vanguard cards nor scheme cards have subtypes.
@@ -230,7 +234,7 @@ Supertypes
 
             An ability reads, "All lands are 1/1 creatures that are still lands." If any of the affected lands were legendary, they are still legendary.
 
-    c. Any land with the supertype "basic" is a basic land. Any land that doesn't have this supertype is a nonbasic land, even if it has a basic land type.  Cards printed in sets prior to the *Eighth Edition* core set didn't use the word "basic" to indicate a basic land. Cards from those sets with the following names are basic lands and have received errata in the Oracle card :ref:erence accordingly: Forest, Island, Mountain, Plains, Swamp, Snow-Covered Forest, Snow-Covered Island, Snow-Covered Mountain, Snow-Covered Plains, and Snow-Covered Swamp.
+    c. Any land with the supertype "basic" is a basic land. Any land that doesn't have this supertype is a nonbasic land, even if it has a basic land type.  Cards printed in sets prior to the *Eighth Edition* core set didn't use the word "basic" to indicate a basic land. Cards from those sets with the following names are basic lands and have received errata in the Oracle card reference accordingly: Forest, Island, Mountain, Plains, Swamp, Snow-Covered Forest, Snow-Covered Island, Snow-Covered Mountain, Snow-Covered Plains, and Snow-Covered Swamp.
     d. Any permanent with the supertype "legendary" is subject to the state-based action for legendary permanents, also called the "legend rule" (see rule 704.5k).
     e. Any permanent with the supertype "world" is subject to the state-based action for world permanents, also called the "world rule" (see rule 704.5m).
     f. Any permanent with the supertype "snow" is a snow permanent. Any permanent that doesn't have this supertype is a nonsnow permanent, regardless of its name.

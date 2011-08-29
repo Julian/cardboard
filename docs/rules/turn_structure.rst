@@ -214,8 +214,8 @@ A creature attacks alone if it's the only creature declared as an attacker durin
 
 Some spells state that they may be cast "only [before/after] [a particular point in the combat phase]," in which that point may be "attackers are declared," "blockers are declared," "the combat damage step," "the end of combat step," "the combat phase," or "combat."
 
-    a. A spell that states it may be cast "only before (or after) attackers are declared" is :ref:erring to the turn-based action of declaring attackers. It may be cast only before (or after) the declare attackers step begins, regardless of whether any attackers are actually declared. (See rule 508.)
-    b. A spell that states it may be cast "only before (or after) blockers are declared" is :ref:erring to the turn-based action of declaring blockers. It may be cast only before (or after) the declare blockers step begins, regardless of whether any blockers are actually declared. (See rule 509.)
+    a. A spell that states it may be cast "only before (or after) attackers are declared" is referring to the turn-based action of declaring attackers. It may be cast only before (or after) the declare attackers step begins, regardless of whether any attackers are actually declared. (See rule 508.)
+    b. A spell that states it may be cast "only before (or after) blockers are declared" is referring to the turn-based action of declaring blockers. It may be cast only before (or after) the declare blockers step begins, regardless of whether any blockers are actually declared. (See rule 509.)
     c. Some spells state that they may be cast only "during combat" or "during a certain player's combat phase" in addition to the criteria described in rule 506.6. If a turn has multiple combat phases, such spells may be cast at an appropriate time during any of them.
     d. Some spells state that they may be cast "only before (or after) [a particular point in the combat phase]," but don't meet the additional criteria described in rule 506.6\ c. If a turn has multiple combat phases, such spells may be cast that turn only before (or after) the stated point of the first combat phase.
     e. If a spell states that it may be cast "only before [a particular point in the combat phase]," but the stated point doesn't exist within the relevant combat phase because the declare blockers step and the combat damage step are skipped (see rule 508.6), then the spell may be cast only before the declare attackers step ends. If the stated point doesn't exist because the relevant combat phase has been skipped, then the spell may be cast only before the precombat main phase ends.
@@ -301,9 +301,9 @@ If a creature is put onto the battlefield attacking, its controller chooses whic
 508.5
 -----
 
-If an ability of an attacking creature :ref:ers to a defending player, or a spell or ability refers to both an attacking creature and a defending player, then unless otherwise specified, the defending player it's referring to is the player that creature was attacking at the time it became an attacking creature that combat, or the controller of the planeswalker that creature was attacking at the time it became an attacking creature that combat.
+If an ability of an attacking creature refers to a defending player, or a spell or ability refers to both an attacking creature and a defending player, then unless otherwise specified, the defending player it's referring to is the player that creature was attacking at the time it became an attacking creature that combat, or the controller of the planeswalker that creature was attacking at the time it became an attacking creature that combat.
 
-    a. In a multiplayer game, any rule, object, or effect that :ref:ers to a "defending player" refers to one specific defending player, not to all of the defending players. If a spell or ability could apply to multiple attacking creatures, the appropriate defending player is individually determined for each of those attacking creatures. If there are multiple defending players that could be chosen, the controller of the spell or ability chooses one.
+    a. In a multiplayer game, any rule, object, or effect that refers to a "defending player" refers to one specific defending player, not to all of the defending players. If a spell or ability could apply to multiple attacking creatures, the appropriate defending player is individually determined for each of those attacking creatures. If there are multiple defending players that could be chosen, the controller of the spell or ability chooses one.
 
 508.6
 -----
@@ -491,7 +491,7 @@ End Step
 
 First, all abilities that trigger "at the beginning of the end step" or "at the beginning of the next end step" go on the stack. (See rule 603, "Handling Triggered Abilities.")
 
-    a. Previously, abilities that trigger at the beginning of the end step were printed with the trigger condition "at end of turn." Cards that were printed with that text have received errata in the Oracle card :ref:erence to say "at the beginning of the end step" or "at the beginning of the next end step."
+    a. Previously, abilities that trigger at the beginning of the end step were printed with the trigger condition "at end of turn." Cards that were printed with that text have received errata in the Oracle card reference to say "at the beginning of the end step" or "at the beginning of the next end step."
 
 513.2
 -----

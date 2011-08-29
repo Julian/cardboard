@@ -1,5 +1,7 @@
 :tocdepth: 3
 
+.. _comprehensive-rules:
+
 ########################################
 Magic: The Gathering Comprehensive Rules
 ########################################

@@ -32,6 +32,8 @@ To play, each player needs his or her own deck of traditional *Magic* cards, sma
 
 Some casual variants require additional items, such as specially designated cards, nontraditional *Magic* cards, and dice. See section 9, :ref:`casual`.
 
+.. _sideboard:
+
 100.4
 -----
 
@@ -65,6 +67,8 @@ The Magic Golden Rules
 
 Whenever a card's text directly contradicts these rules, the card takes precedence. The card overrides only the rule that applies to that specific situation. The only exception is that a player can concede the game at any time (see rule 104.3a).
 
+.. _can-and-cant:
+
 101.2
 -----
 
@@ -75,6 +79,8 @@ When a rule or effect allows or directs something to happen, and another effect 
         If one effect reads "You may play an additional land this turn" and another reads "You can't play land cards this turn," the effect that precludes you from playing lands wins.
 
     a. Adding abilities to objects and removing abilities from objects don't fall under this rule. (See rule 112.10.)
+
+.. _impossible:
 
 101.3
 -----
@@ -122,12 +128,16 @@ In a multiplayer game between teams, a player's teammates are the other players 
 Starting the Game
 =================
 
+.. _shuffles:
+
 103.1
 -----
 
 At the start of a game, each player shuffles his or her deck so that the cards are in a random order. Each player may then shuffle or cut his or her opponents' decks. The players' decks become their libraries.
 
     a. In a Commander game, each player puts his or her commander from his or her deck face up into the command zone before shuffling. See rule 903.6.
+
+.. _first-turn:
 
 103.2
 -----
@@ -136,6 +146,8 @@ After the decks have been shuffled, the players determine which one of them will
 
     a. In a game using the shared team turns option, there is a starting team rather than a starting player.
     b. In an Archenemy game, these methods aren't used to determine who takes the first turn. Rather, the archenemy takes the first turn.
+
+.. _life-and-draw:
 
 103.3
 -----
@@ -158,6 +170,8 @@ A player who is dissatisfied with his or her initial hand may take a mulligan. F
     b. In a multiplayer game, the first time a player takes a mulligan, he or she draws a new hand of as many cards as he or she had before. Subsequent hands decrease by one card as normal.
     c. In a multiplayer game using the shared team turns option, first each player on the starting team declares whether or not he or she will take a mulligan, then the players on each other team in turn order do the same.  Teammates may consult while making their decisions. Then all mulligans are taken at the same time. A player may take a mulligan even after his or her teammate has decided to keep his or her opening hand.
     d. The Commander casual variant uses an alternate mulligan rule. Each time a player takes a mulligan, rather than shuffling his or her entire hand of cards into his or her library, that player exiles any number of cards from his or her hand. Then the player draws a number of cards equal to one less than the number of cards he or she exiled this way. Once a player keeps an opening hand, that player shuffles all cards he or she exiled this way into his or her library.
+
+.. _opening-hand-actions:
 
 103.5
 -----
@@ -182,7 +196,13 @@ In a Planechase game, the starting player moves the top card of his or her plana
 
 The starting player takes his or her first turn.
 
-    a. In a two-player game, the player who plays first skips the draw step (see rule 504, "Draw Step") of his or her first turn.
+    .. _skip-draw-step:
+
+    a. In a two-player game, the player who plays first skips the draw step of his or her first turn.
+
+        .. seealso::
+            :ref:`draw-step`
+
     b. In a Two-Headed Giant game, the team who plays first skips the draw step of their first turn.
     c. In all other multiplayer games, no player skips the draw step of his or her first turn.
 
@@ -201,10 +221,15 @@ A game ends immediately when a player wins, when the game is a draw, or when the
 
 There are several ways to win the game.
 
+    .. _last-man-standing:
+
     a. A player still in the game wins the game if all of that player's opponents have left the game. This happens immediately and overrides all effects that would prevent that player from winning the game.
     b. An effect may state that a player wins the game. (In multiplayer games, this may not cause the game to end; see rule 104.3h.)
     c. In a multiplayer game between teams, a team with at least one player still in the game wins the game if all other teams have left the game. Each player on the winning team wins the game, even if one or more of those players had previously lost that game.
     d. In an Emperor game, a team wins the game if its emperor wins the game.  (See rule 809.5.)
+
+
+.. _losing:
 
 104.3
 -----
@@ -212,15 +237,38 @@ There are several ways to win the game.
 There are several ways to lose the game.
 
     a. A player can concede the game at any time. A player who concedes leaves the game immediately. He or she loses the game.
-    b. If a player's life total is 0 or less, he or she loses the game the next time a player would receive priority. (This is a state-based action. See rule 704, "State-Based Actions.")
-    c. If a player is required to draw more cards than are left in his or her library, he or she draws the remaining cards, and then loses the game the next time a player would receive priority. (This is a state-based action. See rule 704, "State-Based Actions.")
-    d. If a player has ten or more poison counters, he or she loses the game the next time a player would receive priority. (This is a state-based action.  See rule 704, "State-Based Actions.")
+    b. If a player's life total is 0 or less, he or she loses the game the next time a player would receive priority. This is a state-based action.
+
+        .. seealso::
+            :ref:`state-based-action`
+
+    c. If a player is required to draw more cards than are left in his or her library, he or she draws the remaining cards, and then loses the game the next time a player would receive priority. This is a state-based action.
+
+        .. seealso::
+            :ref:`state-based-action`
+
+    d. If a player has ten or more poison counters, he or she loses the game the next time a player would receive priority. This is a state-based action.
+
+        .. seealso::
+            :ref:`state-based-action`
+
     e. An effect may state that a player loses the game.
     f. If a player would both win and lose the game simultaneously, he or she loses the game.
     g. In a multiplayer game between teams, a team loses the game if all players on that team have lost the game.
-    h. In a multiplayer game, an effect that states that a player wins the game instead causes all of that player's opponents to lose the game. (This may not cause the game to end if the limited range of influence option is being used; see rule 801, "Limited Range of Influence Option.")
+    h. In a multiplayer game, an effect that states that a player wins the game instead causes all of that player's opponents to lose the game. (This may not cause the game to end if the limited range of influence option is being used.)
+
+        .. seealso::
+            :ref:`lroi`
+
     i. In an Emperor game, a team loses the game if its emperor loses the game.  (See rule 809.5.)
-    j. In a Commander game, a player that's been dealt 21 or more combat damage by the same commander over the course of the game loses the game. (This is a state-based action. See rule 704, "State-Based Actions". Also see rule 903.14.)
+    j. In a Commander game, a player that's been dealt 21 or more combat damage by the same commander over the course of the game loses the game. This is a state-based action.
+
+        .. seealso::
+
+            :ref:`state-based-action`
+
+            :ref:`Rule 903.14 <winning-commander>`
+
     k. In a tournament, a player may lose the game as a result of a penalty given by a judge. See rule 100.6.
 
 104.4
@@ -590,8 +638,16 @@ Some effects put tokens onto the battlefield. A token is a marker used to repres
     c. A spell or ability that creates a creature token sets both its name and its creature type. If the spell or ability doesn't specify the name of the creature token, its name is the same as its creature type(s). A "Goblin Scout creature token," for example, is named "Goblin Scout" and has the creature subtypes Goblin and Scout. Once a token is on the battlefield, changing its name doesn't change its creature type, and vice versa.
     d. If a spell or ability would create a token, but an effect states that a permanent with one or more of that token's characteristics can't enter the battlefield, the token is not created.
     e. A token is subject to anything that affects permanents in general or that affects the token's card type or subtype. A token isn't a card (even if represented by a card that has a *Magic* back or that came from a *Magic* booster pack).
-    f. A token that's phased out, or that's in a zone other than the battlefield, ceases to exist. This is a state-based action; see rule 704, "State-Based Actions." (Note that if a token changes zones, applicable triggered abilities will trigger before the token ceases to exist.)
-    g. A token that has left the battlefield can't come back onto the battlefield. If such a token would return to the battlefield, it remains in its current zone instead. It ceases to exist the next time state-based actions are checked; see rule 704, "State-Based Actions."
+    f. A token that's phased out, or that's in a zone other than the battlefield, ceases to exist. This is a state-based action. (Note that if a token changes zones, applicable triggered abilities will trigger before the token ceases to exist.)
+
+        .. seealso::
+            :ref:`state-based-action`
+
+    g. A token that has left the battlefield can't come back onto the battlefield. If such a token would return to the battlefield, it remains in its current zone instead. It ceases to exist the next time state-based actions are checked.
+
+        .. seealso::
+            :ref:`state-based-action`
+
 
 110.6
 -----
@@ -856,7 +912,13 @@ Special Actions
 115.1
 -----
 
-Special actions are actions a player may take when he or she has priority that don't use the stack. These are not to be confused with turn-based actions and state-based actions, which the game generates automatically. (See rule 703, "Turn-Based Actions," and rule 704, "State-Based Actions.")
+Special actions are actions a player may take when he or she has priority that don't use the stack. These are not to be confused with turn-based actions and state-based actions, which the game generates automatically.
+
+.. seealso::
+
+    :ref:`turn-based-action`
+
+    :ref:`state-based-action`
 
 115.2
 -----
@@ -901,7 +963,11 @@ Other kinds of abilities and actions are automatically generated or performed by
     a. Triggered abilities can trigger at any time, including while a spell is being cast, an ability is being activated, or a spell or ability is resolving.  (See rule 603, "Handling Triggered Abilities.") However, nothing actually happens at the time an ability triggers. Each time a player would receive priority, each ability that has triggered but hasn't yet been put on the stack is put on the stack. See rule 116.5.
     b. Static abilities continuously affect the game. Priority doesn't apply to them. (See rule 604, "Handling Static Abilities," and rule 611, "Continuous Effects.")
     c. Turn-based actions happen automatically when certain steps or phases begin. They're dealt with before a player would receive priority. See rule 116.3a. Turn-based actions also happen automatically when each step and phase ends; no player receives priority afterward. See rule 703, "Turn-Based Actions."
-    d. State-based actions happen automatically when certain conditions are met. See rule 704, "State-Based Actions." They're dealt with before a player would receive priority.  See rule 116.5.
+    d. State-based actions happen automatically when certain conditions are met. They're dealt with before a player would receive priority.  See rule 116.5.
+
+        .. seealso::
+            :ref:`state-based-action`
+
     e. Resolving spells and abilities may instruct players to make choices or take actions, or may allow players to activate mana abilities. Even if a player is doing so, no player has priority while a spell or ability is resolving. See rule 608, "Resolving Spells and Abilities."
 
 116.3
@@ -1080,7 +1146,10 @@ If an effect sets a player's life total to a specific number, the player gains o
 118.6
 -----
 
-If a player has 0 or less life, that player loses the game as a state-based action. See rule 704, "State-Based Actions."
+If a player has 0 or less life, that player loses the game as a state-based action.
+
+.. seealso::
+    :ref:`state-based-action`
 
 118.7
 -----
@@ -1153,7 +1222,10 @@ Damage is processed in a three-part sequence.
 119.5
 -----
 
-Damage dealt to a creature or planeswalker doesn't destroy it. Likewise, the source of that damage doesn't destroy it. Rather, state-based actions may destroy a creature or planeswalker, or otherwise put it into its owner's graveyard, due to the results of the damage dealt to that permanent. See rule 704, "State-Based Actions."
+Damage dealt to a creature or planeswalker doesn't destroy it. Likewise, the source of that damage doesn't destroy it. Rather, state-based actions may destroy a creature or planeswalker, or otherwise put it into its owner's graveyard, due to the results of the damage dealt to that permanent.
+
+.. seealso::
+    :ref:`state-based-action`
 
 .. admonition:: Example
 
@@ -1162,7 +1234,10 @@ Damage dealt to a creature or planeswalker doesn't destroy it. Likewise, the sou
 119.6
 -----
 
-Damage marked on a creature remains until the cleanup step, even if that permanent stops being a creature. If the total damage marked on a creature is greater than or equal to its toughness, that creature has been dealt lethal damage and is destroyed as a state-based action (see rule 704, "State-Based Actions"). All damage marked on a permanent is removed when it regenerates (see rule 701.11, "Regenerate") and during the cleanup step (see rule 514.2).
+Damage marked on a creature remains until the cleanup step, even if that permanent stops being a creature. If the total damage marked on a creature is greater than or equal to its toughness, that creature has been dealt lethal damage and is destroyed as a state-based action. All damage marked on a permanent is removed when it regenerates (see rule 701.11, "Regenerate") and during the cleanup step (see rule 514.2).
+
+.. seealso::
+    :ref:`state-based-action`
 
 119.7
 -----
@@ -1202,7 +1277,10 @@ If there are no cards in a player's library and an effect offers that player the
 120.4
 -----
 
-A player who attempts to draw a card from a library with no cards in it loses the game the next time a player would receive priority. (This is a state-based action. See rule 704, "State-Based Actions.")
+A player who attempts to draw a card from a library with no cards in it loses the game the next time a player would receive priority. This is a state-based action.
+
+.. seealso::
+    :ref:`state-based-action`
 
 120.5
 -----
@@ -1234,8 +1312,18 @@ Counters
 A counter is a marker placed on an object or player that modifies its characteristics and/or interacts with a rule, ability, or effect. Counters are not objects and have no characteristics. Notably, a counter is not a token, and a token is not a counter. Counters with the same name or description are interchangeable.
 
     a. A +X/+Y counter on a creature or on a creature card in a zone other than the battlefield, where X and Y are numbers, adds X to that object's power and Y to that object's toughness. Similarly, -X/-Y counters subtract from power and toughness. See rule 613.3.
-    b. The number of loyalty counters on a planeswalker on the battlefield indicates how much loyalty it has. A planeswalker with 0 loyalty is put into its owner's graveyard as a state-based action. See rule 704, "State-Based Actions."
-    c. If a player has ten or more poison counters, he or she loses the game as a state-based action. See rule 704, "State-Based Actions." A player is "poisoned" if he or she has one or more poison counters. (See rule 810 for additional rules for Two-Headed Giant games.)
+    b. The number of loyalty counters on a planeswalker on the battlefield indicates how much loyalty it has. A planeswalker with 0 loyalty is put into its owner's graveyard as a state-based action.
+
+        .. seealso::
+            :ref:`state-based-action`
+
+    c. If a player has ten or more poison counters, he or she loses the game as a state-based action. A player is "poisoned" if he or she has one or more poison counters.
+
+        .. seealso::
+
+            :ref:`state-based-action`
+
+            :ref:`thg`
 
 121.2
 -----
@@ -1245,12 +1333,18 @@ Counters on an object are not retained if that object moves from one zone to ano
 121.3
 -----
 
-If a permanent has both a +1/+1 counter and a -1/-1 counter on it, N +1/+1 and N -1/-1 counters are removed from it as a state-based action, where N is the smaller of the number of +1/+1 and -1/-1 counters on it. See rule 704, "State-Based Actions."
+If a permanent has both a +1/+1 counter and a -1/-1 counter on it, N +1/+1 and N -1/-1 counters are removed from it as a state-based action, where N is the smaller of the number of +1/+1 and -1/-1 counters on it.
+
+.. seealso::
+    :ref:`state-based-action`
 
 121.4
 -----
 
-If a permanent with an ability that says it can't have more than N counters of a certain kind on it has more than N counters of that kind on it, all but N of those counters are removed from it as a state-based action. See rule 704, "State-Based Actions."
+If a permanent with an ability that says it can't have more than N counters of a certain kind on it has more than N counters of that kind on it, all but N of those counters are removed from it as a state-based action.
+
+.. seealso::
+    :ref:`state-based-action`
 
 121.5
 -----

@@ -1256,10 +1256,13 @@ State-based actions are game actions that happen automatically whenever certain 
 
 State-based actions are checked throughout the game and are not controlled by any player.
 
+
+.. _grant-priority:
+
 704.3
 -----
 
-Whenever a player would get priority (see rule 116, "Timing and Priority"), the game checks for any of the listed conditions for state-based actions, then performs all applicable state-based actions simultaneously as a single event. If any state-based actions are performed as a result of a check, the check is repeated; otherwise all triggered abilities that are waiting to be put on the stack are put on the stack, then the check is repeated. Once no more state-based actions have been performed as the result of a check and no triggered abilities are waiting to be put on the stack, the appropriate player gets priority. This process also occurs during the cleanup step (see rule 514), except that if no state-based actions are performed as the result of the step's first check and no triggered abilities are waiting to be put on the stack, then no player gets priority and the step ends.
+Whenever a player would get priority (see :ref:`timing`"), the game checks for any of the listed conditions for state-based actions, then performs all applicable state-based actions simultaneously as a single event. If any state-based actions are performed as a result of a check, the check is repeated; otherwise all triggered abilities that are waiting to be put on the stack are put on the stack, then the check is repeated. Once no more state-based actions have been performed as the result of a check and no triggered abilities are waiting to be put on the stack, the appropriate player gets priority. This process also occurs during the cleanup step (see rule 514), except that if no state-based actions are performed as the result of the step's first check and no triggered abilities are waiting to be put on the stack, then no player gets priority and the step ends.
 
 704.4
 -----
@@ -1269,6 +1272,8 @@ Unlike triggered abilities, state-based actions pay no attention to what happens
 .. admonition:: Example
 
     A player controls a creature with the ability "This creature's power and toughness are each equal to the number of cards in your hand" and casts a spell whose effect is "Discard your hand, then draw seven cards." The creature will temporarily have toughness 0 in the middle of the spell's resolution but will be back up to toughness 7 when the spell finishes resolving. Thus the creature will survive when state-based actions are checked. In contrast, an ability that triggers when the player has no cards in hand goes on the stack after the spell resolves, because its trigger event happened during resolution.
+
+.. _sba-list:
 
 704.5
 -----
