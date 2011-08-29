@@ -2,7 +2,8 @@ import unittest
 
 import mock
 
-from cardboard import models as m, exceptions as exc
+from cardboard import exceptions as exc
+from cardboard.db import models as m
 
 
 class TestAbility(unittest.TestCase):
@@ -27,7 +28,7 @@ class TestCard(unittest.TestCase):
 
         self.assertEqual(c.name, "Card")
         self.assertEqual(c.type, "Creature",)
-        self.assertEqual(c.casting_cost, "UUWB")
+        self.assertEqual(c.mana_cost, "UUWB")
         self.assertEqual(c.abilities, ["Does stuff."])
         self.assertEqual(c.subtypes, ["Test"])
 
@@ -45,6 +46,9 @@ class TestDeck(unittest.TestCase):
         d = m.Deck("Test", [c])
         self.assertEqual(d.name, "Test")
         self.assertEqual(d.cards, [c])
+
+    def test_load(self):
+        pass
 
 
 class TestDeckAppearance(unittest.TestCase):
