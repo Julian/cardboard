@@ -3,22 +3,24 @@ Cardboard core
 
 """
 
-from operator import attrgetter, methodcaller
+from collections import deque
 import itertools
+import random
 
 from cardboard import exceptions
 from cardboard.events import events
-from cardboard.util.game import check_started
-from cardboard.zones import zone
+from cardboard.frontend.none import NoFrontend
+from cardboard.phases import phases
+from cardboard.util import check_started
+from cardboard.zone import zone
 
 
-__all__ = ["Game", "ManaPool", "Player"]
+__all__ = ["Game", "ManaPool", "Player", "TurnManager", "do_subscriptions"]
 
 
 def _make_color(name):
 
     _color = "_" + name
-    negative_error = "{} mana pool would be negative.".format(name.title())
     color_events = events["player"]["mana"][name]
 
     @property
@@ -27,24 +29,19 @@ def _make_color(name):
 
     @color.setter
     def color(self, amount):
-        """
-        Set the number of mana in the {color} mana pool.
-
-        """.format(color=name)
-
         current = getattr(self, name)
 
         if amount < 0:
-            raise ValueError(negative_error)
+            err = "{} mana pool cannot be negative."
+            raise ValueError(err.format(name.title()))
         elif amount == current:
             return
+        elif amount > current:
+            self.owner.game.events.trigger(event=color_events["added"])
+        elif amount < current:
+            self.owner.game.events.trigger(event=color_events["removed"])
 
-        setattr(self, "_" + name, amount)
-
-        if amount > current:
-            self.game.events.trigger(event=color_events["added"])
-        else:
-            self.game.events.trigger(event=color_events["removed"])
+        setattr(self, _color, amount)
 
     return color
 
@@ -55,29 +52,59 @@ class ManaPool(object):
 
     """
 
-    COLORS = ("black", "green", "red", "blue", "white", "colorless")
+    COLORS = ("white", "blue", "black", "red", "green", "colorless")
 
-    black = _make_color("black")
-    green = _make_color("green")
-    red = _make_color("red")
-    blue = _make_color("blue")
+    _white = _blue = _black = _red = _green = _colorless = 0
+
     white = _make_color("white")
+    blue = _make_color("blue")
+    black = _make_color("black")
+    red = _make_color("red")
+    green = _make_color("green")
     colorless = _make_color("colorless")
 
     def __init__(self, owner):
         super(ManaPool, self).__init__()
         self.owner = owner
 
-        for color in self.COLORS:
-            setattr(self, "_" + color, 0)
+    def __iadd__(self, amount):
+        try:
+            if len(amount) != 6:
+                err = "Expected 6 values, got {}"
+                raise ValueError(err.format(len(amount)))
+        except TypeError:
+            return NotImplemented
+        else:
+            for color, new_amount in zip(self.COLORS, amount):
+                setattr(self, color, getattr(self, color) + new_amount)
+
+        return self
+
+    def __isub__(self, amount):
+        try:
+            self += [-i for i in amount]
+        except TypeError:
+            # this can still raise a TypeError on iterating
+            return NotImplemented
+        return self
+
+    def __iter__(self):
+        return iter(self.contents)
 
     def __repr__(self):
-        pool = (getattr(self, c) for c in self.COLORS)
-        return "[{}B, {}G, {}R, {}U, {}W, {}]".format(*pool)
+        return "({}W, {}U, {}B, {}R, {}G, {})".format(*self.contents)
 
     @property
-    def game(self):
-        return self.owner.game
+    def contents(self):
+        return tuple(getattr(self, color) for color in self.COLORS)
+
+    @property
+    def is_empty(self):
+        return self.contents == (0, 0, 0, 0, 0, 0)
+
+    def empty(self):
+        for color in self.COLORS:
+            setattr(self, color, 0)
 
 
 class Player(object):
@@ -86,32 +113,43 @@ class Player(object):
 
     """
 
-    def __init__(self, library, hand_size=7, life=20, name=""):
+    def __init__(self, game, library, name=""):
         super(Player, self).__init__()
 
+        self.game = game
+        self.frontend = NoFrontend(self)
         self.name = name
 
-        self.game = None  # set when a Game adds the player
+        self.death_by = None
 
-        self.dead = False
-        self.hand_size = hand_size
-        self._life = int(life)
-
-        self.exiled = zone("Exile")
-        self.graveyard = zone("Graveyard", ordered=True)
-        self.hand = zone("Hand")
-        self.library = zone("Library", library, ordered=True)
+        self.hand_size = 7
+        self._life = 20
+        self.poison = 0
 
         self.mana_pool = ManaPool(self)
 
-    def __repr__(self):
-        if self.game is None:
-            number = "(not yet in game)"
-        else:
-            number = self.game.players.index(self) + 1
+        self.exile = zone["exile"](game=self.game)
+        self.graveyard = zone["graveyard"](game=self.game)
+        self.hand = zone["hand"](game=self.game)
+        self.library = zone["library"](game=self.game, contents=library)
 
-        sep = ": " if self.name else ""
-        return "<Player {}{}{.name}>".format(number, sep, self)
+        for card in self.library:
+            card.game = self.game
+            card.controller = card.owner = self
+            card.zone = self.library
+
+        self._drew_from_empty_library = False
+
+    def __repr__(self):
+        return "<Player{}>".format(self.name and ": " + self.name)
+
+    @property
+    def battlefield(self):
+        return {c for c in self.game.battlefield if card.controller == self}
+
+    @property
+    def dead(self):
+        return self.death_by is not None
 
     @property
     def life(self):
@@ -126,39 +164,49 @@ class Player(object):
 
         if amount == self.life:
             return
-
-        if amount > self.life:
+        elif amount > self.life:
             self.game.events.trigger(event=events["player"]["life"]["gained"])
         else:
             self.game.events.trigger(event=events["player"]["life"]["lost"])
 
         self._life = amount
 
-        if self.life <= 0:
-            self.die()
+    @property
+    def opponents(self):
+        # FIXME
+        return {player for player in self.game.players if player != self}
 
-    def die(self, reason="life"):
+    def concede(self):
+        self.game.events.trigger(event=events["player"]["conceded"])
+        self.die(reason="concede")
+
+    def die(self, reason):
         """
         End the player's sorrowful life.
 
         Arguments:
 
-            * reason (default="life")
-                * one of: "life", "library", "poison", <a card>
+            * reason
+                * concede
+                * life: life total was <= 0
+                * library: drew from an empty library
+                * poison: 10 or more poison counters
+                * <an effect>
+
+                .. seealso::
+                    :ref:`losing`
 
         """
 
-        # FIXME: Make card valid, maybe by a check if reason is on the stack
-        if reason not in {"life", "library", "poison"}:
-            raise ValueError("You can't die from '{}'.".format(reason))
+        if self.dead:
+            raise exceptions.InvalidAction("{} is already dead.".format(self))
 
-        self.dead = True
+        self.death_by = reason
         self.game.events.trigger(event=events["player"]["died"])
 
     def draw(self, cards=1):
         """
         Draw cards from the library.
-
 
         """
 
@@ -167,19 +215,14 @@ class Player(object):
         if cards == 0:
             return
         elif cards < 0:
-            raise ValueError("Can't draw a negative number of cards.")
+            raise ValueError("Cannot draw a negative number of cards.")
         elif cards > len(self.library):
-            self.die(reason="library")
-            return
-        elif cards > 1:
-            # do draw 1 multiple times so that each draw triggers a draw event
+            self._drew_from_empty_library = True
+            return self.draw(len(self.library))
+        else:
             for i in range(cards):
-                self.draw()
-            return
-
-        # FIXME
-        self.library[-1].zone = "hand"
-        self.game.events.trigger(event=events["player"]["draw"])
+                self.hand.add(self.library.pop())
+                self.game.events.trigger(event=events["player"]["draw"])
 
 
 class Game(object):
@@ -187,12 +230,6 @@ class Game(object):
     The Game object maintains information about the current game state.
 
     """
-
-    _subscriptions = {
-
-        "end_if_dead" : {"event" : events["player"]["died"]},
-
-    }
 
     def __init__(self, handler):
         """
@@ -204,93 +241,24 @@ class Game(object):
 
         self.events = handler
 
-        for method, subscription_opts in self._subscriptions.iteritems():
-            self.events.subscribe(getattr(self, method), **subscription_opts)
-
-        self._phases = itertools.cycle(p.name for p in events["game"]["phases"])
-        self._subphases = iter([])  # Default value for first advance
-
-        self._phase = None
-        self._subphase = None
-        self._turn = None
-
         self.ended = None
 
-        self.field = set()
-        self.tapped = set()
-        self.players = []
+        self.battlefield = zone["battlefield"](game=self)
+        self.stack = zone["stack"](game=self)
+
+        self.players = set()
+        self.turn = TurnManager(self)
 
     def __repr__(self):
         return "<{} Player Game>".format(len(self.players))
 
     @property
-    def phase(self):
-        if self._phase is not None:
-            return self._phase.name
-
-    @phase.setter
-    @check_started
-    def phase(self, new):
-        """
-        Set the current turn's phase.
-
-        """
-
-        phase = events["game"]["phases"].get(new)
-
-        if phase is None:
-            raise ValueError("No phase named {}".format(new))
-
-        while next(self._phases) != phase.name:
-            pass
-
-        self._phase = phase
-
-        self.events.trigger(event=phase)
-
-        self._subphases = iter(s.name for s in phase)
-        self.subphase = next(self._subphases, None)
+    def frontends(self):
+        return {player : player.frontend for player in self.players}
 
     @property
-    def subphase(self):
-        if self._subphase is not None:
-            return self._subphase.name
-
-    @subphase.setter
-    @check_started
-    def subphase(self, new):
-        """
-        Set the current subphase.
-
-        """
-
-        if new is None:
-            self._subphase = None
-            return
-
-        subphase = self._phase[new]
-        self._subphase = subphase
-        self.events.trigger(event=subphase)
-
-    @property
-    def turn(self):
-        return self._turn
-
-    @turn.setter
-    @check_started
-    def turn(self, player):
-        """
-        Set the current turn to a given player.
-
-        """
-
-        if player not in self.players:
-            raise ValueError("{} has no player '{}'".format(self, player))
-
-        self._turn = player
-        self.events.trigger(event=events["game"]["turn"]["changed"])
-
-        self.phase = "beginning"
+    def started(self):
+        return self.ended is not None
 
     def add_player(self, **kwargs):
         """
@@ -298,7 +266,7 @@ class Game(object):
 
         """
 
-        player = Player(**kwargs)
+        player = Player(game=self, **kwargs)
         self.add_existing_player(player)
         return player
 
@@ -308,36 +276,24 @@ class Game(object):
 
         """
 
-        player.game = self
-        self.players.append(player)
+        if self.started:
+            raise exceptions.InvalidAction("Cannot add a new player, {} has "
+                                           "already started.".format(self))
 
-    def next_phase(self):
+        self.players.add(player)
+
+    def _start(self):
         """
-        Advance a turn to the next phase.
-
-        """
-
-        if self.phase == "ending" and self.subphase == "cleanup":
-            self.next_turn()
-            return
-
-        try:
-            self.subphase = next(self._subphases)
-        except StopIteration:
-            self.phase = next(self._phases)
-
-    @check_started
-    def next_turn(self):
-        """
-        Advance the game to the next player's turn.
+        Perform the internal steps necessary to get the game ready to start.
 
         """
 
-        self.turn = next(self._turns)
+        if not self.players:
+            raise exceptions.InvalidAction("Starting the game requires at "
+                                           "least one player.")
 
-    @property
-    def started(self):
-        return self.ended is not None
+        self.ended = False
+        self.turn._start()  # Tell the turn manager that the game is starting.
 
     def start(self):
         """
@@ -345,22 +301,14 @@ class Game(object):
 
         """
 
-        if not self.players:
-            raise exceptions.RuntimeError("Starting the game requires at least"
-                                          " one player.")
-
         self.events.trigger(event=events["game"]["started"])
-
-        self._turns = itertools.cycle(self.players)
-        self.ended = False
+        self._start()
 
         for player in self.players:
+            player.library.shuffle()
             player.draw(player.hand_size)
 
-        self.next_turn()
-
-    # @subscribed to: events["player"]["died"]
-    def end_if_dead(self, pangler=None, pool=None):
+    def end_if_dead(self, pangler=None):
         """
         End the game if there is only one living player left.
 
@@ -378,3 +326,140 @@ class Game(object):
         self.ended = True
         # TODO: Stop all other events
         self.events.trigger(event=events["game"]["ended"])
+
+    def grant_priority(self, to=None):
+        """
+        Grant priority to a player.
+
+        .. seealso::
+            :ref:`grant-priority`
+
+        """
+
+        if to is None:
+            to = self.turn.active_player
+
+        self._check_state_based_actions()
+        # TODO: Put triggered abilities on the stack
+        to.frontend.priority_granted()
+
+    def _check_state_based_actions(self):
+        """
+        Check for state based actions.
+
+        .. seealso::
+            :ref:`sba-list`
+
+        """
+
+        for player in self.players:
+            if player.life <= 0:
+                player.die(reason="life")
+            elif player._drew_from_empty_library:
+                player.die(reason="library")
+            elif player.poison >= 10:
+                player.die(reason="poison")
+
+        # TODO: if any spells are anywhere but the stack: cease to exist
+        #       if any cards are anywhere but battlefield or stack: ""
+        #       :ref:`planeswalker-uniqueness-rule`
+        #       :ref:`legend-rule`
+        #       :ref:`world-rule`
+        #       The rest of them in :ref:`sba-list`
+        #
+        #       As per :ref:`sba-replacement` and the rest of the section,
+        #           these should not be iterative, and should check replacement
+
+        for card in self.battlefield:
+
+            if card.type == "Creature":
+                if card.toughness <= 0:
+                    card.owner.graveyard.move(card)
+                elif card.damage >= card.toughness or card._deathtouch_damage:
+                    # TODO: Regenerate
+                    card.owner.graveyard.move(card)
+
+            elif card.type == "Planeswalker":
+                if not card.loyalty:
+                    card.owner.graveyard.move(card)
+            elif card.type == "Aura":
+                if not card.attached_to:
+                    card.owner.graveyard.move(card)
+
+
+class TurnManager(object):
+    def __init__(self, game):
+        super(TurnManager, self).__init__()
+
+        self.game = game
+
+        self.order = None
+
+        self._phases = deque(phases)
+        self._steps = iter(self._phases[0])
+        self._step = next(self._steps)
+
+    @property
+    def active_player(self):
+        if self.game.started:
+            return self.order[0]
+
+    @property
+    def phase(self):
+        if self.game.started:
+            return self._phases[0]
+
+    @property
+    def step(self):
+        if self.game.started:
+            return self._step
+
+    def _start(self):
+        self.order = deque(self.game.players)
+        random.shuffle(self.order)
+        self.step(self.game)
+
+    def next(self):
+        """
+        Advance a turn to the next phase or step.
+
+        """
+
+        check_started(self.game)
+
+        try:
+            next_step = next(self._steps)
+        except StopIteration:
+
+            event = events["game"]["turn"]["phase"][self.phase.name]["ended"]
+            self.game.events.trigger(event=event)
+
+            self._phases.rotate(-1)
+            self._steps = iter(self.phase)
+            self._step = next(self._steps)
+
+        else:
+            self._step = next_step
+        finally:
+            self.step(self.game)
+
+            for player in self.game.players:
+                player.mana_pool.empty()
+
+        # is it the last step of the last phase?
+        if self.phase == phases[0] and self.step == phases[0][0]:
+            self.end()
+
+    def end(self):
+        """
+        End the current turn and advance the game to the next player's turn.
+
+        """
+
+        check_started(self.game)
+
+        self.game.events.trigger(event=events["game"]["turn"]["ended"])
+        self.order.rotate(-1)
+        self.game.events.trigger(event=events["game"]["turn"]["started"])
+
+        # XXX: end from middle of a turn

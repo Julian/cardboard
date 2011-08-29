@@ -1,27 +1,53 @@
 from operator import attrgetter
 
-from cardboard import exceptions, models
+from cardboard import exceptions
+from cardboard.db import models, Session
 from cardboard.events import events
-from cardboard.db import Session
+from cardboard.util import check_started
+
+
+COLORS = {"B" : "black",
+          "G" : "green",
+          "R" : "red",
+          "U" : "blue",
+          "W" : "white"}
+
+PERMANENTS = {"Artifact", "Creature", "Enchantment", "Land", "Planeswalker"}
+NONPERMANENTS = {"Instant", "Sorcery"}
 
 
 class Card(object):
 
-    def __init__(self, db_card, controller):
+    def __init__(self, db_card):
         super(Card, self).__init__()
 
-        self.game = controller.game
+        self.game = None
+        self.controller = None
+        self.owner = None
+        self.zone = None
 
-        self.controller = controller
-        self.owner = controller
-        self._tapped = None
-        self._zone = self.controller.library
-
-        for attr in {"name", "type", "subtypes", "casting_cost", "abilities"}:
+        for attr in {"name", "type", "subtypes", "mana_cost", "abilities"}:
             setattr(self, attr, getattr(db_card, attr))
 
-        self.base_power = db_card.power
-        self.base_toughness = db_card.toughness
+        self.power = self.base_power = db_card.power
+        self.toughness = self.base_toughness = db_card.toughness
+        self.damage = 0
+
+        self._changed_colors = set()
+        self._tapped = None
+        self._face_up = None
+        self._flipped = None
+        self._phased_in = None
+
+    def __lt__(self, other):
+        """
+        Sort two cards alphabetically.
+
+        """
+
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.name < other.name
 
     def __str__(self):
         return self.name
@@ -29,72 +55,26 @@ class Card(object):
     def __repr__(self):
         return "<Card: {}>".format(self)
 
-    @property
-    def is_permanent(self):
-        return self.type.lower() not in {"sorcery", "instant"}
-
-    @property
-    def zone(self):
-        return self._zone
-
-    @zone.setter
-    def zone(self, to):
-        """
-        Move the card to a new zone.
-
-        Arguments
-        ---------
-
-            * to: valid zones are the battlefield, or the controller's exile,
-                  hand, graveyard or library
-
-        """
-
-        if to not in [self.game.battlefield, self.controller.hand,
-                      self.controller.exile, self.controller.graveyard,
-                      self.controller.library]:
-            raise ValueError("'{}' is not a valid zone".format(to))
-        elif to == self.zone:
-            return
-
-        self._zone.remove(self)
-
-        event = events["card"]["zones"][self._zone.name]["left"]
-        self.game.events.trigger(event=event)
-
-        self._zone = to
-
-        event = events["card"]["zones"][self._zone.name]["entered"]
-        self.game.events.trigger(event=event)
-
-        self._zone.add(self)
-
-        if to == self.game.battlefield:
-            self.tapped = False
-
     @classmethod
-    def load(cls, name, controller, session=None):
+    def load(cls, name, session=None):
         if session is None:
             session = Session()
 
         db_card = session.query(models.Card).filter_by(name=name).one()
-        return cls(db_card, controller)
+        return cls(db_card)
+
+    @property
+    def colors(self):
+        return (self._changed_colors or
+                {COLORS[i] for i in self.mana_cost if i.isalpha()})
+
+    @property
+    def is_permanent(self):
+        return self.type in PERMANENTS
 
     @property
     def tapped(self):
         return self._tapped
-
-    @tapped.setter
-    def tapped(self, t):
-        if self.zone != self.game.battlefield:
-            raise exceptions.RuntimeError("{} is not in play.".format(self))
-
-        self._tapped = bool(t)
-
-        if t:
-            self.game.events.trigger(event=events["card"]["tapped"])
-        else:
-            self.game.events.trigger(event=events["card"]["untapped"])
 
     def cast(self):
         """
@@ -102,9 +82,34 @@ class Card(object):
 
         """
 
+        check_started(self.game)
+
         if self.is_permanent:
-            self.zone = self.game.battlefield
+            self.game.battlefield.move(self)
         else:
-            self.zone = self.controller.graveyard
+            self.controller.graveyard.move(self)
 
         self.game.events.trigger(event=events["card"]["cast"])
+
+    def tap(self):
+        check_started(self.game)
+
+        if self.zone != self.game.battlefield:
+            raise exceptions.RuntimeError("{} is not in play.".format(self))
+        elif self._tapped:
+            raise exceptions.RuntimeError("{} is already tapped.".format(self))
+
+        self._tapped = True
+        self.game.events.trigger(event=events["card"]["tapped"])
+
+    def untap(self):
+        check_started(self.game)
+
+        if self.zone != self.game.battlefield:
+            raise exceptions.InvalidAction("{} is not in play.".format(self))
+        elif self._tapped is not None and not self._tapped:
+            err = "{} is already untapped.".format(self)
+            raise exceptions.InvalidAction(err)
+
+        self._tapped = False
+        self.game.events.trigger(event=events["card"]["untapped"])

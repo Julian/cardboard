@@ -2,183 +2,239 @@ import collections
 import random
 import unittest
 
-from cardboard import zones as z
+import mock
+
+from cardboard import card as c, zone as z
+from cardboard.events import events
+from cardboard.tests.util import GameTestCase
 
 
-class TestZone(unittest.TestCase):
-    def test_name(self):
-        n = z.Zone("Casino Night")
-        self.assertEqual(n.name, "Casino Night")
-
-    def test_ordered(self):
-        n = z.Zone("Casino Night")
-        self.assertFalse(n.ordered)
-
-    def test_repr(self):
-        n = z.Zone("Casino Night")
-        self.assertEqual(repr(n), "<Zone: Casino Night>")
-
-    def test_contains(self):
-        n = z.Zone("Casino Night", range(3))
-
-        for i in range(3):
-            self.assertIn(i, n)
-
-        self.assertNotIn(4, n)
-
-    def test_iter(self):
-        noise = [random.random() for _ in range(30)]
-        n = z.Zone("Casino Night", noise)
-        self.assertEqual(set(n), set(noise))
-
-    def test_len(self):
-        n = z.Zone("Casino Night", range(30))
-        self.assertEqual(len(n), 30)
-
-    def test_add(self):
-        n = z.Zone("Casino Night", range(30))
-        n.add(30)
-        self.assertEqual(set(n), set(range(31)))
-
-    def test_discard(self):
-        n = z.Zone("Casino Night", range(30))
-        n.discard(21)
-        n.discard(object())
-        self.assertEqual(len(n), 29)
-        self.assertEqual(n, set(n) - {21})
-
-
-class TestOrderedZone(unittest.TestCase):
+class ZoneTest(GameTestCase):
     def setUp(self):
-        self.noise = [random.random() for _ in range(30)]
+        super(ZoneTest, self).setUp()
+        self.card = mock.Mock(spec=c.Card)
+        self.noise = [mock.Mock(spec=c.Card) for _ in range(30)]
+        self.zone_events = {"entered" : object(), "left" : object()}
 
+        self.u = z.UnorderedZone(name="Emerald Hill",
+                                 game=self.game,
+                                 contents=self.noise,
+                                 _events=self.zone_events)
+
+        self.o = z.OrderedZone(name="Casino Night",
+                               game=self.game,
+                               contents=self.noise,
+                               _events=self.zone_events)
+
+
+class TestZones(ZoneTest):
     def test_name(self):
-        n = z.OrderedZone("Emerald Hill")
-        self.assertEqual(n.name, "Emerald Hill")
+        self.assertEqual(self.u.name, "Emerald Hill")
+        self.assertEqual(self.o.name, "Casino Night")
 
     def test_ordered(self):
-        n = z.OrderedZone("Emerald Hill")
-        self.assertTrue(n.ordered)
+        self.assertFalse(self.u.ordered)
+        self.assertTrue(self.o.ordered)
 
     def test_repr(self):
-        o = z.OrderedZone("Emerald Hill")
-        self.assertEqual(repr(o), "<OrderedZone: Emerald Hill>")
+        self.assertEqual(repr(self.u), "<Zone: Emerald Hill>")
+        self.assertEqual(repr(self.o), "<Zone: Casino Night>")
 
     def test_contains(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-
         for i in self.noise:
-            self.assertIn(i, o)
+            self.assertIn(i, self.u)
+            self.assertIn(i, self.o)
+
+        self.assertNotIn(object(), self.u)
+        self.assertNotIn(object(), self.o)
 
     def test_iter(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        self.assertEqual(list(o), self.noise)
-
-    def test_reversed(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        self.assertEqual(list(reversed(o)), list(reversed(self.noise)))
+        self.assertEqual(set(self.u), set(self.noise))
+        self.assertEqual(list(self.o), self.noise)
 
     def test_len(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        self.assertEqual(len(o), len(self.noise))
-
-    def test_getitem(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        for i, e in enumerate(self.noise):
-            self.assertEqual(o[i], e)
-
-        self.assertEqual(o[2:7:2], self.noise[2:7:2])
-
-    def test_set_del_item(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        self.assertRaises(AttributeError, getattr, o, "__setitem__")
-        self.assertRaises(AttributeError, getattr, o, "__delitem__")
+        self.assertEqual(len(self.u), len(self.noise))
+        self.assertEqual(len(self.o), len(self.noise))
 
     def test_add(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        o.add(42)
-        self.assertEqual(list(o), self.noise + [42])
+        self.u.add(30)
+        self.o.add(30)
 
-    def test_discard(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        e = self.noise[17]
-        o.discard(e)
-        o.discard(object())
-        self.assertEqual(len(o), len(self.noise) - 1)
-        self.assertEqual(set(o), set(self.noise) - {e})
+        self.assertEqual(set(self.u), set(self.noise) | {30})
+        self.assertEqual(list(self.o), self.noise + [30])
+
+        self.assertLastEventsWere([self.zone_events["entered"]])
 
     def test_clear(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        o.clear()
-        self.assertFalse(o)
+        self.u.clear()
+        self.o.clear()
+        self.assertFalse(self.u)
+        self.assertFalse(self.o)
 
-    def test_append(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        o.append(2)
-        self.assertEqual(o[-1], 2)
-        self.assertEqual(len(o), len(self.noise) + 1)
+    def test_discard(self):
+        e = self.noise[17]
+        self.noise.remove(e)
 
-    def test_extend(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        o.extend(range(4))
-        self.assertEqual(o[-4:], range(4))
-        self.assertEqual(len(o), len(self.noise) + 4)
+        self.u.discard(e)
+        self.u.discard(object())
+
+        self.o.discard(e)
+        self.o.discard(object())
+
+        self.assertEqual(len(self.u), len(self.noise))
+        self.assertEqual(len(self.o), len(self.noise))
+
+        self.assertEqual(set(self.u), set(self.noise))
+        self.assertEqual(list(self.o), self.noise)
+
+    def test_events_default(self):
+        u = z.UnorderedZone("Emerald Hill", self.noise)
+        o = z.OrderedZone("Casino Night", self.noise)
+
+        self.assertIs(u._events, events)
+        self.assertIs(o._events, events)
+
+    def test_move(self):
+        self.o.add(self.card)
+        self.card.zone = self.o
+
+        self.u.move(self.card)
+        self.assertIn(self.card, self.u)
+        self.assertEqual(self.card.zone, self.u)
+
+        self.o.move(self.card)
+        self.assertIn(self.card, self.o)
+        self.assertEqual(self.card.zone, self.o)
+
+    def test_pop(self):
+        e = self.u.pop()
+        self.o.pop()
+
+        self.assertEqual(set(self.u), set(self.noise) - {e})
+        self.assertEqual(list(self.o), self.noise[:-1])
 
     def test_remove(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
         e = self.noise[-7]
         self.noise.remove(e)
-        o.remove(e)
 
-        self.assertEqual(list(o), self.noise)
-        self.assertRaises(ValueError, o.remove, object())
+        self.u.remove(e)
+        self.o.remove(e)
 
-    def test_reverse(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        o.reverse()
-        self.assertEqual(list(o), list(reversed(self.noise)))
+        self.assertEqual(set(self.u), set(self.noise))
+        self.assertEqual(list(self.o), self.noise)
 
-    def test_index(self):
-        o = z.OrderedZone("Emerald Hill", self.noise)
-        e = self.noise[13]
-        self.assertEqual(o.index(e), 13)
+        self.assertRaises(ValueError, self.u.remove, object())
+        self.assertRaises(ValueError, self.o.remove, object())
+
+
+class TestOrderedZone(ZoneTest):
+    def test_reversed(self):
+        self.assertEqual(list(reversed(self.o)), list(reversed(self.noise)))
+
+    def test_getitem(self):
+        for i, e in enumerate(self.noise):
+            self.assertEqual(self.o[i], e)
+
+        self.assertEqual(self.o[2:7:2], self.noise[2:7:2])
+
+    def test_set_del_item(self):
+        self.assertRaises(AttributeError, getattr, self.o, "__setitem__")
+        self.assertRaises(AttributeError, getattr, self.o, "__delitem__")
 
     def test_count(self):
-        o = z.OrderedZone("Emerald Hill", [1, 1, 1, 2, 2, 3])
+        o = z.OrderedZone(game=None, name="Emerald Hill",
+                          contents=[1, 1, 1, 2, 2, 3])
 
         for i, e in enumerate(range(3, 0, -1), 1):
             self.assertEqual(o.count(e), i)
 
-    def test_pop(self):
-        o = z.OrderedZone("Emerald Hill", range(40))
-        o.pop()
-        self.assertEqual(len(o), 39)
-        self.assertEqual(list(o), range(39))
+    def test_extend(self):
+        self.o.extend(range(4))
+        self.assertEqual(self.o[-4:], range(4))
+        self.assertEqual(len(self.o), len(self.noise) + 4)
+
+    def test_index(self):
+        e = self.noise[13]
+        self.assertEqual(self.o.index(e), 13)
 
     def test_pop_index(self):
-        r = range(1, 40)
-        r.pop(38)
+        self.o.pop(0)
+        self.o.pop(13)
 
-        o = z.OrderedZone("Emerald Hill", range(40))
-        o.pop(0)
-        o.pop(38)
-        self.assertEqual(list(o), r)
+        self.noise.pop(0)
+        self.noise.pop(13)
+
+        self.assertEqual(list(self.o), self.noise)
+
+    def test_reverse(self):
+        self.o.reverse()
+        self.assertEqual(list(self.o), list(reversed(self.noise)))
+
+    def test_shuffle(self):
+        with mock.patch("cardboard.zone.random.shuffle") as shuffle:
+            self.o.shuffle()
+
+        shuffle.assert_called_once_with(self.o._order)
 
     def test_iterable(self):
         # TODO: This is incomplete, all the methods don't take iterables
-        o = z.OrderedZone("Emerald Hill", iter(range(40)))
+        o = z.OrderedZone(game=None, name="Emerald Hill",
+                          contents=iter(range(40)))
         self.assertIn(2, o)
         self.assertTrue(list(o))
 
 
-class TestZoneOZone(unittest.TestCase):
-    def test_zone(self):
-        n = z.zone("Foo", contents=range(3), ordered=False)
-        self.assertEqual("Foo", n.name)
-        self.assertEqual(list(n), range(3))
-        self.assertIsInstance(n, z.Zone)
+class TestZone(unittest.TestCase):
+    def test_Zone(self):
+        c = mock.Mock()
 
-        o = z.zone("Bar", contents=range(3), ordered=True)
-        self.assertEqual("Bar", o.name)
-        self.assertEqual(list(o), range(3))
-        self.assertIsInstance(o, z.OrderedZone)
+        for zone in ["battlefield", "exile", "hand"]:
+            n = z.zone[zone](game=None, contents=[c])
+            self.assertIsInstance(n, z.UnorderedZone)
+            self.assertEquals(n.name, zone)
+            self.assertIn(c, n)
+
+        for zone in ["graveyard", "library", "stack"]:
+            n = z.zone[zone](game=None, contents=[c])
+            self.assertIsInstance(n, z.OrderedZone)
+            self.assertEquals(n.name, zone)
+            self.assertIn(c, n)
+
+    """
+    def test_zone(self):
+        # TODO: Test all other zones
+        self.db_card.type = "Creature"
+
+        creature = c.Card(self.db_card, controller=self.player)
+
+        creature.zone = self.game.battlefield
+        self.assertIn(creature, self.player.game.battlefield)
+        self.assertEqual(creature.zone, self.player.game.battlefield)
+        self.assertNotIn(creature, self.player.library)
+
+    def test_zone(self):
+        self.creature.zone = self.game.battlefield
+        self.assertLastEventsWere(events["card"]["zones"]["library"]["left"],
+                                  events["card"]["zones"]["battlefield"]["entered"],
+                                  events["card"]["untapped"])
+
+        self.creature.zone = self.player.graveyard
+        self.assertLastEventsWere(events["card"]["zones"]["battlefield"]["left"],
+                                  events["card"]["zones"]["graveyard"]["entered"])
+
+        self.creature.zone = self.player.exile
+        self.assertLastEventsWere(events["card"]["zones"]["graveyard"]["left"],
+                                  events["card"]["zones"]["exile"]["entered"])
+
+        self.creature.zone = self.player.hand
+        self.assertLastEventsWere(events["card"]["zones"]["exile"]["left"],
+                                  events["card"]["zones"]["hand"]["entered"])
+
+        self.creature.zone = self.player.library
+        self.assertLastEventsWere(events["card"]["zones"]["hand"]["left"],
+                                  events["card"]["zones"]["library"]["entered"])
+
+    def test_zone_same(self):
+        self.creature.zone = self.player.library
+        self.assertLastEventsWereNot(events["card"]["zones"]["library"]["entered"])
+    """

@@ -1,49 +1,33 @@
-from collections import OrderedDict
 from itertools import chain
 
 
-__all__ = ["Event", "events", "phases"]
+__all__ = ["Event", "events"]
 
 
 class Event(object):
     """
     An event container.
 
-    To create ordered sections of an event tree, passing in an OrderedDict is
-    supported.
-
-        >>> from collections import OrderedDict
-        >>> o = OrderedDict([("foo", {}), ("bar", {})])
-        >>> e = Event("Foo", subevents=o)
-        This
-
-        >>> list(e)
-        [<Event: Foo.foo>, <Event: Foo.bar>]
-
     """
 
     def __init__(self, name="", subevents=None, _parent=None, **kwsubevents):
         super(Event, self).__init__()
 
-        if subevents is None:
-            subevents = {}
-
         if _parent is not None:
-            _parent = "{.fully_qualified_name}['{}']".format(_parent, name)
+            _parent = "{.fully_qualified_name}[{!r}]".format(_parent, name)
 
         self.fully_qualified_name = _parent or name
 
-        self._subevents = subevents.__class__()
-
-        for k, v in chain(subevents.iteritems(), kwsubevents.iteritems()):
-            self[k] = v
+        self._subevents = {}
+        self.update(subevents, **kwsubevents)
 
     def __contains__(self, event):
         return event in self._subevents.viewvalues()
 
     def __eq__(self, other):
-        return (isinstance(other, Event) and self.name == other.name and
-                self._subevents == other._subevents)
+        if not isinstance(other, Event):
+            return NotImplemented
+        return self.name == other.name and self._subevents == other._subevents
 
     def __getitem__(self, k):
         return self._subevents[k]
@@ -71,35 +55,102 @@ class Event(object):
     def subevent_names(self):
         return self._subevents.viewkeys()
 
-    def get(self, k):
-        return self._subevents.get(k)
+    @property
+    def subevents(self):
+        # evading my .viewvalues __eq__ bug
+        return set(self._subevents.itervalues())
+
+    def get(self, k, d=None):
+        return self._subevents.get(k, d)
+
+    def update(self, subevents=None, **kwsubevents):
+        if subevents is None:
+            subevents = {}
+
+        for k, v in chain(subevents.iteritems(), kwsubevents.iteritems()):
+            self[k] = v
 
 
-phases = OrderedDict([
+phase_events = {
 
-                      ("beginning", OrderedDict([
-                                                 ("untap", {}),
-                                                 ("draw", {}),
-                                                 ("upkeep", {}),
-                                                 ])),
+    "beginning" : {
+                   "started" : {},
+                   "ended" : {},
 
-                      ("first_main", {}),
+                   "untap" : {
+                              "started" : {},
+                              "ended" : {},
+                             },
 
-                      ("combat", OrderedDict([
-                                              ("beginning", {}),
-                                              ("declare_attackers", {}),
-                                              ("declare_blockers", {}),
-                                              ("combat_damage", {}),
-                                              ("end", {}),
-                                             ])),
+                   "upkeep" : {
+                               "started" : {},
+                               "ended" : {},
+                              },
 
-                      ("second_main", {}),
+                   "draw" : {
+                             "started" : {},
+                             "ended" : {},
+                            },
+                  },
 
-                      ("ending", OrderedDict([
-                                              ("end", {}),
-                                              ("cleanup", {}),
-                                             ])),
-                     ])
+    "first_main" : {
+                    "started" : {},
+                    "ended" : {},
+                   },
+
+    "combat" : {
+                "started" : {},
+                "ended" : {},
+
+                "beginning" : {
+                               "started" : {},
+                               "ended" : {},
+                              },
+
+                "declare_attackers" : {
+                                       "started" : {},
+                                       "ended" : {},
+                                      },
+
+                "declare_blockers" : {
+                                      "started" : {},
+                                      "ended" : {},
+                                     },
+
+                "combat_damage" : {
+                                   "started" : {},
+                                   "ended" : {},
+                                  },
+
+                "end" : {
+                         "started" : {},
+                         "ended" : {},
+                        },
+               },
+
+    "second_main" : {
+                     "started" : {},
+                     "ended" : {},
+                    },
+
+
+    "ending" : {
+                   "started" : {},
+                   "ended" : {},
+
+                   "end" : {
+                            "started" : {},
+                            "ended" : {},
+                           },
+
+                   "cleanup" : {
+                                "started" : {},
+                                "ended" : {},
+                               },
+
+               },
+
+}
 
 
 events = Event("all",
@@ -113,44 +164,50 @@ events = Event("all",
                           "zones" : {
 
                                      "exile" : {
-                                                 "entered" : {},
-                                                 "left" : {},
-                                                 },
+                                                "entered" : {},
+                                                "left" : {},
+                                               },
 
                                      "battlefield" : {
-                                                     "entered" : {},
-                                                     "left" : {},
-                                                 },
-
-                                     "graveyard" : {
-                                                     "entered" : {},
-                                                     "left" : {},
+                                                      "entered" : {},
+                                                      "left" : {},
                                                      },
 
+                                     "graveyard" : {
+                                                    "entered" : {},
+                                                    "left" : {},
+                                                   },
+
                                      "hand" : {
-                                                 "entered" : {},
-                                                 "left" : {},
-                                             },
+                                               "entered" : {},
+                                               "left" : {},
+                                              },
 
                                      "library" : {
-                                                 "entered" : {},
-                                                 "left" : {},
+                                                  "entered" : {},
+                                                  "left" : {},
                                                  },
+
+                                     "stack" : {
+                                                "entered" : {},
+                                                "left" : {},
+                                               },
                                     }
                          },
 
                 "game" : {
                           "started" : {},
                           "ended" : {},
-                          "phases" : phases,
 
                           "turn" : {
-                                    "changed" : {},
+                                    "started" : {},
+                                    "ended" : {},
+                                    "phase" : phase_events,
                                    },
-
                          },
 
                 "player" : {
+                            "conceded" : {},
                             "died" : {},
                             "draw" : {},
 

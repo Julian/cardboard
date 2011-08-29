@@ -1,4 +1,3 @@
-import collections
 import unittest
 
 import cardboard.events as e
@@ -40,6 +39,8 @@ class TestEvent(unittest.TestCase):
         s = e.Event("s")
         self.assertNotEqual(s, t)
 
+        self.assertIs(s.__eq__(object()), NotImplemented)
+
     def test_name(self):
         s = e.Event("s")
         self.assertEqual(s.name, "s")
@@ -53,9 +54,15 @@ class TestEvent(unittest.TestCase):
         self.assertEqual(s["foo"].name, "foo")
         self.assertEqual(s["bar"].name, "bar")
 
-    def test_subevent_names(self):
+    def test_get(self):
+        s = e.Event("s", foo={})
+        self.assertIs(s.get("foo"), s["foo"])
+        self.assertIsNone(s.get("bar"))
+
+    def test_subevents(self):
         s = e.Event("s", {"foo" : {}, "bar" : {}})
         self.assertEqual(s.subevent_names, {"foo", "bar"})
+        self.assertEqual(s.subevents, {s["foo"], s["bar"]})
 
     def test_set_subevents(self):
         s = e.Event(subevents={"a" : {"b" : {}, "c" : {}}, "b" : {"a" : {}}})
@@ -74,9 +81,11 @@ class TestEvent(unittest.TestCase):
 
         self.assertRaises(AttributeError, getattr, s, "d")
 
-    def test_ordered(self):
-        keys = ["foo", "bar", "a", "z", "baz", "hello", "world", "oof", "rab"]
-        o = collections.OrderedDict([(a, {}) for a in keys])
-        s = e.Event("s", o)
-        self.assertEqual([v.name for v in s], keys)
-        self.assertIsInstance(s._subevents, collections.OrderedDict)
+    def test_update(self):
+        s = e.Event("s")
+        s.update({"a" : {"b" : {}, "c" : {}}, "b" : {}}, d={})
+        self.assertEqual(s.subevent_names, {"a", "b", "d"})
+
+        self.assertFalse(s["a"]["b"].subevents)
+        self.assertFalse(s["a"]["c"].subevents)
+        self.assertFalse(s["b"].subevents)
