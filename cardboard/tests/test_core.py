@@ -515,6 +515,9 @@ class TestTurnManager(GameTestCase):
         """
         The mana pool should empty at the end of each phase or step.
 
+        .. seealso::
+            :ref:`mana-produced`
+
         """
 
         self.game.start()

@@ -7,7 +7,7 @@ from collections import deque
 import itertools
 import random
 
-from cardboard import exceptions
+from cardboard import exceptions, types
 from cardboard.events import events
 from cardboard.frontend.none import NoFrontend
 from cardboard.phases import phases
@@ -372,18 +372,18 @@ class Game(object):
 
         for card in self.battlefield:
 
-            if card.type == "Creature":
+            if card.type == types.creature:
                 if card.toughness <= 0:
                     card.owner.graveyard.move(card)
                 elif card.damage >= card.toughness or card._deathtouch_damage:
                     # TODO: Regenerate
                     card.owner.graveyard.move(card)
 
-            elif card.type == "Planeswalker":
+            elif card.type == types.planeswalker:
                 if not card.loyalty:
                     card.owner.graveyard.move(card)
-            elif card.type == "Aura":
-                if not card.attached_to:
+            elif card.type == types.enchantment:
+                if card.attached_to is None:
                     card.owner.graveyard.move(card)
 
 

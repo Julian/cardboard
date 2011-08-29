@@ -1,6 +1,6 @@
 from operator import attrgetter
 
-from cardboard import exceptions
+from cardboard import exceptions, types
 from cardboard.db import models, Session
 from cardboard.events import events
 from cardboard.util import check_started
@@ -11,9 +11,6 @@ COLORS = {"B" : "black",
           "R" : "red",
           "U" : "blue",
           "W" : "white"}
-
-PERMANENTS = {"Artifact", "Creature", "Enchantment", "Land", "Planeswalker"}
-NONPERMANENTS = {"Instant", "Sorcery"}
 
 
 class Card(object):
@@ -34,9 +31,10 @@ class Card(object):
         self.damage = 0
 
         self._changed_colors = set()
+
         self._tapped = None
-        self._face_up = None
         self._flipped = None
+        self._face_up = None
         self._phased_in = None
 
     def __lt__(self, other):
@@ -70,7 +68,7 @@ class Card(object):
 
     @property
     def is_permanent(self):
-        return self.type in PERMANENTS
+        return self.type.is_permanent
 
     @property
     def tapped(self):

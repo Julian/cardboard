@@ -2,7 +2,8 @@ import unittest
 
 import mock
 
-from cardboard import core as k, card as c, exceptions as exc, zone as z
+from cardboard import core as k, card as c, zone as z
+from cardboard import exceptions, types
 from cardboard.db import models as m
 from cardboard.events import events
 from cardboard.tests.util import GameTestCase
@@ -14,11 +15,11 @@ class TestCard(GameTestCase):
 
         self.creature_db_card = mock.Mock()
         self.creature_db_card.name = "Test Creature"
-        self.creature_db_card.type = "Creature"
+        self.creature_db_card.type = types.creature
 
         self.instant_db_card = mock.Mock()
         self.instant_db_card.name = "Test Instant"
-        self.instant_db_card.type = "Instant"
+        self.instant_db_card.type = types.instant
 
         self.creature = c.Card(self.creature_db_card)
         self.instant = c.Card(self.instant_db_card)
@@ -97,16 +98,21 @@ class TestCard(GameTestCase):
         self.assertEqual(self.creature.colors, set())
 
     def test_is_permanent(self):
-        for type in ["Artifact", "Creature", "Enchantment",
-                     "Land", "Planeswalker"]:
-            self.creature_db_card.type = type
-            card = c.Card(self.creature_db_card)
-            self.assertTrue(card.is_permanent)
+        """
+        `is_permanent` delegates to Card.type.
 
-        for type in ["Instant", "Sorcery"]:
-            self.instant_db_card.type = type
-            card = c.Card(self.instant_db_card)
-            self.assertFalse(card.is_permanent)
+        """
+
+        mt = mock.Mock()
+        class MockType(mock.Mock):
+            @property
+            def is_permanent(self):
+                return mt()
+
+        self.creature_db_card.type = MockType()
+        card = c.Card(self.creature_db_card)
+        card.is_permanent
+        mt.assert_called_once_with()
 
     def test_cast_permanent(self):
         self.game.battlefield.move = mock.Mock()
@@ -144,18 +150,18 @@ class TestCard(GameTestCase):
         self.creature.zone = self.game.battlefield
 
         self.creature.tap()
-        self.assertRaises(exc.RuntimeError, self.creature.tap)
+        self.assertRaises(exceptions.RuntimeError, self.creature.tap)
 
         # check that it didn't trigger twice
         self.assertLastEventsWereNot([events["card"]["tapped"],
                                       events["card"]["tapped"]])
 
         self.creature.untap()
-        self.assertRaises(exc.RuntimeError, self.creature.untap)
+        self.assertRaises(exceptions.RuntimeError, self.creature.untap)
 
         # check that it didn't trigger twice
         self.assertLastEventsWereNot([events["card"]["untapped"],
                                       events["card"]["untapped"]])
     def test_tap_not_in_play(self):
-        self.assertRaises(exc.RuntimeError, self.creature.tap)
-        self.assertRaises(exc.RuntimeError, self.creature.untap)
+        self.assertRaises(exceptions.RuntimeError, self.creature.tap)
+        self.assertRaises(exceptions.RuntimeError, self.creature.untap)
