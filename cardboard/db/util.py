@@ -154,7 +154,7 @@ def load(f):
 
 def parse(c):
     """
-    Parse a card into a dict containing its information.
+    Parse a deque containing card information into a dict.
 
     The format should be:
 
@@ -165,18 +165,18 @@ def parse(c):
         5) Sets
 
 
-        >>> s = '''
-        ... Voltaic Key
-        ... 1
-        ... Artifact
-        ... {1}, {T}: Untap target artifact.
-        ... US-U, M11-U
-        ... '''
+        >>> from collections import deque
+
+        >>> s = deque(["Voltaic Key",
+        ...            "1",
+        ...            "Artifact",
+        ...            "{1}, {T}: Untap target artifact.",
+        ...            "US-U, M11-U"])
 
         >>> parse(s) == {"name" : "Voltaic Key",
         ...              "type" : "Artifact",
         ...              "mana_cost" : "1",
-        ...              "abilities" : ["{1}, {T}: Untap target artifact"],
+        ...              "abilities" : ["{1}, {T}: Untap target artifact."],
         ...              "appearances" : [("US", "U"), ("M11", "U")]}
         True
 
