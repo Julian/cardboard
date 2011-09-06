@@ -130,38 +130,78 @@ class TestCard(GameTestCase):
         self.p4.graveyard.move.assert_called_with(self.instant)
         self.assertLastEventsWere([events["card"]["cast"]])
 
-    def test_tap(self):
-        self.creature.zone = self.game.battlefield
+class TestStatus(TestCard):
+    def setUp(self):
+        super(TestStatus, self).setUp()
 
-        self.creature.tap()
-        self.assertTrue(self.creature.tapped)
+        self.resetEvents()
 
-        self.assertLastEventsWere([events["card"]["tapped"]])
+        self.evs = [("tapped", "untapped"),
+                    ("flipped", "unflipped"),
+                    ("turned_face_down", "turned_face_up"),
+                    ("phased_out", "phased_in")]
 
-    def test_untap(self):
-        self.creature.zone = self.game.battlefield
+        self.fns = [(self.creature.tap, self.creature.untap),
+                    (self.creature.flip, self.creature.unflip),
+                    (self.creature.turn_face_down, self.creature.turn_face_up),
+                    (self.creature.phase_out, self.creature.phase_in)]
 
-        self.creature.untap()
-        self.assertFalse(self.creature.tapped)
+    def test_not_on_battlefield(self):
+        for default, nondefault in self.fns:
+            with self.assertRaises(exceptions.RequirementNotMet):
+                default()
 
-        self.assertLastEventsWere([events["card"]["untapped"]])
+            with self.assertRaises(exceptions.RequirementNotMet):
+                nondefault()
 
-    def test_tap_untap_already(self):
-        self.creature.zone = self.game.battlefield
+            # didn't fire any events
+            self.assertFalse(self.events.trigger.called)
 
-        self.creature.tap()
-        self.assertRaises(exceptions.RuntimeError, self.creature.tap)
+    def test_defaults(self):
+        self.game.battlefield.move(self.creature)
 
-        # check that it didn't trigger twice
-        self.assertLastEventsWereNot([events["card"]["tapped"],
-                                      events["card"]["tapped"]])
+        self.assertFalse(self.creature.is_tapped)
+        self.assertFalse(self.creature.is_flipped)
+        self.assertTrue(self.creature.is_face_up)
+        self.assertTrue(self.creature.is_phased_in)
 
-        self.creature.untap()
-        self.assertRaises(exceptions.RuntimeError, self.creature.untap)
+    def test_toggle(self):
+        self.game.battlefield.move(self.creature)
 
-        # check that it didn't trigger twice
-        self.assertLastEventsWereNot([events["card"]["untapped"],
-                                      events["card"]["untapped"]])
-    def test_tap_not_in_play(self):
-        self.assertRaises(exceptions.RuntimeError, self.creature.tap)
-        self.assertRaises(exceptions.RuntimeError, self.creature.untap)
+        for (nondefault, _), (event, _) in zip(self.fns, self.evs):
+            nondefault()
+            self.assertLastEventsWere([events["card"]["status"][event]])
+
+        self.assertTrue(self.creature.is_tapped)
+        self.assertTrue(self.creature.is_flipped)
+        self.assertFalse(self.creature.is_face_up)
+        self.assertFalse(self.creature.is_phased_in)
+
+        self.resetEvents()
+
+        # card already has status raises RNM
+        for nondefault, _ in self.fns:
+            with self.assertRaises(exceptions.RequirementNotMet):
+                nondefault()
+
+        # didn't fire any events
+        self.assertFalse(self.events.trigger.called)
+
+        for (_, default), (_, event) in zip(self.fns, self.evs):
+            default()
+            self.assertLastEventsWere([events["card"]["status"][event]])
+
+        self.assertFalse(self.creature.is_tapped)
+        self.assertFalse(self.creature.is_flipped)
+        self.assertTrue(self.creature.is_face_up)
+        self.assertTrue(self.creature.is_phased_in)
+
+        self.resetEvents()
+
+        # card already has status raises RNM
+        for _, default in self.fns:
+            with self.assertRaises(exceptions.RequirementNotMet):
+                default()
+
+        # didn't fire any events
+        self.assertFalse(self.events.trigger.called)

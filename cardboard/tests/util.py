@@ -23,6 +23,65 @@ import panglery
 
 from cardboard.core import Game, Player
 from cardboard.card import Card
+from cardboard.exceptions import RequirementNotMet
+
+
+class _CheckRequirementsContext(object):
+    def __init__(self, test_case, method, *args, **kwargs):
+        super(_CheckRequirementsContext, self).__init__()
+
+        self.test_case = test_case
+
+        self.method = method
+        self.args = args
+        self.kwargs = kwargs
+
+        self.patches = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._prune_patches()
+
+    def _prune_patches(self):
+        while self.patches:
+            self.patches.pop().stop()
+
+    def patch(self, **patches):
+        for attr, patch_to in patches.iteritems():
+            try:
+                patch = mock.patch.object(self.method.im_self, attr, patch_to)
+                patch.start()
+            except AttributeError:
+                patch = mock.patch.object(self.method.im_class, attr, patch_to)
+                patch.start()
+
+            self.patches.append(patch)
+
+    def assertMet(self, **patches):
+        self.patch(**patches)
+
+        try:
+            self.method(*self.args, **self.kwargs)
+        except RequirementNotMet:
+            err = "{} did not meet the requirements for {}"
+            self.test_case.fail(err.format(patches, self.method))
+
+        self._prune_patches()
+
+    def assertNotMet(self, **patches):
+        self.patch(**patches)
+
+        try:
+            self.method(*self.args, **self.kwargs)
+        except RequirementNotMet:
+            pass
+        else:
+            err = "{} unexpectedly met the requirements for {}"
+            self.test_case.fail(err.format(patches, self.method))
+
+        self._prune_patches()
 
 
 class EventHandlerTestCase(unittest.TestCase):
@@ -102,11 +161,15 @@ class EventHandlerTestCase(unittest.TestCase):
         else:
             self.failUnexpectedEvents(events)
 
+    def checkRequirements(self, method, *args, **kwargs):
+        return _CheckRequirementsContext(self, method, *args, **kwargs)
+
     def assertSubscribed(self, fn, **kwargs):
         self.assertIn(((fn,), kwargs), self.events.subscribe.call_args_list)
 
     def resetEvents(self):
         self.events.trigger.call_args_list[:] = []
+        self.events.trigger.called = False
 
 
 class GameTestCase(EventHandlerTestCase):

@@ -10,9 +10,9 @@ class InvalidAction(RuntimeError):
 
     This exception is raised if no more specific error is appropriate.
 
-    It (and its subclasses) should generally be considered recoverable,
-    specifically by catching  and retrying the action after the requirements
-    have been verified.
+    It (and its subclasses) should generally be raised when an action that is
+    being attempted is failing due to something that can be recovered from by
+    reselecting or retrying.
 
     """
 
@@ -33,3 +33,37 @@ class NoSuchObject(InvalidAction):
 
     def __str__(self):
         return self.MSG.format(self)
+
+
+class RequirementNotMet(InvalidAction):
+    """
+    An action is being attempted when a requirement for it was not met.
+
+    """
+
+    MSG = "{self}.{attr} was {got!r} (expected {expected!r})"
+
+    def __init__(self, instance, attr, got, expected, msg=None):
+        super(RequirementNotMet, self).__init__()
+
+        if msg is None:
+            msg = self.MSG
+
+        self.self = instance
+        self.attr = attr
+        self.got = got
+        self.expected = expected
+
+        self.msg = msg.format(self=instance, attr=attr,
+                              got=got, expected=expected)
+
+    def __str__(self):
+        return self.msg
+
+    @classmethod
+    def failed_condition(cls, msg=""):
+        """
+        An arbitrary condition was not met.
+
+        """
+        return cls(instance=None, attr=None, got=None, expected=None, msg=msg)

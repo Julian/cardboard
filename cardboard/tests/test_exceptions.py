@@ -1,9 +1,14 @@
 import unittest
 
-from cardboard import exceptions as e
-from cardboard.tests.util import GameTestCase
+from cardboard import exceptions
 
-class TestNoSuchObject(GameTestCase):
+class TestNoSuchObject(unittest.TestCase):
     def test_str(self):
-        n = e.NoSuchObject(self.game, "foo", 0)
-        self.assertTrue(str(n).endswith("Game> has no such foo '0'"))
+        n = exceptions.NoSuchObject("blablabla", "foo", 0)
+        self.assertEqual(str(n), "blablabla has no such foo '0'")
+
+class TestRequirementNotMet(unittest.TestCase):
+    def test_str(self):
+        r = exceptions.RequirementNotMet(instance=None, attr=None, got=None,
+                                         expected=None, msg="foo bar")
+        self.assertEqual(str(r), "foo bar")

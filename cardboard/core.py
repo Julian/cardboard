@@ -4,14 +4,13 @@ Cardboard core
 """
 
 from collections import deque
-import itertools
 import random
 
 from cardboard import exceptions, types
 from cardboard.events import events
 from cardboard.frontend.none import NoFrontend
 from cardboard.phases import phases
-from cardboard.util import check_started
+from cardboard.util import requirements
 from cardboard.zone import zone
 
 
@@ -29,6 +28,9 @@ def _make_color(name):
 
     @color.setter
     def color(self, amount):
+
+        self.owner.game.require(started=True)
+
         current = getattr(self, name)
 
         if amount < 0:
@@ -113,6 +115,9 @@ class Player(object):
 
     """
 
+    require = requirements({"dead" : {True : "{self} is dead.",
+                                      False : "{self} is alive."}})
+
     def __init__(self, game, library, name=""):
         super(Player, self).__init__()
 
@@ -136,7 +141,6 @@ class Player(object):
         for card in self.library:
             card.game = self.game
             card.controller = card.owner = self
-            card.zone = self.library
 
         self._drew_from_empty_library = False
 
@@ -198,8 +202,7 @@ class Player(object):
 
         """
 
-        if self.dead:
-            raise exceptions.InvalidAction("{} is already dead.".format(self))
+        self.require(dead=False)
 
         self.death_by = reason
         self.game.events.trigger(event=events["player"]["died"])
@@ -230,6 +233,9 @@ class Game(object):
     The Game object maintains information about the current game state.
 
     """
+
+    require = requirements({"started" : {True : "{self} has already started.",
+                                         False : "{self} has not started."}})
 
     def __init__(self, handler):
         """
@@ -276,10 +282,7 @@ class Game(object):
 
         """
 
-        if self.started:
-            raise exceptions.InvalidAction("Cannot add a new player, {} has "
-                                           "already started.".format(self))
-
+        self.require(started=False)
         self.players.add(player)
 
     def _start(self):
@@ -288,9 +291,8 @@ class Game(object):
 
         """
 
-        if not self.players:
-            raise exceptions.InvalidAction("Starting the game requires at "
-                                           "least one player.")
+        self.require(self.players, msg="Starting the game requires at least "
+                                       "one player.")
 
         self.ended = False
         self.turn._start()  # Tell the turn manager that the game is starting.
@@ -383,6 +385,7 @@ class Game(object):
                 if not card.loyalty:
                     card.owner.graveyard.move(card)
             elif card.type == types.enchantment:
+                # if types.enchantment.subtypes["Aura"] in card.subtypes:
                 if card.attached_to is None:
                     card.owner.graveyard.move(card)
 
@@ -425,7 +428,7 @@ class TurnManager(object):
 
         """
 
-        check_started(self.game)
+        self.game.require(started=True)
 
         try:
             next_step = next(self._steps)
@@ -456,7 +459,7 @@ class TurnManager(object):
 
         """
 
-        check_started(self.game)
+        self.game.require(started=True)
 
         self.game.events.trigger(event=events["game"]["turn"]["ended"])
         self.order.rotate(-1)

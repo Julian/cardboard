@@ -3,7 +3,7 @@ from operator import attrgetter
 from cardboard import exceptions, types
 from cardboard.db import models, Session
 from cardboard.events import events
-from cardboard.util import check_started
+from cardboard.util import requirements
 
 
 COLORS = {"B" : "black",
@@ -13,7 +13,56 @@ COLORS = {"B" : "black",
           "W" : "white"}
 
 
+def status(name, on_event, off_event, default=True):
+    """
+    Create a status attribute with togglers.
+
+    The `on_event` will be the default.
+
+    """
+
+    stupid_nonlocal = [default]
+
+    @property
+    def get(self):
+        return stupid_nonlocal[0]
+
+    def toggle(turn_on):
+        if turn_on:
+            event = on_event
+        else:
+            event = off_event
+
+        def setter(self):
+            self.game.require(started=True)
+            self.require(zone=self.game.battlefield, **{name : not turn_on})
+
+            stupid_nonlocal[0] = turn_on
+
+            self.game.events.trigger(event=events["card"]["status"][event])
+
+        return setter
+
+    return get, toggle(turn_on=True), toggle(turn_on=False)
+
+
 class Card(object):
+
+    is_tapped, tap, untap = status(name="is_tapped", on_event="tapped",
+                                   off_event="untapped", default=False)
+
+    is_flipped, flip, unflip = status(name="is_flipped", on_event="flipped",
+                                      off_event="unflipped", default=False)
+
+    is_face_up, turn_face_up, turn_face_down = status("is_face_up",
+                                                      "turned_face_up",
+                                                      "turned_face_down",
+                                                      default=True)
+
+    is_phased_in, phase_in, phase_out = status("is_phased_in", "phased_in",
+                                               "phased_out", default=True)
+
+    require = requirements()
 
     def __init__(self, db_card):
         super(Card, self).__init__()
@@ -21,7 +70,7 @@ class Card(object):
         self.game = None
         self.controller = None
         self.owner = None
-        self.zone = None
+        self._zone = None
 
         for attr in {"name", "type", "subtypes", "mana_cost", "abilities"}:
             setattr(self, attr, getattr(db_card, attr))
@@ -31,11 +80,6 @@ class Card(object):
         self.damage = 0
 
         self._changed_colors = set()
-
-        self._tapped = None
-        self._flipped = None
-        self._face_up = None
-        self._phased_in = None
 
     def __lt__(self, other):
         """
@@ -71,8 +115,19 @@ class Card(object):
         return self.type.is_permanent
 
     @property
-    def tapped(self):
-        return self._tapped
+    def zone(self):
+        if self.game is None or not self.game.started:
+            return
+
+        if self._zone is None or self not in self._zone:
+            for zone in (self.controller.exile, self.controller.hand,
+                         self.game.battlefield, self.game.stack,
+                         self.controller.graveyard, self.controller.library):
+
+                if self in zone:
+                    self._zone = zone
+
+        return self._zone
 
     def cast(self):
         """
@@ -80,7 +135,7 @@ class Card(object):
 
         """
 
-        check_started(self.game)
+        self.game.require(started=True)
 
         if self.is_permanent:
             self.game.battlefield.move(self)
@@ -88,26 +143,3 @@ class Card(object):
             self.controller.graveyard.move(self)
 
         self.game.events.trigger(event=events["card"]["cast"])
-
-    def tap(self):
-        check_started(self.game)
-
-        if self.zone != self.game.battlefield:
-            raise exceptions.RuntimeError("{} is not in play.".format(self))
-        elif self._tapped:
-            raise exceptions.RuntimeError("{} is already tapped.".format(self))
-
-        self._tapped = True
-        self.game.events.trigger(event=events["card"]["tapped"])
-
-    def untap(self):
-        check_started(self.game)
-
-        if self.zone != self.game.battlefield:
-            raise exceptions.InvalidAction("{} is not in play.".format(self))
-        elif self._tapped is not None and not self._tapped:
-            err = "{} is already untapped.".format(self)
-            raise exceptions.InvalidAction(err)
-
-        self._tapped = False
-        self.game.events.trigger(event=events["card"]["untapped"])
