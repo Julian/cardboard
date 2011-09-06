@@ -4,6 +4,18 @@ from itertools import chain
 __all__ = ["Event", "events"]
 
 
+BuiltinKeyError = KeyError
+
+class KeyError(BuiltinKeyError):
+    """
+    A saner KeyError whose args actually roundtrip.
+
+    """
+
+    def __str__(self):
+        return Exception.__str__(self)
+
+
 class Event(object):
     """
     An event container.
@@ -30,7 +42,11 @@ class Event(object):
         return self.name == other.name and self._subevents == other._subevents
 
     def __getitem__(self, k):
-        return self._subevents[k]
+        try:
+            return self._subevents[k]
+        except BuiltinKeyError as k:
+            err = "{.fully_qualified_name} has no subevent {}"
+            raise KeyError(err.format(self, k))
 
     def __setitem__(self, k, v):
         self._subevents[k] = Event(k, v, _parent=self)
@@ -158,8 +174,20 @@ events = Event("all",
                {"card" : {
                           "cast" : {},
                           "countered" : {},
-                          "tapped" : {},
-                          "untapped" : {},
+
+                          "status" : {
+                                      "tapped" : {},
+                                      "untapped" : {},
+
+                                      "flipped" : {},
+                                      "unflipped" : {},
+
+                                      "turned_face_up" : {},
+                                      "turned_face_down" : {},
+
+                                      "phased_in" : {},
+                                      "phased_out" : {},
+                                     },
 
                           "zones" : {
 
