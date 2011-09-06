@@ -10,15 +10,15 @@ __all__ = ["UnorderedZone", "OrderedZone", "zone"]
 def _zone(name):
     @classmethod
     def zone(cls, game, contents=()):
-        return cls(game, name, contents, events["card"]["zones"][name])
+        return cls(game, name, contents, events["card"]["zones"][name.lower()])
     return zone
 
 
 class UnorderedZone(MutableSet):
 
-    battlefield = _zone("battlefield")
-    exile = _zone("exile")
-    hand = _zone("hand")
+    battlefield = _zone("Battlefield")
+    exile = _zone("Exile")
+    hand = _zone("Hand")
 
     ordered = False
 
@@ -45,37 +45,40 @@ class UnorderedZone(MutableSet):
     def __repr__(self):
         return "<Zone: {.name}>".format(self)
 
-    def add(self, e):
+    def add(self, e, silent=False):
         self._contents.add(e)
-        self.game.events.trigger(event=self._events["entered"])
 
-    def discard(self, e):
+        if not silent:
+            self.game.events.trigger(event=self._events["entered"])
+
+    def discard(self, e, silent=False):
         try:
             self._contents.remove(e)
         except KeyError:
             pass
         else:
-            self.game.events.trigger(event=self._events["left"])
+            if not silent:
+                self.game.events.trigger(event=self._events["left"])
 
     def move(self, e):
         e.zone.remove(e)
         self.add(e)
-        e.zone = self
 
-    def remove(self, e):
+    def remove(self, e, silent=False):
         try:
             self._contents.remove(e)
         except KeyError:
             raise ValueError(e)
         else:
-            self.game.events.trigger(event=self._events["left"])
+            if not silent:
+                self.game.events.trigger(event=self._events["left"])
 
 
 class OrderedZone(Set):
 
-    graveyard = _zone("graveyard")
-    library = _zone("library")
-    stack = _zone("stack")
+    graveyard = _zone("Graveyard")
+    library = _zone("Library")
+    stack = _zone("Stack")
 
     ordered = True
 
@@ -113,14 +116,17 @@ class OrderedZone(Set):
     def __repr__(self):
         return "<Zone: {.name}>".format(self)
 
-    def add(self, e):
+    def add(self, e, silent=False):
         self._contents.add(e)
         self._order.append(e)
-        self.game.events.trigger(event=self._events["entered"])
 
-    def clear(self):
-        for i in self:
-            self.game.events.trigger(event=self._events["left"])
+        if not silent:
+            self.game.events.trigger(event=self._events["entered"])
+
+    def clear(self, silent=False):
+        if not silent:
+            for i in self:
+                self.game.events.trigger(event=self._events["left"])
 
         self._contents.clear()
         self._order = []
@@ -128,13 +134,16 @@ class OrderedZone(Set):
     def count(self, e):
         return self._order.count(e)
 
-    def discard(self, e):
+    def discard(self, e, silent=False):
         self._contents.discard(e)
 
         try:
             self._order.remove(e)
         except ValueError:
             pass
+        else:
+            if not silent:
+                self.game.events.trigger(event=self._events["left"])
 
     def extend(self, i):
         self._contents.update(i)
@@ -146,23 +155,27 @@ class OrderedZone(Set):
     def move(self, e):
         e.zone.remove(e)
         self.add(e)
-        e.zone = self
 
-    def pop(self, i=None):
+    def pop(self, i=None, silent=False):
         if i is None:
             e = self._order.pop()
         else:
             e = self._order.pop(i)
 
         self._contents.remove(e)
-        self.game.events.trigger(event=self._events["left"])
+
+        if not silent:
+            self.game.events.trigger(event=self._events["left"])
+
         return e
 
-    def remove(self, e):
+    def remove(self, e, silent=False):
         # order matters here, we want ValueError not KeyError
         self._order.remove(e)
         self._contents.remove(e)
-        self.game.events.trigger(event=self._events["left"])
+
+        if not silent:
+            self.game.events.trigger(event=self._events["left"])
 
     def reverse(self):
         self._order.reverse()

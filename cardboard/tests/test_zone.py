@@ -96,15 +96,16 @@ class TestZones(ZoneTest):
 
     def test_move(self):
         self.o.add(self.card)
+
         self.card.zone = self.o
 
         self.u.move(self.card)
         self.assertIn(self.card, self.u)
-        self.assertEqual(self.card.zone, self.u)
+
+        self.card.zone = self.u
 
         self.o.move(self.card)
         self.assertIn(self.card, self.o)
-        self.assertEqual(self.card.zone, self.o)
 
     def test_pop(self):
         e = self.u.pop()
@@ -126,6 +127,22 @@ class TestZones(ZoneTest):
         self.assertRaises(ValueError, self.u.remove, object())
         self.assertRaises(ValueError, self.o.remove, object())
 
+    def test_silent(self):
+        self.resetEvents()
+
+        self.u.add(20, silent=True)
+        self.o.add(20, silent=True)
+
+        self.u.discard(20, silent=True)
+        self.o.discard(20, silent=True)
+
+        self.u.remove(self.noise[0], silent=True)
+        self.o.remove(self.noise[0], silent=True)
+
+        self.o.pop(silent=True)
+        self.o.clear(silent=True)
+
+        self.assertFalse(self.events.trigger.called)
 
 class TestOrderedZone(ZoneTest):
     def test_reversed(self):
@@ -185,55 +202,22 @@ class TestOrderedZone(ZoneTest):
 
 
 class TestZone(unittest.TestCase):
-    def test_Zone(self):
+    def test_zone(self):
         c = mock.Mock()
 
         for zone in ["battlefield", "exile", "hand"]:
             n = z.zone[zone](game=None, contents=[c])
             self.assertIsInstance(n, z.UnorderedZone)
-            self.assertEquals(n.name, zone)
+            self.assertEquals(n.name, zone.title())
             self.assertIn(c, n)
 
         for zone in ["graveyard", "library", "stack"]:
             n = z.zone[zone](game=None, contents=[c])
             self.assertIsInstance(n, z.OrderedZone)
-            self.assertEquals(n.name, zone)
+            self.assertEquals(n.name, zone.title())
             self.assertIn(c, n)
 
     """
-    def test_zone(self):
-        # TODO: Test all other zones
-        self.db_card.type = "Creature"
-
-        creature = c.Card(self.db_card, controller=self.player)
-
-        creature.zone = self.game.battlefield
-        self.assertIn(creature, self.player.game.battlefield)
-        self.assertEqual(creature.zone, self.player.game.battlefield)
-        self.assertNotIn(creature, self.player.library)
-
-    def test_zone(self):
-        self.creature.zone = self.game.battlefield
-        self.assertLastEventsWere(events["card"]["zones"]["library"]["left"],
-                                  events["card"]["zones"]["battlefield"]["entered"],
-                                  events["card"]["untapped"])
-
-        self.creature.zone = self.player.graveyard
-        self.assertLastEventsWere(events["card"]["zones"]["battlefield"]["left"],
-                                  events["card"]["zones"]["graveyard"]["entered"])
-
-        self.creature.zone = self.player.exile
-        self.assertLastEventsWere(events["card"]["zones"]["graveyard"]["left"],
-                                  events["card"]["zones"]["exile"]["entered"])
-
-        self.creature.zone = self.player.hand
-        self.assertLastEventsWere(events["card"]["zones"]["exile"]["left"],
-                                  events["card"]["zones"]["hand"]["entered"])
-
-        self.creature.zone = self.player.library
-        self.assertLastEventsWere(events["card"]["zones"]["hand"]["left"],
-                                  events["card"]["zones"]["library"]["entered"])
-
     def test_zone_same(self):
         self.creature.zone = self.player.library
         self.assertLastEventsWereNot(events["card"]["zones"]["library"]["entered"])
