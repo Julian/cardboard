@@ -7,10 +7,14 @@ from cardboard.tests.util import GameTestCase
 
 class TestManaPool(GameTestCase):
     def test_iter(self):
+        self.game.start()
+
         self.p1.mana_pool += (1, 2, 3, 4, 5, 6)
         self.assertEqual(list(self.p1.mana_pool), [1, 2, 3, 4, 5, 6])
 
     def test_iadd_isub(self):
+        self.game.start()
+
         self.p1.mana_pool += (2, 4, 6, 8, 10, 12)
         self.p1.mana_pool += (2, 4, 6, 8, 10, 12)
 
@@ -38,6 +42,8 @@ class TestManaPool(GameTestCase):
             self.p1.mana_pool -= (1, 2, 3)
 
     def test_repr(self):
+        self.game.start()
+
         self.assertEqual(repr(self.p1.mana_pool), "(0W, 0U, 0B, 0R, 0G, 0)")
 
         for i, color in enumerate(self.p1.mana_pool.COLORS):
@@ -50,6 +56,8 @@ class TestManaPool(GameTestCase):
                          "black", "red", "green", "colorless"))
 
     def test_mana_changed(self):
+        self.game.start()
+
         mana_events = events["player"]["mana"]
 
         for color in self.p1.mana_pool.COLORS:
@@ -64,14 +72,23 @@ class TestManaPool(GameTestCase):
             self.assertLastEventsWere([mana_events[color]["removed"]])
 
     def test_is_empty(self):
+        self.game.start()
+
         self.assertTrue(self.p1.mana_pool.is_empty)
         self.p1.mana_pool += (1, 2, 3, 4, 5, 6)
         self.assertFalse(self.p1.mana_pool.is_empty)
 
     def test_empty(self):
+        self.game.start()
+
         self.p1.mana_pool += (1, 2, 3, 4, 5, 6)
         self.p1.mana_pool.empty()
         self.assertTrue(self.p1.mana_pool.is_empty)
+
+    def test_unstarted(self):
+        for color in self.p1.mana_pool.COLORS:
+            with self.assertRaises(exceptions.InvalidAction):
+                setattr(self.p1.mana_pool, color, 2)
 
 
 class TestPlayer(GameTestCase):
@@ -183,6 +200,8 @@ class TestPlayer(GameTestCase):
         self.assertTrue(self.p1._drew_from_empty_library)
 
     def test_negatives(self):
+        self.game.start()
+
         self.assertRaises(ValueError, self.p1.draw, -1)
 
         for color in self.p1.mana_pool.COLORS:
