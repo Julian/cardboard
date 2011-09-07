@@ -57,13 +57,14 @@ class TestZones(ZoneTest):
         self.assertEqual(len(self.o), len(self.noise))
 
     def test_add(self):
-        self.u.add(30)
-        self.o.add(30)
+        with self.assertTriggers(event=self.zone_events["entered"]):
+            self.u.add(30)
+
+        with self.assertTriggers(event=self.zone_events["entered"]):
+            self.o.add(30)
 
         self.assertEqual(set(self.u), set(self.noise) | {30})
         self.assertEqual(list(self.o), self.noise + [30])
-
-        self.assertLastEventsWere([self.zone_events["entered"]])
 
     def test_add_already_contains(self):
         self.resetEvents()
@@ -92,12 +93,16 @@ class TestZones(ZoneTest):
 
         self.card.zone = self.o
 
-        self.u.move(self.card)
+        with self.assertTriggers(event=self.zone_events["entered"]):
+            self.u.move(self.card)
+
         self.assertIn(self.card, self.u)
 
         self.card.zone = self.u
 
-        self.o.move(self.card)
+        with self.assertTriggers(event=self.zone_events["entered"]):
+            self.o.move(self.card)
+
         self.assertIn(self.card, self.o)
 
     def test_move_to_self(self):
@@ -110,8 +115,11 @@ class TestZones(ZoneTest):
         self.assertFalse(self.events.trigger.called)
 
     def test_pop(self):
-        e = self.u.pop()
-        self.o.pop()
+        with self.assertTriggers(event=self.zone_events["left"]):
+            e = self.u.pop()
+
+        with self.assertTriggers(event=self.zone_events["left"]):
+            self.o.pop()
 
         self.assertEqual(set(self.u), set(self.noise) - {e})
         self.assertEqual(list(self.o), self.noise[:-1])
@@ -120,8 +128,11 @@ class TestZones(ZoneTest):
         e = self.noise[-7]
         self.noise.remove(e)
 
-        self.u.remove(e)
-        self.o.remove(e)
+        with self.assertTriggers(event=self.zone_events["left"]):
+            self.u.remove(e)
+
+        with self.assertTriggers(event=self.zone_events["left"]):
+            self.o.remove(e)
 
         self.assertEqual(set(self.u), set(self.noise))
         self.assertEqual(list(self.o), self.noise)
@@ -138,6 +149,7 @@ class TestZones(ZoneTest):
         self.u.remove(self.noise[0], silent=True)
         self.o.remove(self.noise[0], silent=True)
 
+        self.u.pop(silent=True)
         self.o.pop(silent=True)
 
         self.assertFalse(self.events.trigger.called)
@@ -178,8 +190,12 @@ class TestOrderedZone(ZoneTest):
 
     def test_extend(self):
         self.o.extend(range(4))
+
         self.assertEqual(self.o[-4:], range(4))
         self.assertEqual(len(self.o), len(self.noise) + 4)
+
+        event = {"event" : self.zone_events["entered"]}
+        self.assertLastEventsWere([event] * 4)
 
     def test_index(self):
         e = self.noise[13]
@@ -193,6 +209,7 @@ class TestOrderedZone(ZoneTest):
         self.noise.pop(13)
 
         self.assertEqual(list(self.o), self.noise)
+        self.assertLastEventsWere([{"event" : self.zone_events["left"]}] * 2)
 
     def test_reverse(self):
         self.o.reverse()

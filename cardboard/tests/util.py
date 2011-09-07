@@ -16,6 +16,7 @@ that:
 
 """
 
+import contextlib
 import unittest
 
 import mock
@@ -161,11 +162,17 @@ class EventHandlerTestCase(unittest.TestCase):
         else:
             self.failUnexpectedEvents(events)
 
-    def checkRequirements(self, method, *args, **kwargs):
-        return _CheckRequirementsContext(self, method, *args, **kwargs)
-
     def assertSubscribed(self, fn, **kwargs):
         self.assertIn(((fn,), kwargs), self.events.subscribe.call_args_list)
+
+    @contextlib.contextmanager
+    def assertTriggers(self, **event):
+        self.resetEvents()
+        yield
+        self.assertLastEventsWere([event])
+
+    def checkRequirements(self, method, *args, **kwargs):
+        return _CheckRequirementsContext(self, method, *args, **kwargs)
 
     def resetEvents(self):
         self.events.trigger.call_args_list[:] = []
