@@ -22,6 +22,7 @@ def do_subscriptions(self, game=None):
     for method, subscription_options in subscriptions.iteritems():
         game.events.subscribe(method, **subscription_options)
 
+
 def log(game):
     event_log = logging.getLogger("Event Logger")
 
