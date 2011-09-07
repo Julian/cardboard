@@ -1,4 +1,4 @@
-from collections import MutableSet, Set
+from collections import Set
 import random
 
 from cardboard.events import events
@@ -62,8 +62,12 @@ class UnorderedZone(Set):
         e.zone.remove(e)
         self.add(e)
 
-    def pop(self):
-        return self._contents.pop()
+    def pop(self, silent=False):
+        try:
+            return self._contents.pop()
+        finally:
+            if not silent:
+                self.game.events.trigger(event=self._events["left"])
 
     def remove(self, e, silent=False):
         try:
@@ -131,8 +135,8 @@ class OrderedZone(Set):
         return self._order.count(e)
 
     def extend(self, i):
-        self._contents.update(i)
-        self._order.extend(i)
+        for e in i:
+            self.add(e)
 
     def index(self, e):
         return self._order.index(e)
