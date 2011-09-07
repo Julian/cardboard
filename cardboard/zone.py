@@ -14,7 +14,7 @@ def _zone(name):
     return zone
 
 
-class UnorderedZone(MutableSet):
+class UnorderedZone(Set):
 
     battlefield = _zone("Battlefield")
     exile = _zone("Exile")
@@ -30,6 +30,7 @@ class UnorderedZone(MutableSet):
 
         self.game = game
         self.name = name
+
         self._contents = set(contents)
         self._events = _events
 
@@ -46,29 +47,29 @@ class UnorderedZone(MutableSet):
         return "<Zone: {.name}>".format(self)
 
     def add(self, e, silent=False):
+        if e in self:
+            raise ValueError("{} is already in {}".format(e, self))
+
         self._contents.add(e)
 
         if not silent:
             self.game.events.trigger(event=self._events["entered"])
 
-    def discard(self, e, silent=False):
-        try:
-            self._contents.remove(e)
-        except KeyError:
-            pass
-        else:
-            if not silent:
-                self.game.events.trigger(event=self._events["left"])
-
     def move(self, e):
+        if e in self:
+            return
+
         e.zone.remove(e)
         self.add(e)
+
+    def pop(self):
+        return self._contents.pop()
 
     def remove(self, e, silent=False):
         try:
             self._contents.remove(e)
         except KeyError:
-            raise ValueError(e)
+            raise ValueError("{} not in zone.".format(e))
         else:
             if not silent:
                 self.game.events.trigger(event=self._events["left"])
@@ -117,33 +118,17 @@ class OrderedZone(Set):
         return "<Zone: {.name}>".format(self)
 
     def add(self, e, silent=False):
+        if e in self:
+            raise ValueError("{} is already in {}".format(e, self))
+
         self._contents.add(e)
         self._order.append(e)
 
         if not silent:
             self.game.events.trigger(event=self._events["entered"])
 
-    def clear(self, silent=False):
-        if not silent:
-            for i in self:
-                self.game.events.trigger(event=self._events["left"])
-
-        self._contents.clear()
-        self._order = []
-
     def count(self, e):
         return self._order.count(e)
-
-    def discard(self, e, silent=False):
-        self._contents.discard(e)
-
-        try:
-            self._order.remove(e)
-        except ValueError:
-            pass
-        else:
-            if not silent:
-                self.game.events.trigger(event=self._events["left"])
 
     def extend(self, i):
         self._contents.update(i)
@@ -153,6 +138,9 @@ class OrderedZone(Set):
         return self._order.index(e)
 
     def move(self, e):
+        if e in self:
+            return
+
         e.zone.remove(e)
         self.add(e)
 
@@ -170,9 +158,11 @@ class OrderedZone(Set):
         return e
 
     def remove(self, e, silent=False):
-        # order matters here, we want ValueError not KeyError
-        self._order.remove(e)
+        if e not in self:
+            raise ValueError("{} not in zone.".format(e))
+
         self._contents.remove(e)
+        self._order.remove(e)
 
         if not silent:
             self.game.events.trigger(event=self._events["left"])

@@ -65,27 +65,20 @@ class TestZones(ZoneTest):
 
         self.assertLastEventsWere([self.zone_events["entered"]])
 
-    def test_clear(self):
-        self.u.clear()
-        self.o.clear()
-        self.assertFalse(self.u)
-        self.assertFalse(self.o)
+    def test_add_already_contains(self):
+        self.resetEvents()
 
-    def test_discard(self):
-        e = self.noise[17]
-        self.noise.remove(e)
+        with self.assertRaises(ValueError):
+            self.u.add(self.noise[0])
 
-        self.u.discard(e)
-        self.u.discard(object())
+        with self.assertRaises(ValueError):
+            self.o.add(self.noise[0])
 
-        self.o.discard(e)
-        self.o.discard(object())
+        # wasn't added twice
+        self.assertIn(self.noise[0], self.u)
+        self.assertEqual(self.o.count(self.noise[0]), 1)
 
-        self.assertEqual(len(self.u), len(self.noise))
-        self.assertEqual(len(self.o), len(self.noise))
-
-        self.assertEqual(set(self.u), set(self.noise))
-        self.assertEqual(list(self.o), self.noise)
+        self.assertFalse(self.events.trigger.called)
 
     def test_events_default(self):
         u = z.UnorderedZone("Emerald Hill", self.noise)
@@ -106,6 +99,15 @@ class TestZones(ZoneTest):
 
         self.o.move(self.card)
         self.assertIn(self.card, self.o)
+
+    def test_move_to_self(self):
+        self.resetEvents()
+
+        # shouldn't even be checking noise[0].zone
+        self.u.move(self.noise[0])
+        self.o.move(self.noise[0])
+
+        self.assertFalse(self.events.trigger.called)
 
     def test_pop(self):
         e = self.u.pop()
@@ -133,16 +135,25 @@ class TestZones(ZoneTest):
         self.u.add(20, silent=True)
         self.o.add(20, silent=True)
 
-        self.u.discard(20, silent=True)
-        self.o.discard(20, silent=True)
-
         self.u.remove(self.noise[0], silent=True)
         self.o.remove(self.noise[0], silent=True)
 
         self.o.pop(silent=True)
-        self.o.clear(silent=True)
 
         self.assertFalse(self.events.trigger.called)
+
+    def test_iterable(self):
+        i = range(10)
+
+        # TODO: This is incomplete, all the methods don't take iterables
+        o = z.OrderedZone(game=None, name="Emerald Hill", contents=i)
+        u = z.UnorderedZone(game=None, name="Emerald Hill", contents=i)
+
+        i.pop()
+
+        self.assertEqual(list(o), range(10))
+        self.assertEqual(list(u), range(10))
+
 
 class TestOrderedZone(ZoneTest):
     def test_reversed(self):
@@ -193,14 +204,6 @@ class TestOrderedZone(ZoneTest):
 
         shuffle.assert_called_once_with(self.o._order)
 
-    def test_iterable(self):
-        # TODO: This is incomplete, all the methods don't take iterables
-        o = z.OrderedZone(game=None, name="Emerald Hill",
-                          contents=iter(range(40)))
-        self.assertIn(2, o)
-        self.assertTrue(list(o))
-
-
 class TestZone(unittest.TestCase):
     def test_zone(self):
         c = mock.Mock()
@@ -216,9 +219,3 @@ class TestZone(unittest.TestCase):
             self.assertIsInstance(n, z.OrderedZone)
             self.assertEquals(n.name, zone.title())
             self.assertIn(c, n)
-
-    """
-    def test_zone_same(self):
-        self.creature.zone = self.player.library
-        self.assertLastEventsWereNot(events["card"]["zones"]["library"]["entered"])
-    """
