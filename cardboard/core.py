@@ -93,12 +93,13 @@ class ManaPool(object):
         for color in self.POOLS:
             setattr(self, color, 0)
 
-    def pay(self, colorless=0, white=0, blue=0, black=0, red=0, green=0):
-
+    def can_pay(self, colorless=0, white=0, blue=0, black=0, red=0, green=0):
         payment = (colorless, white, blue, black, red, green)
-        if any(int(i) > j for i, j in zip(payment, self.contents)):
-            raise exceptions.InvalidAction("Not enough mana for payment.")
+        return all(int(i) <= j for i, j in zip(payment, self.contents))
 
+    def pay(self, colorless=0, white=0, blue=0, black=0, red=0, green=0):
+        if not self.can_pay(colorless, white, blue, black, red, green):
+            raise exceptions.InvalidAction("Not enough mana for payment.")
         return self.add(-colorless, -white, -blue, -black, -red, -green)
 
 

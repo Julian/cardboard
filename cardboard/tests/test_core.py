@@ -12,6 +12,21 @@ class TestManaPool(GameTestCase):
         self.p1.mana_pool.add(1, 2, 3, 4, 5, 6)
         self.assertEqual(list(self.p1.mana_pool), [1, 2, 3, 4, 5, 6])
 
+    def test_can_pay(self):
+        self.game.start()
+
+        self.p1.mana_pool.add(1, 2, 3, 4, 5, 6)
+
+        self.assertTrue(self.p1.mana_pool.can_pay(1))
+        self.assertTrue(self.p1.mana_pool.can_pay(1, blue=2))
+        self.assertTrue(self.p1.mana_pool.can_pay(1, white=2, blue=3, black=4,
+                                                     red=5, green=6))
+
+        self.assertFalse(self.p1.mana_pool.can_pay(10))
+        self.assertFalse(self.p1.mana_pool.can_pay(1, black=8))
+        self.assertFalse(self.p1.mana_pool.can_pay(1, white=2, blue=9, black=4,
+                                                      red=7, green=6))
+
     def test_add_pay(self):
         self.game.start()
 
