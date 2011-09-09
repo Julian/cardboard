@@ -9,58 +9,58 @@ class TestManaPool(GameTestCase):
     def test_iter(self):
         self.game.start()
 
-        self.p1.mana_pool += (1, 2, 3, 4, 5, 6)
+        self.p1.mana_pool.add(1, 2, 3, 4, 5, 6)
         self.assertEqual(list(self.p1.mana_pool), [1, 2, 3, 4, 5, 6])
 
-    def test_iadd_isub(self):
+    def test_add_pay(self):
         self.game.start()
 
-        self.p1.mana_pool += (2, 4, 6, 8, 10, 12)
-        self.p1.mana_pool += (2, 4, 6, 8, 10, 12)
+        self.p1.mana_pool.add(2, 4, 6, 8, 10, 12)
+        self.p1.mana_pool.add(2, white=4, blue=6, black=8, red=10, green=12)
 
-        self.assertEqual(self.p1.mana_pool.white, 4)
-        self.assertEqual(self.p1.mana_pool.blue, 8)
-        self.assertEqual(self.p1.mana_pool.black, 12)
-        self.assertEqual(self.p1.mana_pool.red, 16)
-        self.assertEqual(self.p1.mana_pool.green, 20)
-        self.assertEqual(self.p1.mana_pool.colorless, 24)
+        self.assertEqual(self.p1.mana_pool.colorless, 4)
+        self.assertEqual(self.p1.mana_pool.white, 8)
+        self.assertEqual(self.p1.mana_pool.blue, 12)
+        self.assertEqual(self.p1.mana_pool.black, 16)
+        self.assertEqual(self.p1.mana_pool.red, 20)
+        self.assertEqual(self.p1.mana_pool.green, 24)
 
-        self.p1.mana_pool -= (2, 4, 6, 8, 10, 12)
+        self.p1.mana_pool.pay(2, 4, 6, 8, 10, 12)
         self.assertEqual(self.p1.mana_pool.contents, (2, 4, 6, 8, 10, 12))
 
-        self.p1.mana_pool -= (2, 4, 6, 8, 10, 12)
+        self.p1.mana_pool.pay(2, white=4, blue=6, black=8, red=10, green=12)
         self.assertTrue(self.p1.mana_pool.is_empty)
 
-        self.assertIs(NotImplemented, self.p1.mana_pool.__iadd__(object()))
-        self.assertIs(NotImplemented, self.p1.mana_pool.__isub__(object()))
+        with self.assertRaises(TypeError):
+            self.p1.mana_pool.add(object())
 
-        # non-length 6 sequence should be a ValueError
-        with self.assertRaises(ValueError):
-            self.p1.mana_pool += (1, 2, 3)
+        self.assertTrue(self.p1.mana_pool.is_empty)
 
-        with self.assertRaises(ValueError):
-            self.p1.mana_pool -= (1, 2, 3)
+        with self.assertRaises(TypeError):
+            self.p1.mana_pool.pay(object())
+
+        self.assertTrue(self.p1.mana_pool.is_empty)
 
     def test_repr(self):
         self.game.start()
 
-        self.assertEqual(repr(self.p1.mana_pool), "(0W, 0U, 0B, 0R, 0G, 0)")
+        self.assertEqual(repr(self.p1.mana_pool), "(0, 0W, 0U, 0B, 0R, 0G)")
 
-        for i, color in enumerate(self.p1.mana_pool.COLORS):
+        for i, color in enumerate(c.ManaPool.POOLS):
             setattr(self.p1.mana_pool, color, i)
 
-        self.assertEqual(repr(self.p1.mana_pool), "(0W, 1U, 2B, 3R, 4G, 5)")
+        self.assertEqual(repr(self.p1.mana_pool), "(0, 1W, 2U, 3B, 4R, 5G)")
 
-    def test_colors(self):
-        self.assertEqual(self.p1.mana_pool.COLORS, ("white", "blue",
-                         "black", "red", "green", "colorless"))
+    def test_pools(self):
+        self.assertEqual(c.ManaPool.POOLS, ("colorless", "white", "blue",
+                                            "black", "red", "green"))
 
     def test_mana_changed(self):
         self.game.start()
 
         mana_events = events["player"]["mana"]
 
-        for color in self.p1.mana_pool.COLORS:
+        for color in c.ManaPool.POOLS:
             current = getattr(self.p1.mana_pool, color)
             setattr(self.p1.mana_pool, color, current)
             self.assertLastEventsWereNot([mana_events[color]["added"]])
@@ -75,18 +75,18 @@ class TestManaPool(GameTestCase):
         self.game.start()
 
         self.assertTrue(self.p1.mana_pool.is_empty)
-        self.p1.mana_pool += (1, 2, 3, 4, 5, 6)
+        self.p1.mana_pool.add(1, 2, 3, 4, 5, 6)
         self.assertFalse(self.p1.mana_pool.is_empty)
 
     def test_empty(self):
         self.game.start()
 
-        self.p1.mana_pool += (1, 2, 3, 4, 5, 6)
+        self.p1.mana_pool.add(1, 2, 3, 4, 5, 6)
         self.p1.mana_pool.empty()
         self.assertTrue(self.p1.mana_pool.is_empty)
 
     def test_unstarted(self):
-        for color in self.p1.mana_pool.COLORS:
+        for color in c.ManaPool.POOLS:
             with self.assertRaises(exceptions.InvalidAction):
                 setattr(self.p1.mana_pool, color, 2)
 
@@ -204,7 +204,7 @@ class TestPlayer(GameTestCase):
 
         self.assertRaises(ValueError, self.p1.draw, -1)
 
-        for color in self.p1.mana_pool.COLORS:
+        for color in c.ManaPool.POOLS:
             with self.assertRaises(ValueError):
                 setattr(self.p1.mana_pool, color, -1)
 
@@ -542,8 +542,8 @@ class TestTurnManager(GameTestCase):
         self.game.start()
 
         for _ in range(20):
-            self.p1.mana_pool += (1, 2, 3, 4, 5, 6)
-            self.p2.mana_pool += (2, 2, 2, 2, 2, 2)
+            self.p1.mana_pool.add(1, 2, 3, 4, 5, 6)
+            self.p2.mana_pool.add(2, 2, 2, 2, 2, 2)
 
             self.game.turn.next()
 

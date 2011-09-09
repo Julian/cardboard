@@ -114,27 +114,44 @@ class TestCard(GameTestCase):
         card.is_permanent
         mt.assert_called_once_with()
 
-    def test_cast_permanent(self):
-        self.game.battlefield.move = mock.Mock()
+    def test_cast(self):
+        """
+        Casting a spell should follow a specific series of steps.
+
+        The steps are outlined in :ref:`cast-steps`.
+
+        """
 
         # TODO: Test all types
+
         self.creature.cast()
-        self.game.battlefield.move.assert_called_with(self.creature)
-        self.assertLastEventsWere([events["card"]["cast"]])
-
-    def test_cast_nonpermanent(self):
-        self.p4.graveyard.move = mock.Mock()
-
-        # TODO: Test all types
         self.instant.cast()
-        self.p4.graveyard.move.assert_called_with(self.instant)
+
+        # instant spell on top
+        creature_spell, instant_spell = self.game.stack
+
+        self.assertIs(creature_spell.card, self.creature)
+        self.assertIs(instant_spell.card, self.instant)
+
+        # controller is set to owner
+        self.assertIs(creature_spell.card.controller, self.p4)
+        self.assertIs(instant_spell.card.controller, self.p4)
+
         self.assertLastEventsWere([events["card"]["cast"]])
 
-class TestStatus(TestCard):
+
+class TestStatus(GameTestCase):
     def setUp(self):
         super(TestStatus, self).setUp()
 
-        self.resetEvents()
+        self.creature_db_card = mock.Mock()
+        self.creature_db_card.name = "Test Creature"
+        self.creature_db_card.type = types.creature
+
+        self.creature = c.Card(self.creature_db_card)
+
+        self.library[-1] = self.creature
+        self.p3 = self.game.add_player(library=self.library)
 
         self.evs = [("tapped", "untapped"),
                     ("flipped", "unflipped"),
@@ -145,6 +162,9 @@ class TestStatus(TestCard):
                     (self.creature.flip, self.creature.unflip),
                     (self.creature.turn_face_down, self.creature.turn_face_up),
                     (self.creature.phase_out, self.creature.phase_in)]
+
+        self.game.start()
+        self.resetEvents()
 
     def test_not_on_battlefield(self):
         for default, nondefault in self.fns:
@@ -205,3 +225,22 @@ class TestStatus(TestCard):
 
         # didn't fire any events
         self.assertFalse(self.events.trigger.called)
+
+
+class TestSpell(GameTestCase):
+    def setUp(self):
+        super(TestSpell, self).setUp()
+
+        self.db_card = mock.Mock()
+        self.db_card.name = "Test Creature"
+        self.db_card.type = types.creature
+
+        self.card = c.Card(self.db_card)
+        self.spell = c.Spell(self.card)
+
+    def test_str_repr(self):
+        self.assertEqual(str(self.spell), "Test Creature")
+        self.assertEqual(repr(self.spell), "<Spell: Test Creature>")
+
+    def test_init(self):
+        self.assertIs(self.spell.card, self.card)

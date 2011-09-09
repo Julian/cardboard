@@ -14,7 +14,11 @@ from cardboard.util import requirements
 from cardboard.zone import zone
 
 
-__all__ = ["Game", "ManaPool", "Player", "TurnManager", "do_subscriptions"]
+__all__ = ["COLORS", "COLORS_ABBR",
+           "Game", "ManaPool", "Player", "TurnManager"]
+
+COLORS = ("white", "blue", "black", "red", "green")
+COLORS_ABBR = dict(zip("WUBRG", COLORS))
 
 
 def _make_color(name):
@@ -54,59 +58,43 @@ class ManaPool(object):
 
     """
 
-    COLORS = ("white", "blue", "black", "red", "green", "colorless")
+    POOLS = ("colorless",) + COLORS
 
     _white = _blue = _black = _red = _green = _colorless = 0
-
-    white = _make_color("white")
-    blue = _make_color("blue")
-    black = _make_color("black")
-    red = _make_color("red")
-    green = _make_color("green")
-    colorless = _make_color("colorless")
+    colorless, white, blue, black, red, green = (_make_color(p) for p in POOLS)
 
     def __init__(self, owner):
         super(ManaPool, self).__init__()
         self.owner = owner
 
-    def __iadd__(self, amount):
-        try:
-            if len(amount) != 6:
-                err = "Expected 6 values, got {}"
-                raise ValueError(err.format(len(amount)))
-        except TypeError:
-            return NotImplemented
-        else:
-            for color, new_amount in zip(self.COLORS, amount):
-                setattr(self, color, getattr(self, color) + new_amount)
-
-        return self
-
-    def __isub__(self, amount):
-        try:
-            self += [-i for i in amount]
-        except TypeError:
-            # this can still raise a TypeError on iterating
-            return NotImplemented
-        return self
-
     def __iter__(self):
         return iter(self.contents)
 
     def __repr__(self):
-        return "({}W, {}U, {}B, {}R, {}G, {})".format(*self.contents)
+        return "({}, {}W, {}U, {}B, {}R, {}G)".format(*self.contents)
 
     @property
     def contents(self):
-        return tuple(getattr(self, color) for color in self.COLORS)
+        return tuple(getattr(self, color) for color in self.POOLS)
 
     @property
     def is_empty(self):
-        return self.contents == (0, 0, 0, 0, 0, 0)
+        return not any(self.contents)
+
+    def add(self, colorless=0, white=0, blue=0, black=0, red=0, green=0):
+        self.colorless += colorless
+        self.white += white
+        self.blue += blue
+        self.black += black
+        self.red += red
+        self.green += green
 
     def empty(self):
-        for color in self.COLORS:
+        for color in self.POOLS:
             setattr(self, color, 0)
+
+    def pay(self, colorless=0, white=0, blue=0, black=0, red=0, green=0):
+        return self.add(-colorless, -white, -blue, -black, -red, -green)
 
 
 class Player(object):

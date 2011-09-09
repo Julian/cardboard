@@ -1,16 +1,10 @@
 from operator import attrgetter
 
 from cardboard import exceptions, types
+from cardboard.core import COLORS_ABBR
 from cardboard.db import models, Session
 from cardboard.events import events
 from cardboard.util import requirements
-
-
-COLORS = {"B" : "black",
-          "G" : "green",
-          "R" : "red",
-          "U" : "blue",
-          "W" : "white"}
 
 
 def status(name, on_event, off_event, default=True):
@@ -108,7 +102,7 @@ class Card(object):
     @property
     def colors(self):
         return (self._changed_colors or
-                {COLORS[i] for i in self.mana_cost if i.isalpha()})
+                {COLORS_ABBR[i] for i in self.mana_cost if i.isalpha()})
 
     @property
     def is_permanent(self):
@@ -136,10 +130,23 @@ class Card(object):
         """
 
         self.game.require(started=True)
-
-        if self.is_permanent:
-            self.game.battlefield.move(self)
-        else:
-            self.controller.graveyard.move(self)
-
+        self.game.stack.add(Spell(self))
         self.game.events.trigger(event=events["card"]["cast"])
+
+
+class Spell(object):
+    """
+    A spell is a card or copy of a card that is placed on the stack.
+
+    """
+
+    def __init__(self, card=None):
+        super(Spell, self).__init__()
+
+        self.card = card
+
+    def __str__(self):
+        return str(self.card)
+
+    def __repr__(self):
+        return "<Spell: {}>".format(self.card)
