@@ -38,7 +38,7 @@ def _make_color(name):
         current = getattr(self, name)
 
         if amount < 0:
-            err = "{} mana pool cannot be negative."
+            err = "{} mana pool would be negative."
             raise ValueError(err.format(name.title()))
         elif amount == current:
             return
@@ -94,6 +94,11 @@ class ManaPool(object):
             setattr(self, color, 0)
 
     def pay(self, colorless=0, white=0, blue=0, black=0, red=0, green=0):
+
+        payment = (colorless, white, blue, black, red, green)
+        if any(int(i) > j for i, j in zip(payment, self.contents)):
+            raise exceptions.InvalidAction("Not enough mana for payment.")
+
         return self.add(-colorless, -white, -blue, -black, -red, -green)
 
 

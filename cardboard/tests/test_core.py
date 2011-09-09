@@ -41,6 +41,16 @@ class TestManaPool(GameTestCase):
 
         self.assertTrue(self.p1.mana_pool.is_empty)
 
+    def test_pay_is_atomic(self):
+        self.game.start()
+
+        self.p1.mana_pool.add(2, 0, 4, 0, 6, 0)
+
+        with self.assertRaises(exceptions.InvalidAction):
+            self.p1.mana_pool.pay(2, 0, 4, 0, 6, 3)
+
+        self.assertEqual(self.p1.mana_pool.contents, (2, 0, 4, 0, 6, 0))
+
     def test_repr(self):
         self.game.start()
 
@@ -202,11 +212,21 @@ class TestPlayer(GameTestCase):
     def test_negatives(self):
         self.game.start()
 
-        self.assertRaises(ValueError, self.p1.draw, -1)
+        lib, hand = list(self.p1.library), set(self.p1.hand)
+
+        with self.assertRaises(ValueError):
+            self.p1.draw(-1)
+
+        self.assertEqual(list(self.p1.library), lib)
+        self.assertEqual(set(self.p1.hand), hand)
 
         for color in c.ManaPool.POOLS:
+            was = getattr(self.p1.mana_pool, color)
+
             with self.assertRaises(ValueError):
                 setattr(self.p1.mana_pool, color, -1)
+
+            self.assertEqual(getattr(self.p1.mana_pool, color), was)
 
     def test_shallow_copies_library(self):
         library = [mock.Mock() for _ in range(10)]
