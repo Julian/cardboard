@@ -19,9 +19,9 @@ Casting Spells
 601.1
 -----
 
-Previously, the action of casting a spell, or casting a card as a spell, was :ref:erred to on cards as "playing" that spell or that card. Cards that were printed with that text have received errata in the Oracle card reference so they now refer to "casting" that spell or that card.
+Previously, the action of casting a spell, or casting a card as a spell, was referred to on cards as "playing" that spell or that card. Cards that were printed with that text have received errata in the Oracle card reference so they now refer to "casting" that spell or that card.
 
-    a. Some effects still :ref:er to "playing" a card. "Playing a card" means playing that card as a land or casting that card as a spell, whichever is appropriate.
+    a. Some effects still refer to "playing" a card. "Playing a card" means playing that card as a land or casting that card as a spell, whichever is appropriate.
 
 601.2
 -----
@@ -85,8 +85,8 @@ Activated abilities have a cost and an effect. They are written as "[Cost]: [Eff
             The activation cost of an ability that reads "|2|, |T|: You gain 1 life" is two mana of any type plus tapping the permanent that has the ability.
 
     b. Some text after the colon of an activated ability states instructions that must be followed while activating that ability. Such text may state which players can activate that ability, may restrict when a player can activate the ability, or may define some aspect of the activation cost. This text is not part of the ability's effect. It functions at all times. If an activated ability has any activation instructions, they appear last, after the ability's effect.
-    c. An activated ability is the only kind of ability that can be activated.  If an object or rule :ref:ers to activating an ability without specifying what kind, it must be referring to an activated ability.
-    d. Previously, the action of using an activated ability was :ref:erred to on cards as "playing" that ability. Cards that were printed with that text have received errata in the Oracle card reference so they now refer to "activating" that ability.
+    c. An activated ability is the only kind of ability that can be activated.  If an object or rule refers to activating an ability without specifying what kind, it must be referring to an activated ability.
+    d. Previously, the action of using an activated ability was referred to on cards as "playing" that ability. Cards that were printed with that text have received errata in the Oracle card reference so they now refer to "activating" that ability.
 
 602.2
 -----
@@ -94,7 +94,7 @@ Activated abilities have a cost and an effect. They are written as "[Cost]: [Eff
 To activate an ability is to put it onto the stack and pay its costs, so that it will eventually resolve and have its effect. Only an object's controller (or its owner, if it doesn't have a controller) can activate its activated ability unless the object specifically says otherwise. Activating an ability follows the steps listed below, in order. If, at any point during the activation of an ability, a player is unable to comply with any of those steps, the activation is illegal; the game returns to the moment before that ability started to be activated (see rule 716, "Handling Illegal Actions").  Announcements and payments can't be altered after they've been made.
 
     a. The player announces that he or she is activating the ability. If an activated ability is being activated from a hidden zone, the card that has that ability is revealed. That ability is created on the stack as an object that's not a card. It becomes the topmost object on the stack. It has the text of the ability that created it, and no other characteristics. Its controller is the player who activated the ability. The ability remains on the stack until it's countered, it resolves, or an effect moves it elsewhere.
-    b. The remainder of the process for activating an ability is identical to the process for casting a spell listed in rules 601.2b-h. Those rules apply to activating an ability just as they apply to casting a spell. An activated ability's analog to a spell's mana cost (as :ref:erenced in rule 601.2e) is its activation cost.
+    b. The remainder of the process for activating an ability is identical to the process for casting a spell listed in rules 601.2b-h. Those rules apply to activating an ability just as they apply to casting a spell. An activated ability's analog to a spell's mana cost (as referenced in rule 601.2e) is its activation cost.
 
 602.3
 -----
@@ -172,7 +172,7 @@ Once an ability has triggered, its controller puts it on the stack as an object 
 603.4
 -----
 
-A triggered ability may read "When/Whenever/At [trigger event], if [condition], [effect]." When the trigger event occurs, the ability checks whether the stated condition is true. The ability triggers only if it is; otherwise it does nothing. If the ability triggers, it checks the stated condition again as it resolves. If the condition isn't true at that time, the ability is removed from the stack and does nothing. Note that this mirrors the check for legal targets. This rule is :ref:erred to as the "intervening 'if' clause" rule. (The word "if" has only its normal English meaning anywhere else in the text of a card; this rule only applies to an "if" that immediately follows a trigger condition.) Example: Felidar Sovereign reads, "At the beginning of your upkeep, if you have 40 or more life, you win the game." Its controller's life total is checked as that player's upkeep begins. If that player has 39 or less life, the ability doesn't trigger at all. If that player has 40 or more life, the ability triggers and goes on the stack. As the ability resolves, that player's life total is checked again. If that player has 39 or less life at this time, the ability is removed from the stack and has no effect. If that player has 40 or more life at this time, the ability resolves and that player wins the game.
+A triggered ability may read "When/Whenever/At [trigger event], if [condition], [effect]." When the trigger event occurs, the ability checks whether the stated condition is true. The ability triggers only if it is; otherwise it does nothing. If the ability triggers, it checks the stated condition again as it resolves. If the condition isn't true at that time, the ability is removed from the stack and does nothing. Note that this mirrors the check for legal targets. This rule is referred to as the "intervening 'if' clause" rule. (The word "if" has only its normal English meaning anywhere else in the text of a card; this rule only applies to an "if" that immediately follows a trigger condition.) Example: Felidar Sovereign reads, "At the beginning of your upkeep, if you have 40 or more life, you win the game." Its controller's life total is checked as that player's upkeep begins. If that player has 39 or less life, the ability doesn't trigger at all. If that player has 40 or more life, the ability triggers and goes on the stack. As the ability resolves, that player's life total is checked again. If that player has 39 or less life at this time, the ability is removed from the stack and has no effect. If that player has 40 or more life at this time, the ability resolves and that player wins the game.
 
 603.5
 -----
@@ -219,7 +219,7 @@ An effect may create a delayed triggered ability that can do something at a late
             If an effect reads "When this creature becomes untapped" and the named creature becomes untapped before the effect resolves, the ability waits for the next time that creature untaps.
 
     b. A delayed triggered ability will trigger only once -- the next time its trigger event occurs -- unless it has a stated duration, such as "this turn."
-    c. A delayed triggered ability that :ref:ers to a particular object still affects it even if the object changes characteristics. However, if that object is no longer in the zone it's expected to be in at the time the delayed triggered ability resolves, the ability won't affect it. (Note that if that object left that zone and then returned, it's a new object and thus won't be affected. See rule 400.7.) Example: An ability that reads "Exile this creature at the beginning of the next end step" will exile the permanent even if it's no longer a creature during the next end step. However, it won't do anything if the permanent left the battlefield before then.
+    c. A delayed triggered ability that refers to a particular object still affects it even if the object changes characteristics. However, if that object is no longer in the zone it's expected to be in at the time the delayed triggered ability resolves, the ability won't affect it. (Note that if that object left that zone and then returned, it's a new object and thus won't be affected. See rule 400.7.) Example: An ability that reads "Exile this creature at the beginning of the next end step" will exile the permanent even if it's no longer a creature during the next end step. However, it won't do anything if the permanent left the battlefield before then.
     d. If a spell creates a delayed triggered ability, the source of that delayed triggered ability is that spell. The controller of that delayed triggered ability is the player who controlled that spell as it resolved.
     e. If an activated or triggered ability creates a delayed triggered ability, the source of that delayed triggered ability is the same as the source of that other ability. The controller of that delayed triggered ability is the player who controlled that other ability as it resolved.
     f. If a static ability generates a replacement effect which causes a delayed triggered ability to be created, the source of that delayed triggered ability is the object with that static ability. The controller of that delayed triggered ability is the same as the controller of that object at the time the replacement effect was applied.
@@ -279,7 +279,7 @@ Many Auras, Equipment, and Fortifications have static abilities that modify the 
 604.5
 -----
 
-Some static abilities apply while a spell is on the stack. These are often abilities that :ref:er to countering the spell. Also, abilities that say "As an additional cost to cast . . . ," "You may pay [cost] rather than pay [this object]'s mana cost," and "You may cast [this object] without paying its mana cost" work while a spell is on the stack.
+Some static abilities apply while a spell is on the stack. These are often abilities that refer to countering the spell. Also, abilities that say "As an additional cost to cast . . . ," "You may pay [cost] rather than pay [this object]'s mana cost," and "You may cast [this object] without paying its mana cost" work while a spell is on the stack.
 
 604.6
 -----
@@ -338,7 +338,7 @@ Triggered mana abilities follow all the rules for other triggered abilities (see
 Abilities that don't meet the criteria specified in rules 605.1a-b and spells aren't mana abilities.
 
     a. An ability with a target is not a mana ability, even if it could put mana into a player's mana pool when it resolves. The same is true for a triggered ability that could produce mana but triggers from an event other than activating a mana ability, or a triggered ability that triggers from activating a mana ability but couldn't produce mana. These follow the normal rules for activated or triggered abilities, as appropriate.
-    b. A spell can never be a mana ability, even if it could put mana into a player's mana pool when it resolves. It's cast and resolves just like any other spell. Some older cards were printed with the card type "mana source"; these cards have received errata in the Oracle card :ref:erence and are now instants.
+    b. A spell can never be a mana ability, even if it could put mana into a player's mana pool when it resolves. It's cast and resolves just like any other spell. Some older cards were printed with the card type "mana source"; these cards have received errata in the Oracle card reference and are now instants.
 
 .. _loyalty-abilities:
 
@@ -378,7 +378,7 @@ Linked Abilities
 607.1
 -----
 
-An object may have two abilities printed on it such that one of them causes actions to be taken or objects to be affected and the other one directly :ref:ers to those actions or objects. If so, these two abilities are linked: the second refers only to actions that were taken or objects that were affected by the first, and not by any other ability.
+An object may have two abilities printed on it such that one of them causes actions to be taken or objects to be affected and the other one directly refers to those actions or objects. If so, these two abilities are linked: the second refers only to actions that were taken or objects that were affected by the first, and not by any other ability.
 
     a. An ability printed on an object within another ability that grants that ability to that object is still considered to be "printed on" that object for these purposes.
     b. An ability printed on an object that fulfills both criteria described in rule 607.1 is linked to itself.
@@ -388,15 +388,15 @@ An object may have two abilities printed on it such that one of them causes acti
 
 There are different kinds of linked abilities.
 
-    a. If an object has an activated or triggered ability printed on it that instructs a player to exile one or more cards and an ability printed on it that :ref:ers either to "the exiled cards" or to cards "exiled with [this object]," these abilities are linked. The second ability refers only to cards in the exile zone that were put there as a result of an instruction to exile them in the first ability.
-    b. If an object has an ability printed on it that generates a replacement effect which causes one or more cards to be exiled and an ability printed on it that :ref:ers either to "the exiled cards" or to cards "exiled with [this object]," these abilities are linked. The second ability refers only to cards in the exile zone that were put there as a direct result of a replacement event caused by the first ability. See rule 614, "Replacement Effects."
-    c. If an object has an activated or triggered ability printed on it that puts one or more objects onto the battlefield and an ability printed on it that :ref:ers to objects "put onto the battlefield with [this object]," those abilities are linked. The second can refer only to objects put onto the battlefield as a result of the first.
-    d. If an object has an ability printed on it that causes a player to "choose a [value]" or "name a card" and an ability printed on it that :ref:ers to "the chosen [value]," "the last chosen [value]," or "the named card," those abilities are linked. The second ability refers only to a choice made as a result of the first ability.
-    e. If an object has an ability printed on it that causes a player to choose from between two or more words that otherwise have no rules meaning and an ability printed on it that :ref:ers to a choice involving one or more of those words, those abilities are linked. The second can refer only to a choice made as a result of the first ability.
-    f. If an object has an ability printed on it that causes a player to pay a cost as it enters the battlefield and an ability printed on it that :ref:ers to the cost paid "as [this object] entered the battlefield," these abilities are linked. The second ability refers only to a cost paid as a result of the first ability.
-    g. If an object has both a static ability and a triggered ability printed on it in the same paragraph, those abilities are linked. The triggered ability :ref:ers only to actions taken as a result of the static ability. See rule 603.10.
-    h. If an object has a kicker ability printed on it and an ability printed on it that :ref:ers to whether that object was kicked, those abilities are linked. The second refers only to whether the intent to pay the kicker cost listed in the first was declared as the object was cast as a spell. If a kicker ability lists multiple costs, it will have multiple abilities linked to it.  Each of those abilities will specify which kicker cost it refers to. See rule 702.31, "Kicker."
-    i. If an object has an ability printed on it that causes a player to pay a variable additional cost as it's cast and an ability printed on it that :ref:ers to the cost paid "as [this object] was cast," these abilities are linked. The second refers only to the value chosen for the cost listed in the first as the object was cast as a spell. See rule 601.2b.
+    a. If an object has an activated or triggered ability printed on it that instructs a player to exile one or more cards and an ability printed on it that refers either to "the exiled cards" or to cards "exiled with [this object]," these abilities are linked. The second ability refers only to cards in the exile zone that were put there as a result of an instruction to exile them in the first ability.
+    b. If an object has an ability printed on it that generates a replacement effect which causes one or more cards to be exiled and an ability printed on it that refers either to "the exiled cards" or to cards "exiled with [this object]," these abilities are linked. The second ability refers only to cards in the exile zone that were put there as a direct result of a replacement event caused by the first ability. See rule 614, "Replacement Effects."
+    c. If an object has an activated or triggered ability printed on it that puts one or more objects onto the battlefield and an ability printed on it that refers to objects "put onto the battlefield with [this object]," those abilities are linked. The second can refer only to objects put onto the battlefield as a result of the first.
+    d. If an object has an ability printed on it that causes a player to "choose a [value]" or "name a card" and an ability printed on it that refers to "the chosen [value]," "the last chosen [value]," or "the named card," those abilities are linked. The second ability refers only to a choice made as a result of the first ability.
+    e. If an object has an ability printed on it that causes a player to choose from between two or more words that otherwise have no rules meaning and an ability printed on it that refers to a choice involving one or more of those words, those abilities are linked. The second can refer only to a choice made as a result of the first ability.
+    f. If an object has an ability printed on it that causes a player to pay a cost as it enters the battlefield and an ability printed on it that refers to the cost paid "as [this object] entered the battlefield," these abilities are linked. The second ability refers only to a cost paid as a result of the first ability.
+    g. If an object has both a static ability and a triggered ability printed on it in the same paragraph, those abilities are linked. The triggered ability refers only to actions taken as a result of the static ability. See rule 603.10.
+    h. If an object has a kicker ability printed on it and an ability printed on it that refers to whether that object was kicked, those abilities are linked. The second refers only to whether the intent to pay the kicker cost listed in the first was declared as the object was cast as a spell. If a kicker ability lists multiple costs, it will have multiple abilities linked to it.  Each of those abilities will specify which kicker cost it refers to. See rule 702.31, "Kicker."
+    i. If an object has an ability printed on it that causes a player to pay a variable additional cost as it's cast and an ability printed on it that refers to the cost paid "as [this object] was cast," these abilities are linked. The second refers only to the value chosen for the cost listed in the first as the object was cast as a spell. See rule 601.2b.
     j. The two abilities represented by the champion keyword are linked abilities. See rule 702.70, "Champion."
 
 607.3
@@ -448,13 +448,13 @@ If the object that's resolving is an instant spell, a sorcery spell, or an abili
     e. Some spells and abilities have multiple steps or actions, denoted by separate sentences or clauses, that involve multiple players. In these cases, the choices for the first action are made in APNAP order, and then the first action is processed simultaneously. Then the choices for the second action are made in APNAP order, and then that action is processed simultaneously, and so on. See rule 101.4.
     f. If an effect gives a player the option to pay mana, he or she may activate mana abilities before taking that action. If an effect specifically instructs or allows a player to cast a spell during resolution, he or she does so by putting that spell on top of the stack, then continuing to cast it by following the steps in rules 601.2a-h, except no player receives priority after it's cast. The currently resolving spell or ability then continues to resolve, which may include casting other spells this way. No other spells can normally be cast and no other abilities can normally be activated during resolution.
     g. If an effect requires information from the game (such as the number of creatures on the battlefield), the answer is determined only once, when the effect is applied. If the effect requires information from a specific object, including the source of the ability itself or a target that's become illegal, the effect uses the current information of that object if it's in the public zone it was expected to be in; if it's no longer in that zone, or if the effect has moved it from a public zone to a hidden zone, the effect uses the object's last known information. See rule 112.7a. If an ability states that an object does something, it's the object as it exists -- or as it most recently existed -- that does it, not the ability.
-    h. If an effect :ref:ers to certain characteristics, it checks only for the value of the specified characteristics, regardless of any related ones an object may also have.
+    h. If an effect refers to certain characteristics, it checks only for the value of the specified characteristics, regardless of any related ones an object may also have.
 
         .. admonition:: Example
 
             An effect that reads "Destroy all black creatures" destroys a white-and-black creature, but one that reads "Destroy all nonblack creatures" doesn't.
 
-    i. If an ability's effect :ref:ers to a specific untargeted object that has been previously referred to by that ability's cost or trigger condition, it still affects that object even if the object has changed characteristics.
+    i. If an ability's effect refers to a specific untargeted object that has been previously referred to by that ability's cost or trigger condition, it still affects that object even if the object has changed characteristics.
 
         .. admonition:: Example
 
@@ -529,7 +529,7 @@ Some continuous effects are replacement effects or prevention effects.  See rule
 
 Some effects apply to damage from a source -- for example, "The next time a red source of your choice would deal damage to you this turn, prevent that damage."
 
-    a. If an effect requires a player to choose a source of damage, he or she may choose a permanent; a spell on the stack (including a permanent spell); any object :ref:erred to by an object on the stack, by a replacement or prevention effect that's waiting to apply, or by a delayed triggered ability that's waiting to trigger (even if that object is no longer in the zone it used to be in); or, for certain casual variant games, a face-up card in the command zone.  A source doesn't need to be capable of dealing damage to be a legal choice. The source is chosen when the effect is created. If the player chooses a permanent, the effect will apply to the next damage dealt by that permanent, regardless of whether it's combat damage or damage dealt as the result of a spell or ability.  If the player chooses a permanent spell, the effect will apply to any damage dealt by that spell and any damage dealt by the permanent that spell becomes when it resolves.
+    a. If an effect requires a player to choose a source of damage, he or she may choose a permanent; a spell on the stack (including a permanent spell); any object referred to by an object on the stack, by a replacement or prevention effect that's waiting to apply, or by a delayed triggered ability that's waiting to trigger (even if that object is no longer in the zone it used to be in); or, for certain casual variant games, a face-up card in the command zone.  A source doesn't need to be capable of dealing damage to be a legal choice. The source is chosen when the effect is created. If the player chooses a permanent, the effect will apply to the next damage dealt by that permanent, regardless of whether it's combat damage or damage dealt as the result of a spell or ability.  If the player chooses a permanent spell, the effect will apply to any damage dealt by that spell and any damage dealt by the permanent that spell becomes when it resolves.
     b. Some effects from resolved spells and abilities prevent or replace damage from sources with certain properties, such as a creature or a source of a particular color. When the source would deal damage, the "shield" rechecks the source's properties. If the properties no longer match, the damage isn't prevented or replaced. If for any reason the shield prevents no damage or replaces no damage, the shield isn't used up.
     c. Some effects from static abilities prevent or replace damage from sources with certain properties. For these effects, the prevention or replacement applies to sources that are permanents with that property and to any sources that aren't on the battlefield that have that property.
 
@@ -864,7 +864,7 @@ An effect that modifies how a permanent enters the battlefield may cause other o
 614.14
 ------
 
-An object may have one ability printed on it that generates a replacement effect which causes one or more cards to be exiled, and another ability that :ref:ers either to "the exiled cards" or to cards "exiled with [this object]." These abilities are linked: the second refers only to cards in the exile zone that were put there as a direct result of the replacement event caused by the first. If another object gains a pair of linked abilities, the abilities will be similarly linked on that object. They can't be linked to any other ability, regardless of what other abilities the object may currently have or may have had in the past. See rule 607, "Linked Abilities."
+An object may have one ability printed on it that generates a replacement effect which causes one or more cards to be exiled, and another ability that refers either to "the exiled cards" or to cards "exiled with [this object]." These abilities are linked: the second refers only to cards in the exile zone that were put there as a direct result of the replacement event caused by the first. If another object gains a pair of linked abilities, the abilities will be similarly linked on that object. They can't be linked to any other ability, regardless of what other abilities the object may currently have or may have had in the past. See rule 607, "Linked Abilities."
 
 614.15
 ------
@@ -905,7 +905,7 @@ Prevention effects must exist before the appropriate damage event occurs -- they
 615.5
 -----
 
-Some prevention effects also include an additional effect, which may :ref:er to the amount of damage that was prevented. The prevention takes place at the time the original event would have happened; the rest of the effect takes place immediately afterward.
+Some prevention effects also include an additional effect, which may refer to the amount of damage that was prevented. The prevention takes place at the time the original event would have happened; the rest of the effect takes place immediately afterward.
 
 615.6
 -----
@@ -915,17 +915,17 @@ If damage that would be dealt is prevented, it never happens. A modified event m
 615.7
 -----
 
-Some prevention effects generated by the resolution of a spell or ability :ref:er to a specific amount of damage -- for example, "Prevent the next 3 damage that would be dealt to target creature or player this turn." These work like shields. Each 1 damage that would be dealt to the "shielded" creature or player is prevented. Preventing 1 damage reduces the remaining shield by 1.  If damage would be dealt to the shielded creature or player by two or more applicable sources at the same time, the player or the controller of the creature chooses which damage the shield prevents. Once the shield has been reduced to 0, any remaining damage is dealt normally. Such effects count only the amount of damage; the number of events or sources dealing it doesn't matter.
+Some prevention effects generated by the resolution of a spell or ability refer to a specific amount of damage -- for example, "Prevent the next 3 damage that would be dealt to target creature or player this turn." These work like shields. Each 1 damage that would be dealt to the "shielded" creature or player is prevented. Preventing 1 damage reduces the remaining shield by 1.  If damage would be dealt to the shielded creature or player by two or more applicable sources at the same time, the player or the controller of the creature chooses which damage the shield prevents. Once the shield has been reduced to 0, any remaining damage is dealt normally. Such effects count only the amount of damage; the number of events or sources dealing it doesn't matter.
 
 615.8
 -----
 
-Some prevention effects generated by the resolution of a spell or ability :ref:er to the next time a specific source would deal damage. These effects prevent the next instance of damage from that source, regardless of how much damage that is. Once an instance of damage from that source has been prevented, any subsequent instances of damage that would be dealt by that source are dealt normally.
+Some prevention effects generated by the resolution of a spell or ability refer to the next time a specific source would deal damage. These effects prevent the next instance of damage from that source, regardless of how much damage that is. Once an instance of damage from that source has been prevented, any subsequent instances of damage that would be dealt by that source are dealt normally.
 
 615.9
 -----
 
-Some prevention effects generated by static abilities :ref:er to a specific amount of damage -- for example, "If a source would deal damage to you, prevent 1 of that damage." Such an effect prevents only the indicated amount of damage in any applicable damage event at any given time. It will apply separately to damage from other applicable events that would happen at the same time, or at a different time.
+Some prevention effects generated by static abilities refer to a specific amount of damage -- for example, "If a source would deal damage to you, prevent 1 of that damage." Such an effect prevents only the indicated amount of damage in any applicable damage event at any given time. It will apply separately to damage from other applicable events that would happen at the same time, or at a different time.
 
 .. admonition:: Example
 
