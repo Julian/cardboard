@@ -26,9 +26,10 @@ class TestPhase(unittest.TestCase):
         h = p.Phase("Foo", [1, 2, 3])
         self.assertEqual(len(h), 3)
 
-    def test_repr(self):
+    def test_repr_str(self):
         h = p.Phase("foo_bar", [1, 2, 3])
         self.assertEqual(repr(h), "<Phase: Foo Bar>")
+        self.assertEqual(str(h), "Foo Bar")
 
 
 class TestPhaseMechanics(GameTestCase):

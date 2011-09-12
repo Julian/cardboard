@@ -177,7 +177,9 @@ def cleanup(game):
 
 class Phase(object):
     def __init__(self, name, steps):
-        self.name = name
+        super(Phase, self).__init__()
+
+        self.name = str(name)
         self.steps = list(steps)
 
     def __getitem__(self, i):
@@ -189,8 +191,11 @@ class Phase(object):
     def __len__(self):
         return len(self.steps)
 
+    def __str__(self):
+        return self.name.replace("_", " ").title()
+
     def __repr__(self):
-        return "<Phase: {}>".format(self.name.replace("_", " ").title())
+        return "<Phase: {}>".format(self)
 
 
 beginning = Phase("beginning", [untap, upkeep, draw])

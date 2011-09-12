@@ -794,7 +794,7 @@ The controller of an activated ability on the stack is the player who activated 
 112.9
 -----
 
-Activated and triggered abilities on the stack aren't spells, and the:ref:ore can't be countered by anything that counters only spells. Activated and triggered abilities on the stack can be countered by effects that specifically counter abilities, as well as by the rules (for example, an ability with one or more targets is countered if all its targets become illegal). Static abilities don't use the stack and thus can't be countered at all.
+Activated and triggered abilities on the stack aren't spells, and therefore can't be countered by anything that counters only spells. Activated and triggered abilities on the stack can be countered by effects that specifically counter abilities, as well as by the rules (for example, an ability with one or more targets is countered if all its targets become illegal). Static abilities don't use the stack and thus can't be countered at all.
 
 112.10
 ------
@@ -1218,7 +1218,7 @@ Damage is processed in a three-part sequence.
 
         .. admonition:: Example
 
-            A player who controls Boon :ref:lection, an enchantment that says "If you would gain life, you gain twice that much life instead," attacks with a 3/3 creature with wither and lifelink.  It's blocked by a 2/2 creature, and the defending player casts a spell that prevents the next 2 damage that would be dealt to the blocking creature. The damage event starts out as [3 damage is dealt to the 2/2 creature, 2 damage is dealt to the 3/3 creature]. The prevention effect is applied, so the damage event becomes [1 damage is dealt to the 2/2 creature, 2 damage is dealt to the 3/3 creature]. That's transformed into its results, so the damage event is now [one -1/-1 counter is put on the 2/2 creature, the active player gains 1 life, 2 damage is marked on the 3/3 creature]. Boon Reflection's effect is applied, so the damage event becomes [one -1/-1 counter is put on the 2/2 creature, the active player gains 2 life, 2 damage is marked on the 3/3 creature]. Then the damage event occurs.
+            A player who controls Boon reflection, an enchantment that says "If you would gain life, you gain twice that much life instead," attacks with a 3/3 creature with wither and lifelink.  It's blocked by a 2/2 creature, and the defending player casts a spell that prevents the next 2 damage that would be dealt to the blocking creature. The damage event starts out as [3 damage is dealt to the 2/2 creature, 2 damage is dealt to the 3/3 creature]. The prevention effect is applied, so the damage event becomes [1 damage is dealt to the 2/2 creature, 2 damage is dealt to the 3/3 creature]. That's transformed into its results, so the damage event is now [one -1/-1 counter is put on the 2/2 creature, the active player gains 1 life, 2 damage is marked on the 3/3 creature]. Boon Reflection's effect is applied, so the damage event becomes [one -1/-1 counter is put on the 2/2 creature, the active player gains 2 life, 2 damage is marked on the 3/3 creature]. Then the damage event occurs.
 
         .. admonition:: Example
 

@@ -1,5 +1,3 @@
-import unittest
-
 from cardboard.frontend import none as n
 from cardboard.tests.util import GameTestCase
 

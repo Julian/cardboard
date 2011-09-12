@@ -1,14 +1,16 @@
+# coding: utf-8
 from __future__ import print_function, unicode_literals
-from textwrap import dedent
+
 import logging
+import textwrap
 
 
 # FIXME : > 2 Players
 class TextualFrontend(object):
-    def __init__(self, player, debug=False):
+    def __init__(self, player):
         super(TextualFrontend, self).__init__()
 
-        self.debug = debug
+        self._debug = False
 
         self.game = player.game
         self.player = player
@@ -19,8 +21,9 @@ class TextualFrontend(object):
     def priority_granted(self):
         pass
 
-    def prompt(self, msg, *args, **kwargs):
-        print(msg.encode("utf-8"), *args, **kwargs)
+    def prompt(self, *args, **kwargs):
+        args = (arg.encode("utf-8") for arg in args)
+        print(*args, **kwargs)
 
     def select(self, choices, how_many=1, duplicates=False):
         choices = {str(k) : v for k, v in choices.iteritems()}
@@ -63,30 +66,54 @@ class TextualFrontend(object):
         getattr(self, selection.lower().replace(" ", "_"))()
 
     def card_info(self, card):
-        info = ["Name: {0.name}", "Type: {0.type}"]
+        mana_cost = card.mana_cost or ""
 
-        for more in ["mana_cost", "abilities", "power", "toughness"]:
-            attr = getattr(card, more)
+        subtypes = pt = ""
 
-            if attr is not None:
-                info.append(
-                    "{}: {{0.{}}}".format(more.title().replace("_", " "), more)
-                )
+        if card.subtypes:
+            subtypes = " — {}".format(", ".join(card.subtypes))
 
-        return "\n".join(info).format(card)
+        if card.power or card.toughness:
+            pt = "\n{card.power}/{card.toughness}".format(card=card)
+
+        abilities = "\n".join(
+            textwrap.fill(ability, width=28) for ability in card.abilities
+        )
+
+        return textwrap.dedent("""
+                               {0.name:<20}{mana_cost}
+                               {0.type}{subtypes}
+
+                               {abilities}{pt}
+                               """).strip("\n").format(card,
+                                                       mana_cost=mana_cost,
+                                                       subtypes=subtypes,
+                                                       abilities=abilities,
+                                                       pt=pt)
 
     def player_info(self):
-        opponents = (str(p) for p in self.game.players - {self.player})
-        return dedent("""
-                      You: {.player}
-                      Opponent: {}
-                      """.strip("\n").format(self, ", ".join(opponents)))
+        self.game.require(started=True)
+
+        s = "s" if len(self.player.opponents) > 1 else ""
+        opponents = ", ".join(str(o) for o in self.game.turn.order
+                                     if o in self.player.opponents)
+
+        return textwrap.dedent(
+            """
+            You: {}
+            Opponent{}: {}
+            """
+        ).strip("\n").format(self.player, s, opponents)
 
     def turn_info(self):
-        return dedent("""
-                      Phase: {0.game.turn.phase}
-                      Step: {0.game.turn.step}
-                      """.strip("\n").format(self))
+        phase = self.game.turn.phase
+        info = ["Phase: {}".format(phase)]
+
+        if len(phase) > 1:
+            step = self.game.turn.step.__name__
+            info.append("Step: {}".format(step.replace("_", " ").title()))
+
+        return "\n".join(info)
 
     def zone_info(self):
         choices = {"Field" : set(self.game.battlefield),
@@ -94,10 +121,10 @@ class TextualFrontend(object):
                    "Graveyard" : list(self.player.graveyard),
                    "Hand" : set(self.player.hand)}
 
-        if self.debug:
-            choices["library"] = list(self.player.library)
+        if self._debug:
+            choices["Library"] = list(self.player.library)
 
-        selection = self.menu("Zone Info", None, *choices)
+        selection = self.menu("Zone Info", None, *sorted(choices))
 
         selection = self.menu(selection, None, *choices[selection])
         self.prompt(self.card_info(selection))
