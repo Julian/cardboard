@@ -192,6 +192,9 @@ class Phase(object):
         return len(self.steps)
 
     def __str__(self):
+        return unicode(self).encode("utf-8")
+
+    def __unicode__(self):
         return self.name.replace("_", " ").title()
 
     def __repr__(self):
