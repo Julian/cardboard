@@ -16,9 +16,9 @@ def _zone(name):
 
 class UnorderedZone(Set):
 
-    battlefield = _zone("Battlefield")
-    exile = _zone("Exile")
-    hand = _zone("Hand")
+    battlefield = _zone(u"Battlefield")
+    exile = _zone(u"Exile")
+    hand = _zone(u"Hand")
 
     ordered = False
 
@@ -81,9 +81,9 @@ class UnorderedZone(Set):
 
 class OrderedZone(Set):
 
-    graveyard = _zone("Graveyard")
-    library = _zone("Library")
-    stack = _zone("Stack")
+    graveyard = _zone(u"Graveyard")
+    library = _zone(u"Library")
+    stack = _zone(u"Stack")
 
     ordered = True
 

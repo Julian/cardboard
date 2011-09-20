@@ -32,6 +32,9 @@ class NoSuchObject(InvalidAction):
         self.object = object
 
     def __str__(self):
+        return unicode(self).encode("utf-8")
+
+    def __unicode__(self):
         return self.MSG.format(self)
 
 
@@ -58,6 +61,9 @@ class RequirementNotMet(InvalidAction):
                               got=got, expected=expected)
 
     def __str__(self):
+        return unicode(self).encode("utf-8")
+
+    def __unicode__(self):
         return self.msg
 
     @classmethod

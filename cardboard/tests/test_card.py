@@ -15,11 +15,11 @@ class TestCard(GameTestCase):
 
         self.creature_db_card = mock.Mock()
         self.creature_db_card.name = "Test Creature"
-        self.creature_db_card.type = types.creature
+        self.creature_db_card.type = types.CREATURE
 
         self.instant_db_card = mock.Mock()
         self.instant_db_card.name = "Test Instant"
-        self.instant_db_card.type = types.instant
+        self.instant_db_card.type = types.INSTANT
 
         self.creature = c.Card(self.creature_db_card)
         self.instant = c.Card(self.instant_db_card)
@@ -71,25 +71,25 @@ class TestCard(GameTestCase):
 
     def test_colors(self):
         self.creature.mana_cost = "UU"
-        self.assertEqual(self.creature.colors, {"blue"})
+        self.assertEqual(self.creature.colors, {"U"})
 
         self.creature.mana_cost = "B"
-        self.assertEqual(self.creature.colors, {"black"})
+        self.assertEqual(self.creature.colors, {"B"})
 
         self.creature.mana_cost = "2R"
-        self.assertEqual(self.creature.colors, {"red"})
+        self.assertEqual(self.creature.colors, {"R"})
 
         self.creature.mana_cost = "WWW"
-        self.assertEqual(self.creature.colors, {"white"})
+        self.assertEqual(self.creature.colors, {"W"})
 
         self.creature.mana_cost = "G"
-        self.assertEqual(self.creature.colors, {"green"})
+        self.assertEqual(self.creature.colors, {"G"})
 
         self.creature.mana_cost = "GWR"
-        self.assertEqual(self.creature.colors, {"green", "white", "red"})
+        self.assertEqual(self.creature.colors, {"G", "W", "R"})
 
         self.creature.mana_cost = "GBB"
-        self.assertEqual(self.creature.colors, {"green", "black"})
+        self.assertEqual(self.creature.colors, {"G", "B"})
 
         self.creature.mana_cost = "3"
         self.assertEqual(self.creature.colors, set())
@@ -146,7 +146,7 @@ class TestStatus(GameTestCase):
 
         self.creature_db_card = mock.Mock()
         self.creature_db_card.name = "Test Creature"
-        self.creature_db_card.type = types.creature
+        self.creature_db_card.type = types.CREATURE
 
         self.creature = c.Card(self.creature_db_card)
 
@@ -233,7 +233,7 @@ class TestSpell(GameTestCase):
 
         self.db_card = mock.Mock()
         self.db_card.name = "Test Creature"
-        self.db_card.type = types.creature
+        self.db_card.type = types.CREATURE
 
         self.card = c.Card(self.db_card)
         self.spell = c.Spell(self.card)

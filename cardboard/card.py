@@ -86,7 +86,10 @@ class Card(object):
         return self.name < other.name
 
     def __str__(self):
-        return self.name
+        return str(self.name)
+
+    def __unicode__(self):
+        return unicode(self.name)
 
     def __repr__(self):
         return "<Card: {}>".format(self)
@@ -102,7 +105,7 @@ class Card(object):
     @property
     def colors(self):
         return (self._changed_colors or
-                {COLORS_ABBR[i] for i in self.mana_cost if i.isalpha()})
+                {i for i in self.mana_cost or "" if i.isalpha()})
 
     @property
     def is_permanent(self):
@@ -147,6 +150,9 @@ class Spell(object):
 
     def __str__(self):
         return str(self.card)
+
+    def __unicode__(self):
+        return unicode(self.card)
 
     def __repr__(self):
         return "<Spell: {}>".format(self.card)

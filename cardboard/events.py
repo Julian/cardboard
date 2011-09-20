@@ -58,7 +58,10 @@ class Event(object):
         return len(self._subevents)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
+
+    def __unicode__(self):
+        return unicode(self.name)
 
     def __repr__(self):
         return "<Event: {.fully_qualified_name}>".format(self)

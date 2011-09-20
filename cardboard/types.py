@@ -12,7 +12,10 @@ class Type(object):
         return hash(self.name)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
+
+    def __unicode__(self):
+        return unicode(self.name)
 
     def __repr__(self):
         return "<Type: {.name}>".format(self)
@@ -21,15 +24,15 @@ class Type(object):
     def is_permanent(self):
         return self in PERMANENTS
 
-artifact = Type("Artifact")
-creature = Type("Creature")
-enchantment = Type("Enchantment")
-land = Type("Land")
-planeswalker = Type("Planeswalker")
+ARTIFACT = Type("Artifact")
+CREATURE = Type("Creature")
+ENCHANTMENT = Type("Enchantment")
+LAND = Type("Land")
+PLANESWALKER = Type("Planeswalker")
 
-instant = Type("Instant")
-sorcery = Type("Sorcery")
+INSTANT = Type("Instant")
+SORCERY = Type("Sorcery")
 
-PERMANENTS = {artifact, creature, enchantment, land, planeswalker}
-NONPERMANENTS = {instant, sorcery}
+PERMANENTS = {ARTIFACT, CREATURE, ENCHANTMENT, LAND, PLANESWALKER}
+NONPERMANENTS = {INSTANT, SORCERY}
 TYPES = PERMANENTS | NONPERMANENTS
