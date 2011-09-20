@@ -52,6 +52,9 @@ class TextualFrontend(object):
                 except KeyError as e:
                     self.prompt("{} is not a valid choice.".format(e[0]))
 
+    def run(self):
+        return self.main_menu()
+
     def menu(self, title, preamble, *choices):
         self.prompt("\n{}:".format(title), end="\n\n")
 
@@ -67,7 +70,6 @@ class TextualFrontend(object):
 
     def card_info(self, card):
         mana_cost = card.mana_cost or ""
-
         subtypes = pt = ""
 
         if card.subtypes:
@@ -76,9 +78,7 @@ class TextualFrontend(object):
         if card.power or card.toughness:
             pt = "\n{card.power}/{card.toughness}".format(card=card)
 
-        abilities = "\n".join(
-            textwrap.fill(ability, width=28) for ability in card.abilities
-        )
+        abilities = "\n".join(card.abilities)
 
         return textwrap.dedent("""
                                {0.name:<20}{mana_cost}

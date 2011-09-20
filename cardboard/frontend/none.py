@@ -18,3 +18,6 @@ class NoFrontend(object):
 
     def select(self, choices, how_many=1, duplicates=False):
         return []
+
+    def run(self):
+        pass
