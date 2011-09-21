@@ -127,17 +127,13 @@ class Layout(object):
 
     @property
     def top_players(self):
-        # FIXME
         opponents = self.frontend.player.opponents
-        return (p for p in self.frontend.game.turn.order if p in opponents)
+        return [p for p in self.frontend.game.turn.order if p in opponents]
 
     @property
     def bottom_players(self):
-        # FIXME
-        teammates = self.frontend.player.teammates
-        order = [p for p in self.frontend.game.turn.order if p in teammates]
-        order.insert(len(order) // 2, self.frontend.player)
-        return order
+        team = self.frontend.player.team
+        return [p for p in self.frontend.game.turn.order if p in team]
 
     def unhandled_input(self, key):
         if key in {"q", "Q"}:

@@ -4,7 +4,7 @@ from cardboard import Game
 from cardboard.card import Card
 from cardboard.db import Session
 from cardboard.db.models import Deck
-from cardboard.frontend.textual import TextualFrontend
+from cardboard.frontend.urwid import UrwidFrontend
 from cardboard.util import log
 
 def build_deck(deck):
@@ -31,5 +31,5 @@ d2 = s.query(Deck).filter_by(name="TokenAscension").one()
 p1 = game.add_player(library=build_deck(d1), name="Julian")
 p2 = game.add_player(library=build_deck(d2), name="Opponent")
 
-p1.frontend = TextualFrontend(p1)
+p1.frontend = UrwidFrontend(p1)
 game.start()

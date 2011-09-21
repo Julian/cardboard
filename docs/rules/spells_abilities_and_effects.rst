@@ -23,6 +23,8 @@ Previously, the action of casting a spell, or casting a card as a spell, was ref
 
     a. Some effects still refer to "playing" a card. "Playing a card" means playing that card as a land or casting that card as a spell, whichever is appropriate.
 
+.. _cast-steps:
+
 601.2
 -----
 
