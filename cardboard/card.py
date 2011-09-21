@@ -56,7 +56,10 @@ class Card(object):
     is_phased_in, phase_in, phase_out = status("is_phased_in", "phased_in",
                                                "phased_out", default=True)
 
-    require = requirements()
+    require = requirements(
+        {"zone" : {"default" : "{self} was expected to be in {expected.name}, "
+                               "not {got}."}},
+    )
 
     def __init__(self, db_card):
         super(Card, self).__init__()
@@ -128,7 +131,7 @@ class Card(object):
 
     def cast(self):
         """
-        Cast a card.
+        Cast the card.
 
         """
 
