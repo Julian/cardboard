@@ -397,29 +397,20 @@ class TestGame(GameTestCase):
         with self.assertRaises(ValueError):
             game.add_player(library=self.library, team=unknown_team)
 
-            self.assertEqual(game.teams, [{p1, p3}, {p2, p4}])
-            self.assertEqual(p1.team, {p1, p3})
-            self.assertEqual(p1.opponents, {p2, p4})
-            self.assertEqual(p2.team, {p2, p4})
-            self.assertEqual(p2.opponents, {p1, p3})
-            self.assertEqual(p3.team, {p1, p3})
-            self.assertEqual(p3.opponents, {p2, p4})
-            self.assertEqual(p4.team, {p2, p4})
-            self.assertEqual(p4.opponents, {p1, p3})
-
         with self.assertRaises(ValueError):
             p5 = c.Player(game=game, library=self.library)
             game.add_existing_player(p5, team=unknown_team)
 
-            self.assertEqual(game.teams, [{p1, p3}, {p2, p4}])
-            self.assertEqual(p1.team, {p1, p3})
-            self.assertEqual(p1.opponents, {p2, p4})
-            self.assertEqual(p2.team, {p2, p4})
-            self.assertEqual(p2.opponents, {p1, p3})
-            self.assertEqual(p3.team, {p1, p3})
-            self.assertEqual(p3.opponents, {p2, p4})
-            self.assertEqual(p4.team, {p2, p4})
-            self.assertEqual(p4.opponents, {p1, p3})
+        # didn't modify teams
+        self.assertEqual(game.teams, [{p1, p3}, {p2, p4}])
+        self.assertEqual(p1.team, {p1, p3})
+        self.assertEqual(p1.opponents, {p2, p4})
+        self.assertEqual(p2.team, {p2, p4})
+        self.assertEqual(p2.opponents, {p1, p3})
+        self.assertEqual(p3.team, {p1, p3})
+        self.assertEqual(p3.opponents, {p2, p4})
+        self.assertEqual(p4.team, {p2, p4})
+        self.assertEqual(p4.opponents, {p1, p3})
 
 
 class TestStateBasedEffects(GameTestCase):
