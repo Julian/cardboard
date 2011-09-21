@@ -188,6 +188,6 @@ class GameTestCase(EventHandlerTestCase):
 
         self.library = k
 
-        self.p1 = self.game.add_player(library=i, name="1")
-        self.p2 = self.game.add_player(library=j, name="2")
-        self.p3 = Player(game=self.game, library=k, name="3")
+        self.p1 = self.game.add_player(library=i, name=u"1")
+        self.p2 = self.game.add_player(library=j, name=u"2")
+        self.p3 = Player(game=self.game, library=k, name=u"3")

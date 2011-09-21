@@ -14,11 +14,11 @@ class TestCard(GameTestCase):
         super(TestCard, self).setUp()
 
         self.creature_db_card = mock.Mock()
-        self.creature_db_card.name = "Test Creature"
+        self.creature_db_card.name = u"Test Creature"
         self.creature_db_card.type = types.CREATURE
 
         self.instant_db_card = mock.Mock()
-        self.instant_db_card.name = "Test Instant"
+        self.instant_db_card.name = u"Test Instant"
         self.instant_db_card.type = types.INSTANT
 
         self.creature = c.Card(self.creature_db_card)
@@ -37,6 +37,9 @@ class TestCard(GameTestCase):
 
         self.assertEqual(str(self.creature), "Test Creature")
         self.assertEqual(str(self.instant), "Test Instant")
+
+        self.assertEqual(unicode(self.creature), u"Test Creature")
+        self.assertEqual(unicode(self.instant), u"Test Instant")
 
     def test_init(self):
         card = c.Card(self.creature_db_card)
@@ -232,15 +235,16 @@ class TestSpell(GameTestCase):
         super(TestSpell, self).setUp()
 
         self.db_card = mock.Mock()
-        self.db_card.name = "Test Creature"
+        self.db_card.name = u"Test Creature"
         self.db_card.type = types.CREATURE
 
         self.card = c.Card(self.db_card)
         self.spell = c.Spell(self.card)
 
-    def test_str_repr(self):
-        self.assertEqual(str(self.spell), "Test Creature")
+    def test_repr_str(self):
         self.assertEqual(repr(self.spell), "<Spell: Test Creature>")
+        self.assertEqual(str(self.spell), "Test Creature")
+        self.assertEqual(unicode(self.spell), u"Test Creature")
 
     def test_init(self):
         self.assertIs(self.spell.card, self.card)

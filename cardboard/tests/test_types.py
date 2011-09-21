@@ -4,13 +4,15 @@ from cardboard import types as t
 
 class TestType(unittest.TestCase):
     def test_init(self):
-        y = t.Type("Foo")
-        self.assertEqual(y.name, "Foo")
+        y = t.Type(u"Foo")
+        self.assertEqual(y.name, u"Foo")
 
-    def test_str_repr(self):
-        y = t.Type("Foo")
-        self.assertEqual(str(y), y.name)
+    def test_repr_str(self):
+        y = t.Type(u"Foo")
+
         self.assertEqual(repr(y), "<Type: Foo>")
+        self.assertEqual(str(y), "Foo")
+        self.assertEqual(unicode(y), u"Foo")
 
     def test_hash_eq(self):
         x = t.Type("Foo")
@@ -34,11 +36,11 @@ class TestType(unittest.TestCase):
 
     def test_PERMANENTS_NONPERMANENTS(self):
         self.assertEqual({type.name for type in t.PERMANENTS},
-                         {"Artifact", "Creature", "Enchantment",
-                          "Land", "Planeswalker"})
+                         {u"Artifact", u"Creature", u"Enchantment",
+                          u"Land", u"Planeswalker"})
 
         self.assertEqual({type.name for type in t.NONPERMANENTS},
-                         {"Instant", "Sorcery"})
+                         {u"Instant", u"Sorcery"})
 
     def test_TYPES(self):
         self.assertEqual(t.TYPES, t.PERMANENTS | t.NONPERMANENTS)
