@@ -75,7 +75,7 @@ class TestZones(ZoneTest):
         with self.assertRaises(ValueError):
             self.o.add(self.noise[0])
 
-        # wasn't added twice
+        # wasn't added twice nor removed
         self.assertIn(self.noise[0], self.u)
         self.assertEqual(self.o.count(self.noise[0]), 1)
 
@@ -90,15 +90,13 @@ class TestZones(ZoneTest):
 
     def test_move(self):
         self.o.add(self.card)
-
-        self.card.zone = self.o
+        self.card.zone = self.o  # on actual cards this is a property
 
         with self.assertTriggers(event=self.zone_events["entered"]):
             self.u.move(self.card)
+            self.card.zone = self.u
 
         self.assertIn(self.card, self.u)
-
-        self.card.zone = self.u
 
         with self.assertTriggers(event=self.zone_events["entered"]):
             self.o.move(self.card)
@@ -109,8 +107,15 @@ class TestZones(ZoneTest):
         self.resetEvents()
 
         # shouldn't even be checking noise[0].zone
-        self.u.move(self.noise[0])
-        self.o.move(self.noise[0])
+        with self.assertRaises(ValueError):
+            self.u.move(self.noise[0])
+
+        with self.assertRaises(ValueError):
+            self.o.move(self.noise[0])
+
+        # wasn't added twice nor removed
+        self.assertIn(self.noise[0], self.u)
+        self.assertEqual(self.o.count(self.noise[0]), 1)
 
         self.assertFalse(self.events.trigger.called)
 

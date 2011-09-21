@@ -57,7 +57,7 @@ class UnorderedZone(Set):
 
     def move(self, e):
         if e in self:
-            return
+            raise ValueError("{} is already in {}".format(e, self))
 
         e.zone.remove(e)
         self.add(e)
@@ -143,7 +143,7 @@ class OrderedZone(Set):
 
     def move(self, e):
         if e in self:
-            return
+            raise ValueError("{} is already in {}".format(e, self))
 
         e.zone.remove(e)
         self.add(e)
