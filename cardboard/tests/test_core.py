@@ -350,6 +350,77 @@ class TestGame(GameTestCase):
         self.assertEqual(self.game.frontends, {self.p1 : self.p1.frontend,
                                                self.p2 : self.p2.frontend})
 
+    def test_teams(self):
+        game = c.Game(self.events)
+        self.assertFalse(game.teams)
+
+        p1, p3 = (c.Player(game=game, library=self.library) for _ in range(2))
+
+        game.add_existing_player(p1)
+
+        self.assertEqual(game.teams, [{p1}])
+        self.assertEqual(p1.team, {p1})
+        self.assertEqual(p1.opponents, set())
+
+        p2 = game.add_player(library=self.library)
+
+        self.assertEqual(game.teams, [{p1}, {p2}])
+        self.assertEqual(p1.team, {p1})
+        self.assertEqual(p1.opponents, {p2})
+        self.assertEqual(p2.team, {p2})
+        self.assertEqual(p2.opponents, {p1})
+
+        game.add_existing_player(p3, team=game.teams[0])
+
+        self.assertEqual(game.teams, [{p1, p3}, {p2}])
+        self.assertEqual(p1.team, {p1, p3})
+        self.assertEqual(p1.opponents, {p2})
+        self.assertEqual(p2.team, {p2})
+        self.assertEqual(p2.opponents, {p1, p3})
+        self.assertEqual(p3.team, {p1, p3})
+        self.assertEqual(p3.opponents, {p2})
+
+        p4 = game.add_player(library=self.library, team=game.teams[1])
+
+        self.assertEqual(game.teams, [{p1, p3}, {p2, p4}])
+        self.assertEqual(p1.team, {p1, p3})
+        self.assertEqual(p1.opponents, {p2, p4})
+        self.assertEqual(p2.team, {p2, p4})
+        self.assertEqual(p2.opponents, {p1, p3})
+        self.assertEqual(p3.team, {p1, p3})
+        self.assertEqual(p3.opponents, {p2, p4})
+        self.assertEqual(p4.team, {p2, p4})
+        self.assertEqual(p4.opponents, {p1, p3})
+
+        unknown_team = []
+
+        with self.assertRaises(ValueError):
+            game.add_player(library=self.library, team=unknown_team)
+
+            self.assertEqual(game.teams, [{p1, p3}, {p2, p4}])
+            self.assertEqual(p1.team, {p1, p3})
+            self.assertEqual(p1.opponents, {p2, p4})
+            self.assertEqual(p2.team, {p2, p4})
+            self.assertEqual(p2.opponents, {p1, p3})
+            self.assertEqual(p3.team, {p1, p3})
+            self.assertEqual(p3.opponents, {p2, p4})
+            self.assertEqual(p4.team, {p2, p4})
+            self.assertEqual(p4.opponents, {p1, p3})
+
+        with self.assertRaises(ValueError):
+            p5 = c.Player(game=game, library=self.library)
+            game.add_existing_player(p5, team=unknown_team)
+
+            self.assertEqual(game.teams, [{p1, p3}, {p2, p4}])
+            self.assertEqual(p1.team, {p1, p3})
+            self.assertEqual(p1.opponents, {p2, p4})
+            self.assertEqual(p2.team, {p2, p4})
+            self.assertEqual(p2.opponents, {p1, p3})
+            self.assertEqual(p3.team, {p1, p3})
+            self.assertEqual(p3.opponents, {p2, p4})
+            self.assertEqual(p4.team, {p2, p4})
+            self.assertEqual(p4.opponents, {p1, p3})
+
 
 class TestStateBasedEffects(GameTestCase):
     def test_no_life(self):

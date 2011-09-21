@@ -171,8 +171,12 @@ class Player(object):
 
     @property
     def opponents(self):
-        # FIXME
-        return {player for player in self.game.players if player != self}
+        return set().union(*(t for t in self.game.teams if self not in t))
+
+    @property
+    def team(self):
+        team, = (team for team in self.game.teams if self in team)
+        return team
 
     def concede(self):
         self.game.events.trigger(event=events["player"]["conceded"])
@@ -246,7 +250,7 @@ class Game(object):
         self.battlefield = zone["battlefield"](game=self)
         self.stack = zone["stack"](game=self)
 
-        self.players = set()
+        self.teams = []
         self.turn = TurnManager(self)
 
     def __repr__(self):
@@ -257,27 +261,38 @@ class Game(object):
         return {player : player.frontend for player in self.players}
 
     @property
+    def players(self):
+        return set().union(*self.teams)
+
+    @property
     def started(self):
         return self.ended is not None
 
-    def add_player(self, **kwargs):
+    def add_player(self, team=None, **kwargs):
         """
         Add a new player to the game.
 
         """
 
         player = Player(game=self, **kwargs)
-        self.add_existing_player(player)
+        self.add_existing_player(player, team)
         return player
 
-    def add_existing_player(self, player):
+    def add_existing_player(self, player, team=None):
         """
         Add an existing Player object to the game.
 
         """
 
         self.require(started=False)
-        self.players.add(player)
+
+        if team is None:
+            self.teams.append({player})
+        else:
+            if team not in self.teams:
+                raise ValueError("{} has no such team {}".format(self, team))
+
+            team.add(player)
 
     def _start(self):
         """
