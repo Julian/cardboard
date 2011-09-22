@@ -1,10 +1,15 @@
-class RuntimeError(Exception):
+class CardboardRuntimeError(Exception):
     """
     The base class for all cardboard exceptions.
 
     """
 
-class InvalidAction(RuntimeError):
+
+class CardNotImplemented(CardboardRuntimeError):
+    pass
+
+
+class InvalidAction(CardboardRuntimeError):
     """
     An action was attempted with incorrect parameters.
 
@@ -15,6 +20,7 @@ class InvalidAction(RuntimeError):
     reselecting or retrying.
 
     """
+
 
 class NoSuchObject(InvalidAction):
     """
