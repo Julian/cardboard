@@ -11,9 +11,16 @@ __all__ = ["UnorderedZone", "OrderedZone", "zone"]
 
 
 def _zone(name):
+    """
+    Create a zone classmethod from the zone name.
+
+    """
+
+    _events = events["card"]["zones"][name.lower()]
+
     @classmethod
     def zone(cls, game, contents=()):
-        return cls(game, name, contents, events["card"]["zones"][name.lower()])
+        return cls(game, name, contents, _events=_events)
     return zone
 
 

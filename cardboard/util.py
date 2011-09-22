@@ -8,6 +8,9 @@ import logging
 from cardboard import exceptions
 
 
+__all__ = ["do_subscriptions", "log", "requirements", "match"]
+
+
 def do_subscriptions(self, game=None):
     """
     Subscribe any of the class' instance methods to events.
@@ -34,7 +37,7 @@ def requirements(messages=None):
     Arguments
     ---------
 
-    * **messages: A mapping of attr names to failure messages for each value
+    * messages: A mapping of attr names to failure messages for each value
 
     If a failure message for either an entire attribute or a given value is not
     provided, a default message will be used.
