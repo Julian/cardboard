@@ -146,6 +146,8 @@ class TestZones(ZoneTest):
         self.assertRaises(ValueError, self.o.remove, object())
 
     def test_silent(self):
+        self.o.add(self.card)
+        self.card.zone = self.o
         self.resetEvents()
 
         self.u.add(20, silent=True)
@@ -156,6 +158,12 @@ class TestZones(ZoneTest):
 
         self.u.pop(silent=True)
         self.o.pop(silent=True)
+
+        self.u.move(self.card, silent=True)
+        self.card.zone = self.u
+        self.o.move(self.card, silent=True)
+
+        self.o.extend(range(10), silent=True)
 
         self.assertFalse(self.events.trigger.called)
 

@@ -7,6 +7,9 @@ from cardboard.events import events
 __all__ = ["UnorderedZone", "OrderedZone", "zone"]
 
 
+# TODO: Clarify / make zone operations atomic
+
+
 def _zone(name):
     @classmethod
     def zone(cls, game, contents=()):
@@ -55,12 +58,12 @@ class UnorderedZone(Set):
         if not silent:
             self.game.events.trigger(event=self._events["entered"])
 
-    def move(self, e):
+    def move(self, e, silent=False):
         if e in self:
             raise ValueError("{} is already in {}".format(e, self))
 
-        e.zone.remove(e)
-        self.add(e)
+        e.zone.remove(e, silent=silent)
+        self.add(e, silent=silent)
 
     def pop(self, silent=False):
         try:
@@ -134,19 +137,19 @@ class OrderedZone(Set):
     def count(self, e):
         return self._order.count(e)
 
-    def extend(self, i):
+    def extend(self, i, silent=False):
         for e in i:
-            self.add(e)
+            self.add(e, silent=silent)
 
     def index(self, e):
         return self._order.index(e)
 
-    def move(self, e):
+    def move(self, e, silent=False):
         if e in self:
             raise ValueError("{} is already in {}".format(e, self))
 
-        e.zone.remove(e)
-        self.add(e)
+        e.zone.remove(e, silent=silent)
+        self.add(e, silent=silent)
 
     def pop(self, i=None, silent=False):
         if i is None:
