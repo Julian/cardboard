@@ -186,7 +186,7 @@ class GameTestCase(EventHandlerTestCase):
 
         i, j, k = [[mock.Mock(spec=Card) for _ in range(60)] for _ in range(3)]
 
-        self.library = k
+        self.library = [mock.Mock(spec=Card) for _ in range(60)]
 
         self.p1 = self.game.add_player(library=i, name=u"1")
         self.p2 = self.game.add_player(library=j, name=u"2")

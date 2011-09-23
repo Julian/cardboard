@@ -8,6 +8,7 @@ __all__ = ["UnorderedZone", "OrderedZone", "zone"]
 
 
 # TODO: Clarify / make zone operations atomic
+#       Write a Mixin
 
 
 def _zone(name):
@@ -19,8 +20,8 @@ def _zone(name):
     _events = events["card"]["zones"][name.lower()]
 
     @classmethod
-    def zone(cls, game, contents=()):
-        return cls(game, name, contents, _events=_events)
+    def zone(cls, game, contents=(), owner=None):
+        return cls(game, name, contents, owner=owner, _events=_events)
     return zone
 
 
@@ -32,7 +33,7 @@ class UnorderedZone(Set):
 
     ordered = False
 
-    def __init__(self, game, name, contents=(), _events=None):
+    def __init__(self, game, name, contents=(), owner=None, _events=None):
         super(UnorderedZone, self).__init__()
 
         if _events is None:
@@ -40,6 +41,7 @@ class UnorderedZone(Set):
 
         self.game = game
         self.name = name
+        self.owner = owner
 
         self._contents = set(contents)
         self._events = _events
@@ -57,8 +59,17 @@ class UnorderedZone(Set):
         return "<Zone: {.name}>".format(self)
 
     def add(self, e, silent=False):
+        if not silent and self.owner is not None and self.owner != e.owner:
+            # TODO: log things that misbehaved
+            return getattr(e.owner, self.name.lower()).add(e)
+
         if e in self:
-            raise ValueError("{} is already in {}".format(e, self))
+            if self.owner is not None:
+                s = "in {}'s {}".format(self.owner, self.name.lower())
+            else:
+                s = "on the {}".format(self.name.lower())
+
+            raise ValueError("{} is already {}.".format(e, s))
 
         self._contents.add(e)
 
@@ -97,7 +108,7 @@ class OrderedZone(Set):
 
     ordered = True
 
-    def __init__(self, game, name, contents=(), _events=None):
+    def __init__(self, game, name, contents=(), owner=None, _events=None):
         super(OrderedZone, self).__init__()
 
         if _events is None:
@@ -105,6 +116,7 @@ class OrderedZone(Set):
 
         self.game = game
         self.name = name
+        self.owner = owner
 
         self._order = list(contents)
         self._contents = set(self._order)
@@ -132,8 +144,17 @@ class OrderedZone(Set):
         return "<Zone: {.name}>".format(self)
 
     def add(self, e, silent=False):
+        if not silent and self.owner is not None and self.owner != e.owner:
+            # TODO: log things that misbehaved
+            return getattr(e.owner, self.name).add(e)
+
         if e in self:
-            raise ValueError("{} is already in {}".format(e, self))
+            if self.owner is not None:
+                s = "in {}'s {}".format(self.owner, self.name.lower())
+            else:
+                s = "on the {}".format(self.name.lower())
+
+            raise ValueError("{} is already {}.".format(e, s))
 
         self._contents.add(e)
         self._order.append(e)

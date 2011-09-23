@@ -67,19 +67,51 @@ class TestZones(ZoneTest):
         self.assertEqual(list(self.o), self.noise + [30])
 
     def test_add_already_contains(self):
+        NO_OWNER, OWNER = "on the {}", "in {}'s {}"
+        u, o = self.u.name.lower(), self.o.name.lower()
+
+        n = mock.Mock()
+        self.u.add(n)
+        self.o.add(n)
+
         self.resetEvents()
 
-        with self.assertRaises(ValueError):
-            self.u.add(self.noise[0])
+        with self.assertRaisesRegexp(ValueError, NO_OWNER.format(u)):
+            self.u.add(n)
 
-        with self.assertRaises(ValueError):
-            self.o.add(self.noise[0])
+        with self.assertRaisesRegexp(ValueError, NO_OWNER.format(o)):
+            self.o.add(n)
+
+        with self.assertRaisesRegexp(ValueError, OWNER.format(n.owner, u)):
+            self.u.owner = n.owner
+            self.u.add(n)
+
+        with self.assertRaisesRegexp(ValueError, OWNER.format(n.owner, o)):
+            self.o.owner = n.owner
+            self.o.add(n)
 
         # wasn't added twice nor removed
         self.assertIn(self.noise[0], self.u)
         self.assertEqual(self.o.count(self.noise[0]), 1)
 
         self.assertFalse(self.events.trigger.called)
+
+    def test_add_owner_redirection(self):
+        """
+        Adding a card with a different owner than the zone's redirects.
+
+        """
+
+        card = mock.Mock()
+
+        self.u.name, self.o.name = "foo", "bar"
+        self.u.owner, self.o.owner = mock.Mock(), mock.Mock()
+
+        self.u.add(card)
+        self.o.add(card)
+
+        card.owner.foo.add.assert_called_once_with(card)
+        card.owner.bar.add.assert_called_once_with(card)
 
     def test_events_default(self):
         u = z.UnorderedZone("Emerald Hill", self.noise)
