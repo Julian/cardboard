@@ -1,6 +1,6 @@
 from operator import attrgetter
 
-from cardboard import exceptions, types
+from cardboard import cards, exceptions, types
 from cardboard.core import COLORS_ABBR
 from cardboard.db import models, Session
 from cardboard.events import events
@@ -57,14 +57,15 @@ class Card(object):
                                                "phased_out", default=True)
 
     require = requirements(
-        {"zone" : {"default" : "{self} was expected to be in {expected.name}, "
-                               "not {got}."}},
+        {"zone" : {"default" : "{self} was expected to be in a {expected.name}"
+                               " zone, not '{got}'."}},
     )
 
-    def __init__(self, db_card):
+    def __init__(self, db_card, _card_behaviors=cards.cards):
         super(Card, self).__init__()
 
         self.game = None
+
         self.controller = None
         self.owner = None
         self._zone = None
@@ -74,9 +75,12 @@ class Card(object):
 
         self.power = self.base_power = db_card.power
         self.toughness = self.base_toughness = db_card.toughness
-        self.damage = 0
 
+        self.damage = 0
         self._changed_colors = set()
+
+        # XXX: Overly simplistic, this will evolve as I write more cards
+        self._execute = _card_behaviors.get(self.name, cards.not_implemented)
 
     def __lt__(self, other):
         """
