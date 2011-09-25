@@ -1,6 +1,7 @@
 import unittest
 
 from cardboard.frontend import testing as t
+from cardboard.tests.util import GameTestCase
 
 
 class TestSelector(unittest.TestCase):
@@ -33,3 +34,18 @@ class TestSelector(unittest.TestCase):
                 s = f.foo(how_many=2)
 
         self.assertEqual(f.foo.__name__, "foo")
+
+
+class TestTestingFrontend(GameTestCase):
+    def setUp(self):
+        super(TestTestingFrontend, self).setUp()
+        self.t = t.TestingFrontend(self.p1)
+        self.p1.frontend = self.t
+
+    def test_repr(self):
+        name = self.p1.name
+        self.assertEqual(repr(self.t), "<Testing Frontend to {}>".format(name))
+
+    def test_init(self):
+        self.assertIs(self.t.game, self.p1.game)
+        self.assertIs(self.t.player, self.p1)

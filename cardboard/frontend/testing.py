@@ -4,7 +4,6 @@ A frontend for use when testing.
 """
 
 import contextlib
-import functools
 import logging
 
 
