@@ -17,7 +17,7 @@ def _zone(name):
 
     """
 
-    _events = events["card"]["zones"][name.lower()]
+    _events = events["card"]["zones"][name]
 
     @classmethod
     def zone(cls, game, contents=(), owner=None):
@@ -25,29 +25,62 @@ def _zone(name):
     return zone
 
 
-class UnorderedZone(Set):
-
-    battlefield = _zone(u"Battlefield")
-    exile = _zone(u"Exile")
-    hand = _zone(u"Hand")
-
-    ordered = False
-
+class ZoneMixin(object):
     def __init__(self, game, name, contents=(), owner=None, _events=None):
-        super(UnorderedZone, self).__init__()
+        super(ZoneMixin, self).__init__()
 
         if _events is None:
             _events = events
+
+        self._events = _events
 
         self.game = game
         self.name = name
         self.owner = owner
 
         self._contents = set(contents)
-        self._events = _events
 
     def __contains__(self, e):
         return e in self._contents
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return "<Zone: {}>".format(self)
+
+    def update(self, i, silent=False):
+        """
+        Add multiple elements at the same time.
+
+        Analogous to list.extend and set.update.
+        """
+
+        for e in i:
+            self.add(e, silent=silent)
+
+    def move(self, e, silent=False):
+        """
+        Remove a card from its current zone and place it in this zone.
+
+        Raises a ValueError for cards that are already present.
+
+        """
+
+        if e in self:
+            raise ValueError("'{}' is already in the {} zone.".format(e, self))
+
+        e.zone.remove(e, silent=silent)
+        self.add(e, silent=silent)
+
+
+class UnorderedZone(ZoneMixin):
+
+    battlefield = _zone(u"battlefield")
+    exile = _zone(u"exile")
+    hand = _zone(u"hand")
+
+    ordered = False
 
     def __iter__(self):
         return iter(self._contents)
@@ -55,19 +88,16 @@ class UnorderedZone(Set):
     def __len__(self):
         return len(self._contents)
 
-    def __repr__(self):
-        return "<Zone: {.name}>".format(self)
-
     def add(self, e, silent=False):
         if not silent and self.owner is not None and self.owner != e.owner:
             # TODO: log things that misbehaved
-            return getattr(e.owner, self.name.lower()).add(e)
+            return getattr(e.owner, self.name).add(e)
 
         if e in self:
             if self.owner is not None:
-                s = "in {}'s {}".format(self.owner, self.name.lower())
+                s = "in {}'s {}".format(self.owner, self.name)
             else:
-                s = "on the {}".format(self.name.lower())
+                s = "on the {}".format(self.name)
 
             raise ValueError("{} is already {}.".format(e, s))
 
@@ -75,13 +105,6 @@ class UnorderedZone(Set):
 
         if not silent:
             self.game.events.trigger(event=self._events["entered"])
-
-    def move(self, e, silent=False):
-        if e in self:
-            raise ValueError("{} is already in {}".format(e, self))
-
-        e.zone.remove(e, silent=silent)
-        self.add(e, silent=silent)
 
     def pop(self, silent=False):
         try:
@@ -94,37 +117,27 @@ class UnorderedZone(Set):
         try:
             self._contents.remove(e)
         except KeyError:
-            raise ValueError("{} not in zone.".format(e))
+            raise ValueError("'{}' is not in the {} zone.".format(e, self))
         else:
             if not silent:
                 self.game.events.trigger(event=self._events["left"])
 
 
-class OrderedZone(Set):
+class OrderedZone(ZoneMixin):
 
-    graveyard = _zone(u"Graveyard")
-    library = _zone(u"Library")
-    stack = _zone(u"Stack")
+    graveyard = _zone(u"graveyard")
+    library = _zone(u"library")
+    stack = _zone(u"stack")
 
     ordered = True
 
     def __init__(self, game, name, contents=(), owner=None, _events=None):
-        super(OrderedZone, self).__init__()
-
-        if _events is None:
-            _events = events
-
-        self.game = game
-        self.name = name
-        self.owner = owner
-
         self._order = list(contents)
-        self._contents = set(self._order)
 
-        self._events = _events
-
-    def __contains__(self, e):
-        return e in self._contents
+        super(OrderedZone, self).__init__(
+            game=game, name=name, contents=self._order,
+            owner=owner, _events=_events
+        )
 
     def __getitem__(self, i):
         # TODO / Beware: Zone slicing
@@ -140,19 +153,17 @@ class OrderedZone(Set):
     def __reversed__(self):
         return reversed(self._order)
 
-    def __repr__(self):
-        return "<Zone: {.name}>".format(self)
-
     def add(self, e, silent=False):
+        # a safeguard against cards that are accidentally being moved to
+        # another zone other than their owners (TODO: log misbehavers)
         if not silent and self.owner is not None and self.owner != e.owner:
-            # TODO: log things that misbehaved
             return getattr(e.owner, self.name).add(e)
 
         if e in self:
             if self.owner is not None:
-                s = "in {}'s {}".format(self.owner, self.name.lower())
+                s = "in {}'s {}".format(self.owner, self.name)
             else:
-                s = "on the {}".format(self.name.lower())
+                s = "on the {}".format(self.name)
 
             raise ValueError("{} is already {}.".format(e, s))
 
@@ -165,19 +176,8 @@ class OrderedZone(Set):
     def count(self, e):
         return self._order.count(e)
 
-    def extend(self, i, silent=False):
-        for e in i:
-            self.add(e, silent=silent)
-
     def index(self, e):
         return self._order.index(e)
-
-    def move(self, e, silent=False):
-        if e in self:
-            raise ValueError("{} is already in {}".format(e, self))
-
-        e.zone.remove(e, silent=silent)
-        self.add(e, silent=silent)
 
     def pop(self, i=None, silent=False):
         if i is None:
@@ -194,7 +194,7 @@ class OrderedZone(Set):
 
     def remove(self, e, silent=False):
         if e not in self:
-            raise ValueError("{} not in zone.".format(e))
+            raise ValueError("'{}' is not in the {} zone.".format(e, self))
 
         self._contents.remove(e)
         self._order.remove(e)

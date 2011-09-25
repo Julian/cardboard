@@ -36,7 +36,10 @@ class TestZones(ZoneTest):
         self.assertFalse(self.u.ordered)
         self.assertTrue(self.o.ordered)
 
-    def test_repr(self):
+    def test_str_repr(self):
+        self.assertEqual(str(self.u), "Emerald Hill")
+        self.assertEqual(str(self.o), "Casino Night")
+
         self.assertEqual(repr(self.u), "<Zone: Emerald Hill>")
         self.assertEqual(repr(self.o), "<Zone: Casino Night>")
 
@@ -68,7 +71,7 @@ class TestZones(ZoneTest):
 
     def test_add_already_contains(self):
         NO_OWNER, OWNER = "on the {}", "in {}'s {}"
-        u, o = self.u.name.lower(), self.o.name.lower()
+        u, o = self.u.name, self.o.name
 
         n = mock.Mock()
         self.u.add(n)
@@ -177,6 +180,27 @@ class TestZones(ZoneTest):
         self.assertRaises(ValueError, self.u.remove, object())
         self.assertRaises(ValueError, self.o.remove, object())
 
+    def test_update(self):
+        self.u.update(range(4))
+
+        for i in range(4):
+            self.assertIn(i, self.u)
+
+        self.assertEqual(len(self.u), len(self.noise) + 4)
+
+        event = {"event" : self.zone_events["entered"]}
+        self.assertLastEventsWere([event] * 4)
+
+        self.resetEvents()
+
+        self.o.update(range(4))
+        self.assertEqual(self.o[-4:], range(4))
+
+        self.assertEqual(len(self.o), len(self.noise) + 4)
+
+        event = {"event" : self.zone_events["entered"]}
+        self.assertLastEventsWere([event] * 4)
+
     def test_silent(self):
         self.o.add(self.card)
         self.card.zone = self.o
@@ -195,7 +219,8 @@ class TestZones(ZoneTest):
         self.card.zone = self.u
         self.o.move(self.card, silent=True)
 
-        self.o.extend(range(10), silent=True)
+        self.u.update(range(10), silent=True)
+        self.o.update(range(10), silent=True)
 
         self.assertFalse(self.events.trigger.called)
 
@@ -233,15 +258,6 @@ class TestOrderedZone(ZoneTest):
         for i, e in enumerate(range(3, 0, -1), 1):
             self.assertEqual(o.count(e), i)
 
-    def test_extend(self):
-        self.o.extend(range(4))
-
-        self.assertEqual(self.o[-4:], range(4))
-        self.assertEqual(len(self.o), len(self.noise) + 4)
-
-        event = {"event" : self.zone_events["entered"]}
-        self.assertLastEventsWere([event] * 4)
-
     def test_index(self):
         e = self.noise[13]
         self.assertEqual(self.o.index(e), 13)
@@ -273,11 +289,11 @@ class TestZone(unittest.TestCase):
         for zone in ["battlefield", "exile", "hand"]:
             n = z.zone[zone](game=None, contents=[c])
             self.assertIsInstance(n, z.UnorderedZone)
-            self.assertEquals(n.name, zone.title())
+            self.assertEquals(n.name, zone)
             self.assertIn(c, n)
 
         for zone in ["graveyard", "library", "stack"]:
             n = z.zone[zone](game=None, contents=[c])
             self.assertIsInstance(n, z.OrderedZone)
-            self.assertEquals(n.name, zone.title())
+            self.assertEquals(n.name, zone)
             self.assertIn(c, n)
