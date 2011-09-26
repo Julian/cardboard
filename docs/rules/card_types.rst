@@ -47,7 +47,7 @@ Artifact subtypes are always a single word and are listed after a long dash: "Ar
 301.4
 -----
 
-Artifacts have no characteristics specific to their card type. Most artifacts have no colored mana symbols in their mana costs, and are the:ref:ore colorless. However, there is no correlation between being colorless and being an artifact: artifacts may be colored, and colorless objects may be card types other than artifact.
+Artifacts have no characteristics specific to their card type. Most artifacts have no colored mana symbols in their mana costs, and are therefore colorless. However, there is no correlation between being colorless and being an artifact: artifacts may be colored, and colorless objects may be card types other than artifact.
 
 301.5
 -----
@@ -67,7 +67,7 @@ Some artifacts have the subtype "Fortification." A Fortification can be attached
 301.7
 -----
 
-If a non-Equipment permanent has an ability that :ref:ers to the "equipped creature," that phrase doesn't refer to any creature. Similarly, a non-Fortification permanent that has an ability that refers to the "fortified land" doesn't refer to any land.
+If a non-Equipment permanent has an ability that refers to the "equipped creature," that phrase doesn't refer to any creature. Similarly, a non-Fortification permanent that has an ability that refers to the "fortified land" doesn't refer to any land.
 
 .. _creatures:
 
@@ -150,7 +150,7 @@ Some enchantments have the subtype "Aura." An Aura enters the battlefield attach
     f. If an Aura is entering the battlefield under a player's control by any means other than by resolving as an Aura spell, and the effect putting it onto the battlefield doesn't specify the object or player the Aura will enchant, that player chooses what it will enchant as the Aura enters the battlefield.  The player must choose a legal object or player according to the Aura's enchant ability and any other applicable effects.
     g. If an Aura is entering the battlefield and there is no legal object or player for it to enchant, the Aura remains in its current zone, unless that zone is the stack. In that case, the Aura is put into its owner's graveyard instead of entering the battlefield.
     h. If an effect attempts to attach an Aura on the battlefield to an object or player, that object or player must be able to be enchanted by it. If the object or player can't be, the Aura doesn't move.
-    i. If a non-Aura permanent has an ability that :ref:ers to the "enchanted [object or player]" that phrase doesn't refer to any object or player.
+    i. If a non-Aura permanent has an ability that refers to the "enchanted [object or player]" that phrase doesn't refer to any object or player.
 
 .. _instants:
 
@@ -219,7 +219,7 @@ Land subtypes are always a single word and are listed after a long dash.  Land s
 305.6
 -----
 
-The basic land types are Plains, Island, Swamp, Mountain, and Forest. If an object uses the words "basic land type," it's :ref:erring to one of these subtypes. A land with a basic land type has the intrinsic ability "|T|: Add [mana symbol] to your mana pool," even if the text box doesn't actually contain that text or the object has no text box. For Plains, [mana symbol] is |W|; for Islands, |U|; for Swamps, |B|; for Mountains, |R|; and for Forests, |G|. See rule 107.4a. Also see rule 605, "Mana Abilities."
+The basic land types are Plains, Island, Swamp, Mountain, and Forest. If an object uses the words "basic land type," it's referring to one of these subtypes. A land with a basic land type has the intrinsic ability "|T|: Add [mana symbol] to your mana pool," even if the text box doesn't actually contain that text or the object has no text box. For Plains, [mana symbol] is |W|; for Islands, |U|; for Swamps, |B|; for Mountains, |R|; and for Forests, |G|. See rule 107.4a. Also see rule 605, "Mana Abilities."
 
 305.7
 -----
