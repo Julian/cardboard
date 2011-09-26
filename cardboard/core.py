@@ -125,6 +125,9 @@ class Player(object):
         self._life = 20
         self.poison = 0
 
+        self.lands_per_turn = 1
+        self.lands_this_turn = 0
+
         self.mana_pool = ManaPool(self)
 
         self.exile = zone["exile"](game=self.game, owner=self)
@@ -384,17 +387,17 @@ class Game(object):
 
         for card in self.battlefield:
 
-            if card.type == types.creature:
+            if card.type == types.CREATURE:
                 if card.toughness <= 0:
                     card.owner.graveyard.move(card)
                 elif card.damage >= card.toughness or card._deathtouch_damage:
                     # TODO: Regenerate
                     card.owner.graveyard.move(card)
 
-            elif card.type == types.planeswalker:
+            elif card.type == types.PLANESWALKER:
                 if not card.loyalty:
                     card.owner.graveyard.move(card)
-            elif card.type == types.enchantment:
+            elif card.type == types.ENCHANTMENT:
                 # if types.enchantment.subtypes["Aura"] in card.subtypes:
                 if card.attached_to is None:
                     card.owner.graveyard.move(card)

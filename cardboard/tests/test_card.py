@@ -21,12 +21,17 @@ class TestCard(GameTestCase):
         self.instant_db_card.name = u"Test Instant"
         self.instant_db_card.type = types.INSTANT
 
+        self.land_db_card = mock.Mock()
+        self.land_db_card.name = "Plountain"
+        self.land_db_card.type = types.LAND
+
         self.creature = c.Card(self.creature_db_card)
         self.instant = c.Card(self.instant_db_card)
+        self.land = c.Card(self.land_db_card)
 
         self.game.add_existing_player(self.p3)
 
-        self.library[-2:] = [self.creature, self.instant]
+        self.library[-3:] = [self.creature, self.instant, self.land]
         self.p4 = self.game.add_player(library=self.library)
 
         self.game.start()
@@ -117,9 +122,25 @@ class TestCard(GameTestCase):
         card.is_permanent
         mt.assert_called_once_with()
 
-    def test_cast(self):
+    def test_play_land(self):
+        self.assertEqual(self.land.owner.lands_this_turn, 0)
+        self.assertEqual(self.land.owner.lands_per_turn, 1)
+
+        self.land.play()
+
+        self.assertEqual(self.land.owner.lands_this_turn, 1)
+        self.assertIn(self.land, self.game.battlefield)
+
+        second_land = c.Card(self.land_db_card)
+        second_land.game = self.land.game
+        second_land.owner = self.land.owner
+
+        with self.assertRaises(exceptions.InvalidAction):
+            second_land.play()
+
+    def test_play_spell(self):
         """
-        Casting a spell should follow a specific series of steps.
+        Playing (=casting) a spell should follow a specific series of steps.
 
         The steps are outlined in :ref:`cast-steps`.
 
@@ -127,8 +148,8 @@ class TestCard(GameTestCase):
 
         # TODO: Test all types
 
-        self.creature.cast()
-        self.instant.cast()
+        self.creature.play()
+        self.instant.play()
 
         # instant spell on top
         creature_spell, instant_spell = self.game.stack

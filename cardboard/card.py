@@ -7,11 +7,12 @@ from cardboard.events import events
 from cardboard.util import requirements
 
 
+__all__ = ["Card", "Spell"]
+
+
 def status(name, on_event, off_event, default=True):
     """
     Create a status attribute with togglers.
-
-    The `on_event` will be the default.
 
     """
 
@@ -133,13 +134,28 @@ class Card(object):
 
         return self._zone
 
-    def cast(self):
+    def play(self):
         """
-        Cast the card.
+        Play the card.
+
+        For a spell, this is equivalent to casting the spell. For a land,
+        playing it is a special action that places the land on the battlefield.
+
+        See :term:`playing` and :term:`cast` in the glossary.
 
         """
 
         self.game.require(started=True)
+
+        if self.type == types.LAND:
+            if self.owner.lands_this_turn < self.owner.lands_per_turn:
+                self.owner.lands_this_turn += 1
+                # TODO: event trigger?
+                return self.game.battlefield.move(self)
+            else:
+                err = "{} cannot play another land this turn."
+                raise exceptions.InvalidAction(err.format(self.owner))
+
         self.game.stack.add(Spell(self))
         self.game.events.trigger(event=events["card"]["cast"])
 
