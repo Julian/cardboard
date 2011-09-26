@@ -25,6 +25,7 @@ import panglery
 from cardboard.core import Game, Player
 from cardboard.card import Card
 from cardboard.exceptions import RequirementNotMet
+from cardboard.frontend.testing import TestingFrontend
 
 
 class _CheckRequirementsContext(object):
@@ -191,3 +192,6 @@ class GameTestCase(EventHandlerTestCase):
         self.p1 = self.game.add_player(library=i, name=u"1")
         self.p2 = self.game.add_player(library=j, name=u"2")
         self.p3 = Player(game=self.game, library=k, name=u"3")
+
+        for player in self.p1, self.p2, self.p3:
+            player.frontend = TestingFrontend(player)

@@ -13,7 +13,7 @@ class SelectionError(Exception):
 
 def selector(name):
 
-    selections = []
+    selections = [()]
 
     @contextlib.contextmanager
     def will_return(*selection):
@@ -23,15 +23,12 @@ def selector(name):
 
     def select(self, source=(), *args, **kwargs):
         how_many = kwargs.get("how_many")
+        selection = selections[-1]
 
-        try:
-            selection = selections[-1]
-        except IndexError:
-            raise SelectionError("No selection was set.")
-        else:
-            if how_many is not None and len(selection) != how_many:
-                raise SelectionError("Expected {} selections".format(how_many))
-            return selection
+        if how_many is not None and len(selection) != how_many:
+            raise SelectionError("Expected {} selections".format(how_many))
+
+        return selection
 
     select.__name__ = name
     select.will_return = will_return
@@ -64,3 +61,6 @@ class TestingFrontend(object):
 
     def prompt(self, msg, *args, **kwargs):
         self._logger.info(msg, *args, **kwargs)
+
+    def priority_granted(self):
+        pass

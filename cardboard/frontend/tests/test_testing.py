@@ -17,6 +17,9 @@ class TestSelector(unittest.TestCase):
             with f.foo.will_return("a"):
                 self.assertEqual(f.foo(how_many=1), ("a",))
 
+            with f.foo.will_return():
+                self.assertEqual(f.foo(how_many=0), ())
+
             self.assertEqual(f.foo(how_many=3), (10, 11, 12))
 
         # arbitrary selection doesn't check return value
@@ -24,9 +27,13 @@ class TestSelector(unittest.TestCase):
             self.assertEqual(f.foo(), (10, 11, 12))
             self.assertEqual(f.foo(how_many=None), (10, 11, 12))
 
-        # can't select without setting a selection return value
+        with f.foo.will_return():
+            self.assertEqual(f.foo(), ())
+
+        # select without setting a selection return value returns empty select
         with self.assertRaises(t.SelectionError):
-            f.foo()
+            with f.foo.will_return():
+                f.foo(how_many=1)
 
         # can't return more selections than how_many
         with self.assertRaises(t.SelectionError):
