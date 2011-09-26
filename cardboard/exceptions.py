@@ -5,6 +5,19 @@ class CardboardRuntimeError(Exception):
     """
 
 
+class NoFrontendConnected(CardboardRuntimeError):
+    """
+    No frontend was connected to a player.
+
+    """
+    def __init__(self, player):
+        super(NoFrontendConnected, self).__init__()
+        self.player = player
+
+    def __str__(self):
+        return "No frontend was connected to {}.".format(self.player)
+
+
 class CardNotImplemented(CardboardRuntimeError):
     pass
 
