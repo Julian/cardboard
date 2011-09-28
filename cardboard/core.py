@@ -272,6 +272,13 @@ class Game(object):
     def started(self):
         return self.ended is not None
 
+    @property
+    def zones(self):
+        zones = {"shared" : {self.battlefield, self.stack}}
+        zones.update((p, {p.exile, p.graveyard, p.hand, p.library})
+                     for p in self.players)
+        return zones
+
     def add_player(self, team=None, **kwargs):
         """
         Add a new player to the game.

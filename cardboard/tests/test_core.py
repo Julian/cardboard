@@ -350,6 +350,15 @@ class TestGame(GameTestCase):
         self.assertEqual(self.game.frontends, {self.p1 : self.p1.frontend,
                                                self.p2 : self.p2.frontend})
 
+    def test_zones(self):
+        zones = {"shared" : {self.game.battlefield, self.game.stack},
+                 self.p1 : {self.p1.exile, self.p1.graveyard,
+                            self.p1.hand, self.p1.library},
+                 self.p2 : {self.p2.exile, self.p2.graveyard,
+                            self.p2.hand, self.p2.library}}
+
+        self.assertEqual(self.game.zones, zones)
+
     def test_teams(self):
         game = c.Game(self.events)
         self.assertFalse(game.teams)
