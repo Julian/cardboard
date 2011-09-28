@@ -18,7 +18,7 @@ class NoFrontendConnected(CardboardRuntimeError):
         return "No frontend was connected to {}.".format(self.player)
 
 
-class CardNotImplemented(CardboardRuntimeError):
+class NotImplemented(CardboardRuntimeError):
     pass
 
 
