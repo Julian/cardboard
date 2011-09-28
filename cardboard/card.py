@@ -71,8 +71,10 @@ class Card(object):
         self.owner = None
         self._zone = None
 
-        for attr in {"name", "type", "subtypes", "mana_cost", "abilities"}:
+        for attr in {"name", "type", "subtypes", "mana_cost"}:
             setattr(self, attr, getattr(db_card, attr))
+
+        self.abilities = dict.fromkeys(db_card.abilities)
 
         self.power = self.base_power = db_card.power
         self.toughness = self.base_toughness = db_card.toughness

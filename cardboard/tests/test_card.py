@@ -9,21 +9,22 @@ from cardboard.events import events
 from cardboard.tests.util import GameTestCase
 
 
+def mock_card(type, name=None, abilities=()):
+    if name is None:
+        name = "Test {}".format(type)
+
+    card = mock.Mock()
+    card.name, card.type, card.abilities = name, type, abilities
+    return card
+
+
 class TestCard(GameTestCase):
     def setUp(self):
         super(TestCard, self).setUp()
 
-        self.creature_db_card = mock.Mock()
-        self.creature_db_card.name = u"Test Creature"
-        self.creature_db_card.type = types.CREATURE
-
-        self.instant_db_card = mock.Mock()
-        self.instant_db_card.name = u"Test Instant"
-        self.instant_db_card.type = types.INSTANT
-
-        self.land_db_card = mock.Mock()
-        self.land_db_card.name = "Plountain"
-        self.land_db_card.type = types.LAND
+        self.creature_db_card = mock_card(types.CREATURE)
+        self.instant_db_card = mock_card(types.INSTANT)
+        self.land_db_card = mock_card(types.LAND)
 
         self.creature = c.Card(self.creature_db_card)
         self.instant = c.Card(self.instant_db_card)
@@ -69,13 +70,16 @@ class TestCard(GameTestCase):
 
     def test_load(self):
         session = mock.Mock()
+        card = self.creature_db_card
+        session.query(m.Card).filter_by.return_value.one.return_value = card
+
         d = c.Card.load("Foo", session=session)
         session.query(m.Card).filter_by.assert_called_once_with(name="Foo")
 
-        with mock.patch("cardboard.card.Session") as session:
-            session.return_value = session
-            d = c.Card.load("Foo")
-            session.query(m.Card).filter_by.assert_called_once_with(name="Foo")
+        with mock.patch("cardboard.card.Session") as Session:
+            Session.return_value = session
+            d = c.Card.load("Bar")
+            session.query(m.Card).filter_by.assert_called_with(name="Bar")
 
     def test_colors(self):
         self.creature.mana_cost = "UU"
@@ -168,10 +172,7 @@ class TestStatus(GameTestCase):
     def setUp(self):
         super(TestStatus, self).setUp()
 
-        self.creature_db_card = mock.Mock()
-        self.creature_db_card.name = "Test Creature"
-        self.creature_db_card.type = types.CREATURE
-
+        self.creature_db_card = mock_card(types.CREATURE)
         self.creature = c.Card(self.creature_db_card)
 
         self.library[-1] = self.creature
@@ -255,10 +256,7 @@ class TestSpell(GameTestCase):
     def setUp(self):
         super(TestSpell, self).setUp()
 
-        self.db_card = mock.Mock()
-        self.db_card.name = u"Test Creature"
-        self.db_card.type = types.CREATURE
-
+        self.db_card = mock_card(types.CREATURE)
         self.card = c.Card(self.db_card)
         self.spell = c.Spell(self.card)
 
