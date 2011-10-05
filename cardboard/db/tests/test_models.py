@@ -2,7 +2,7 @@ import unittest
 
 import mock
 
-from cardboard import exceptions as exc
+from cardboard import types, exceptions as exc
 from cardboard.db import models as m
 
 
@@ -24,16 +24,14 @@ class TestCard(unittest.TestCase):
         self.assertEqual(repr(c), "<Card Model: Test Card>")
 
     def test_init(self):
-        c = m.Card("Card", "Creature", "UUWB", ["Does stuff."], ["Test"], 2, 4)
+        d = dict(name="Card", type=types.CREATURE, mana_cost="UUWB",
+                 abilities=["Does stuff"], subtypes=["Test"],
+                 supertypes=["Thing"], power=2, toughness=4, loyalty=4)
 
-        self.assertEqual(c.name, "Card")
-        self.assertEqual(c.type, "Creature",)
-        self.assertEqual(c.mana_cost, "UUWB")
-        self.assertEqual(c.abilities, ["Does stuff."])
-        self.assertEqual(c.subtypes, ["Test"])
+        c = m.Card(**d)
 
-        self.assertEqual(c.power, 2)
-        self.assertEqual(c.toughness, 4)
+        for k, v in d.iteritems():
+            self.assertEqual(getattr(c, k), v)
 
 
 class TestDeck(unittest.TestCase):
