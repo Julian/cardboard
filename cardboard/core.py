@@ -147,7 +147,7 @@ class Player(object):
 
     @property
     def battlefield(self):
-        return {c for c in self.game.battlefield if card.controller == self}
+        return {c for c in self.game.battlefield if c.controller == self}
 
     @property
     def dead(self):
@@ -208,6 +208,7 @@ class Player(object):
 
         self.death_by = reason
         self.game.events.trigger(event=events["player"]["died"])
+        self.game._check_for_win()
 
     def draw(self, cards=1):
         """
@@ -330,14 +331,15 @@ class Game(object):
             player.library.shuffle()
             player.draw(player.hand_size)
 
-    def end_if_dead(self, pangler=None):
+    def _check_for_win(self):
         """
-        End the game if there is only one living player left.
+        Check if there is a player that has won the game via last man standing.
 
         """
 
-        if sum(1 for player in self.players if not player.dead) <= 1:
-            self.end()
+        for player in self.players:
+            if all(opponent.dead for opponent in player.opponents):
+                self.end()
 
     def end(self):
         """

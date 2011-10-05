@@ -161,8 +161,8 @@ class TestPlayer(GameTestCase):
         self.assertEqual(self.p1.death_by, "concede")
         self.assertTrue(self.p1.dead)
 
-        self.assertLastEventsWere([events["player"]["conceded"],
-                                   events["player"]["died"]])
+        self.assertTriggered([events["player"]["conceded"],
+                              events["player"]["died"]])
 
     def test_die(self):
         self.game.start()
@@ -172,7 +172,7 @@ class TestPlayer(GameTestCase):
         self.assertTrue(self.p1.dead)
         self.assertEqual(self.p1.death_by, "test")
 
-        self.assertLastEventsWere([events["player"]["died"]])
+        self.assertTriggered([events["player"]["died"]])
 
         # can't die twice
         self.resetEvents()
@@ -319,7 +319,7 @@ class TestGame(GameTestCase):
         self.assertLastEventsWere([events["game"]["ended"]])
         self.assertTrue(self.game.ended)
 
-    def test_end_if_dead(self):
+    def test_check_for_win(self):
         """
         The game ends when there is one person left.
 
@@ -334,11 +334,9 @@ class TestGame(GameTestCase):
         self.assertFalse(self.game.ended)
 
         self.p1.die("test")
-        self.game.end_if_dead()
         self.assertFalse(self.game.ended)
 
         self.p2.die("test")
-        self.game.end_if_dead()
         self.assertTrue(self.game.ended)
 
         self.assertFalse(self.p3.dead)
