@@ -23,7 +23,8 @@ def untap(game):
     game.events.trigger(event=phase_events["beginning"]["untap"]["started"])
 
     for permanent in game.turn.active_player.battlefield:
-        permanent.untap()
+        if permanent.is_tapped:
+            permanent.untap()
 
     game.events.trigger(event=phase_events["beginning"]["untap"]["ended"])
 
@@ -95,9 +96,9 @@ def declare_attackers(game):
         targets |= {card for card in opponent.battlefield
                     if card.type == "Planeswalker"}
 
-    attackers = game.turn.active_player.frontend.select(possible_attackers,
-                                                        how_many=None)
-    attacks = {k : game.turn.active_player.frontend.select(targets)
+    attackers = game.turn.active_player.frontend.select_cards(game.battlefield,
+                                                              how_many=None)
+    attacks = {k : game.turn.active_player.frontend.select_combined()
                for k in attackers}
 
     for card in attacks:
