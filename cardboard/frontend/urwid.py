@@ -13,6 +13,10 @@ from cardboard.frontend import util
 #       don't show player changer if only one team member
 
 
+ROUND_CORNERS = {"tlcorner" : urwid.Text(u"╭"), "trcorner" : urwid.Text(u"╮"),
+                 "blcorner" : urwid.Text(u"╰"), "brcorner" : urwid.Text(u"╯")}
+
+
 palette = [
     ("default", "default", "default"),
 
@@ -58,6 +62,9 @@ class UrwidFrontend(object):
 
         # XXX: Remove, debug
         to.game.start()
+        to.game.battlefield.move(list(to.hand)[0])
+        to.game.battlefield.move(list(to.hand)[0])
+        to.game.battlefield.move(list(list(to.opponents)[0].hand)[0])
 
         self._debug = False
 
@@ -209,10 +216,11 @@ class Slider(urwid.WidgetWrap):
     def __init__(self, slides, show_header=True, tabbed=False):
         frames = urwid.Columns([
             urwid.Frame(
-                slide, header=urwid.Columns([("fixed", 1, self.slider_left),
-                                             urwid.Text(name, align="center"),
-                                             ("fixed", 1, self.slider_right)],
-                                            dividechars=1)
+                pad(slide),
+                header=urwid.Columns([("fixed", 1, self.slider_left),
+                                      urwid.Text(name, align="center"),
+                                      ("fixed", 1, self.slider_right)],
+                                     dividechars=1)
             )
             for name, slide in slides
         ])
@@ -238,9 +246,11 @@ class PlayerPane(urwid.WidgetWrap):
     def __init__(self, player, top):
         self.player = player
 
-        self.battlefield = urwid.Filler(
-            urwid.Text("Battlefield for {}".format(self.player))
-        )
+        battlefield = urwid.GridFlow([
+            Card(card) for card in self.player.battlefield
+        ], cell_width=10, h_sep=2, v_sep=6, align="center")
+
+        self.battlefield = urwid.Filler(battlefield)
 
         self.vitals = urwid.Columns([
             urwid.Text("Life: {.life}".format(self.player)),
@@ -299,12 +309,13 @@ class Card(urwid.WidgetWrap):
         pile = pad(urwid.Pile([name_line, picture, type, abilities, pt]))
         pile = urwid.AttrMap(pile, self._color + " background")
 
-        info = pad(urwid.LineBox(pile))
-        box = urwid.LineBox(urwid.AttrMap(info, "card border"))
+        info = pad(urwid.LineBox(pile, **ROUND_CORNERS))
+        info = urwid.AttrMap(info, "card border")
 
-        padding = urwid.Padding(box, align="center", width=("relative", 90))
+        box = urwid.LineBox(info, **ROUND_CORNERS)
+        box = urwid.Padding(box, align="center", width=("relative", 90))
 
-        super(Card, self).__init__(padding)
+        super(Card, self).__init__(box)
 
     @property
     def _color(self):
@@ -381,8 +392,6 @@ def pad(widget, n=1):
 
 def rounded_box(*widgets):
     # TODO: urwid tip just replace with linebox
-    #   corners = {"tlcorner" : u"╭", "trcorner" : u"╮",
-    #              "blcorner" : u"╰", "brcorner" : u"╯"}
 
     top = pad(urwid.Divider(u"_"))
     left = ("fixed", 2, urwid.Text(u"("))
@@ -397,4 +406,4 @@ def rounded_box(*widgets):
 
 def color_cost(mana_cost, *args, **kwargs):
     colored = [(c if c.isalpha() else "colorless", c) for c in mana_cost or ""]
-    return urwid.Text(colored, *args, **kwargs)
+    return urwid.Text(colored or "", *args, **kwargs)
