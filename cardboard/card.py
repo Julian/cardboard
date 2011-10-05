@@ -7,7 +7,7 @@ from cardboard.events import events
 from cardboard.util import requirements
 
 
-__all__ = ["Card", "Spell"]
+__all__ = ["Card", "Spell", "Token", "characteristics"]
 
 
 def status(name, on_event, off_event, default=True):
@@ -71,7 +71,8 @@ class Card(object):
         self.owner = None
         self._zone = None
 
-        for attr in {"name", "type", "subtypes", "mana_cost"}:
+        for attr in {"name", "loyalty", "mana_cost",
+                     "type", "subtypes", "supertypes"}:
             setattr(self, attr, getattr(db_card, attr))
 
         self.abilities = dict.fromkeys(db_card.abilities)
@@ -181,3 +182,51 @@ class Spell(object):
 
     def __repr__(self):
         return "<Spell: {}>".format(self.card)
+
+
+class Token(object):
+    """
+    A token is a marker for an object on the battlefield that is not a card.
+
+    .. seealso::
+        :ref:`tokens`
+
+    """
+
+    def __init__(self, name="", mana_cost="", colors=(), abilities=None,
+                 type=None, subtypes=(), supertypes=(),
+                 power=None, toughness=None, loyalty=None):
+
+        super(Token, self).__init__()
+
+        if abilities is None:
+            abilities = {}
+
+        self.name = name
+        self.mana_cost = str(mana_cost)
+        self.colors = set(colors)
+        self.abilities = abilities  # non-card tokens should be ability dicts
+        self.type = type
+        self.subtypes, self.supertypes = set(subtypes), set(supertypes)
+        self.power, self.toughness = power, toughness
+        self.loyalty = loyalty
+
+    @classmethod
+    def from_card(cls, card, **new_characteristics):
+        card_chars = characteristics(card)
+        card_chars.update(**new_characteristics)
+        return cls(**card_chars)
+
+
+def characteristics(mtg_object):
+    """
+    Return the characteristics of a M:TG object.
+
+    .. seealso::
+        :ref:`characteristics`
+
+    """
+
+    chars = ["name", "mana_cost", "colors", "type", "subtypes", "supertypes",
+             "abilities", "power", "toughness", "loyalty"]
+    return {c : getattr(mtg_object, c) for c in chars}

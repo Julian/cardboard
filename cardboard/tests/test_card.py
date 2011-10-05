@@ -9,12 +9,11 @@ from cardboard.events import events
 from cardboard.tests.util import GameTestCase
 
 
-def mock_card(type, name=None, abilities=()):
-    if name is None:
-        name = "Test {}".format(type)
-
+def mock_card(type, abilities=(), mana_cost=""):
+    name = "Test {}".format(type)
     card = mock.Mock()
-    card.name, card.type, card.abilities = name, type, abilities
+    card.name, card.type, card.abilities = name, type, list(abilities)
+    card.mana_cost, card.subtypes, card.supertypes = mana_cost, set(), set()
     return card
 
 
@@ -168,6 +167,25 @@ class TestCard(GameTestCase):
         self.assertLastEventsWere([events["card"]["cast"]])
 
 
+class TestCharacteristics(unittest.TestCase):
+    def test_characteristics(self):
+        o = mock.Mock()
+        self.assertEqual(c.characteristics(o), {
+            "name" : o.name,
+            "mana_cost" : o.mana_cost,
+            "colors" : o.colors,
+            "type" : o.type,
+            "subtypes" : o.subtypes,
+            "supertypes" : o.supertypes,
+            "abilities" : o.abilities,
+            "power" : o.power,
+            "toughness" : o.toughness,
+            "loyalty" : o.loyalty,
+            # "expansion" : o.expansion XXX
+            # "rules_text" : o.rules_text XXX
+        })
+
+
 class TestStatus(GameTestCase):
     def setUp(self):
         super(TestStatus, self).setUp()
@@ -267,3 +285,31 @@ class TestSpell(GameTestCase):
 
     def test_init(self):
         self.assertIs(self.spell.card, self.card)
+
+
+class TestToken(GameTestCase):
+    def setUp(self):
+        super(TestToken, self).setUp()
+
+        self.db_card = mock_card(types.CREATURE)
+        self.card = c.Card(self.db_card)
+
+    def test_from_card(self):
+        t = c.Token.from_card(self.card)
+        self.assertEqual(c.characteristics(t), c.characteristics(self.card))
+
+    def test_missing_characteristics(self):
+        """
+        A token doesn't have any characteristics not defined by its creator.
+
+        .. seealso::
+            :ref:`token-characteristics`
+
+        """
+
+        t = c.Token(power=1, toughness=1, colors="G",
+                    type=types.CREATURE, subtypes={"Saproling"})
+
+        self.assertEqual(t.mana_cost, "")
+        self.assertEqual(t.supertypes, set())
+        self.assertEqual(t.abilities, {})
