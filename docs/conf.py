@@ -9,7 +9,8 @@
 
 import sys, os
 
-print sys.path
+sys.path.append("")
+
 from epilog import rst_epilog
 
 # If extensions (or modules to document with autodoc) are in another directory,

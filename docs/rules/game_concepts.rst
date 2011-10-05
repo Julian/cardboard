@@ -240,17 +240,17 @@ There are several ways to lose the game.
     b. If a player's life total is 0 or less, he or she loses the game the next time a player would receive priority. This is a state-based action.
 
         .. seealso::
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
     c. If a player is required to draw more cards than are left in his or her library, he or she draws the remaining cards, and then loses the game the next time a player would receive priority. This is a state-based action.
 
         .. seealso::
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
     d. If a player has ten or more poison counters, he or she loses the game the next time a player would receive priority. This is a state-based action.
 
         .. seealso::
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
     e. An effect may state that a player loses the game.
     f. If a player would both win and lose the game simultaneously, he or she loses the game.
@@ -265,7 +265,7 @@ There are several ways to lose the game.
 
         .. seealso::
 
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
             :ref:`Rule 903.14 <winning-commander>`
 
@@ -577,6 +577,8 @@ If a spell or ability uses a description of an object that includes a card type 
     c. If a spell or ability uses a description of an object that includes the word "source," it means a source matching that description -- either a source of an ability or a source of damage -- in any zone. See rule 609.7.
     d. If an ability of a scheme card includes the text "this scheme," it means the scheme card in the command zone on which that ability is printed.
 
+.. _characteristics:
+
 109.3
 -----
 
@@ -627,12 +629,17 @@ There are five permanent types: artifact, creature, enchantment, land, and plane
     b. The term "permanent spell" is used to refer to a spell that will enter the battlefield as a permanent as part of its resolution. Specifically, it means an artifact, creature, enchantment, or planeswalker spell.
     c. If a permanent somehow loses all its permanent types, it remains on the battlefield. It's still a permanent.
 
+.. _tokens:
+
 110.5
 -----
 
 Some effects put tokens onto the battlefield. A token is a marker used to represent any permanent that isn't represented by a card.
 
     a. A token is both owned and controlled by the player under whose control it entered the battlefield.
+
+    .. _token-characteristics:
+
     b. The spell or ability that creates a token may define the values of any number of characteristics for the token. This becomes the token's "text." The characteristic values defined this way are functionally equivalent to the characteristic values that are printed on a card; for example, they define the token's copiable values. A token doesn't have any characteristics not defined by the spell or ability that created it.
 
         .. admonition:: Example
@@ -645,12 +652,12 @@ Some effects put tokens onto the battlefield. A token is a marker used to repres
     f. A token that's phased out, or that's in a zone other than the battlefield, ceases to exist. This is a state-based action. (Note that if a token changes zones, applicable triggered abilities will trigger before the token ceases to exist.)
 
         .. seealso::
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
     g. A token that has left the battlefield can't come back onto the battlefield. If such a token would return to the battlefield, it remains in its current zone instead. It ceases to exist the next time state-based actions are checked.
 
         .. seealso::
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
 .. _status-categories:
 
@@ -921,9 +928,9 @@ Special actions are actions a player may take when he or she has priority that d
 
 .. seealso::
 
-    :ref:`turn-based-action`
+    :ref:`turn-based-actions`
 
-    :ref:`state-based-action`
+    :ref:`state-based-actions`
 
 115.2
 -----
@@ -971,7 +978,7 @@ Other kinds of abilities and actions are automatically generated or performed by
     d. State-based actions happen automatically when certain conditions are met. They're dealt with before a player would receive priority.  See rule 116.5.
 
         .. seealso::
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
     e. Resolving spells and abilities may instruct players to make choices or take actions, or may allow players to activate mana abilities. Even if a player is doing so, no player has priority while a spell or ability is resolving. See rule 608, "Resolving Spells and Abilities."
 
@@ -1154,7 +1161,7 @@ If an effect sets a player's life total to a specific number, the player gains o
 If a player has 0 or less life, that player loses the game as a state-based action.
 
 .. seealso::
-    :ref:`state-based-action`
+    :ref:`state-based-actions`
 
 118.7
 -----
@@ -1230,7 +1237,7 @@ Damage is processed in a three-part sequence.
 Damage dealt to a creature or planeswalker doesn't destroy it. Likewise, the source of that damage doesn't destroy it. Rather, state-based actions may destroy a creature or planeswalker, or otherwise put it into its owner's graveyard, due to the results of the damage dealt to that permanent.
 
 .. seealso::
-    :ref:`state-based-action`
+    :ref:`state-based-actions`
 
 .. admonition:: Example
 
@@ -1242,7 +1249,7 @@ Damage dealt to a creature or planeswalker doesn't destroy it. Likewise, the sou
 Damage marked on a creature remains until the cleanup step, even if that permanent stops being a creature. If the total damage marked on a creature is greater than or equal to its toughness, that creature has been dealt lethal damage and is destroyed as a state-based action. All damage marked on a permanent is removed when it regenerates (see rule 701.11, "Regenerate") and during the cleanup step (see rule 514.2).
 
 .. seealso::
-    :ref:`state-based-action`
+    :ref:`state-based-actions`
 
 119.7
 -----
@@ -1285,7 +1292,7 @@ If there are no cards in a player's library and an effect offers that player the
 A player who attempts to draw a card from a library with no cards in it loses the game the next time a player would receive priority. This is a state-based action.
 
 .. seealso::
-    :ref:`state-based-action`
+    :ref:`state-based-actions`
 
 120.5
 -----
@@ -1320,13 +1327,13 @@ A counter is a marker placed on an object or player that modifies its characteri
     b. The number of loyalty counters on a planeswalker on the battlefield indicates how much loyalty it has. A planeswalker with 0 loyalty is put into its owner's graveyard as a state-based action.
 
         .. seealso::
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
     c. If a player has ten or more poison counters, he or she loses the game as a state-based action. A player is "poisoned" if he or she has one or more poison counters.
 
         .. seealso::
 
-            :ref:`state-based-action`
+            :ref:`state-based-actions`
 
             :ref:`thg`
 
@@ -1341,7 +1348,7 @@ Counters on an object are not retained if that object moves from one zone to ano
 If a permanent has both a +1/+1 counter and a -1/-1 counter on it, N +1/+1 and N -1/-1 counters are removed from it as a state-based action, where N is the smaller of the number of +1/+1 and -1/-1 counters on it.
 
 .. seealso::
-    :ref:`state-based-action`
+    :ref:`state-based-actions`
 
 121.4
 -----
@@ -1349,7 +1356,7 @@ If a permanent has both a +1/+1 counter and a -1/-1 counter on it, N +1/+1 and N
 If a permanent with an ability that says it can't have more than N counters of a certain kind on it has more than N counters of that kind on it, all but N of those counters are removed from it as a state-based action.
 
 .. seealso::
-    :ref:`state-based-action`
+    :ref:`state-based-actions`
 
 121.5
 -----
