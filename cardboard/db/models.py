@@ -7,9 +7,14 @@ from sqlalchemy.orm import backref, reconstructor, relationship
 from cardboard.db import Base, Session
 
 cardsubtype_table = Table("cardsubtypes", Base.metadata,
-        Column("card_id", Integer, ForeignKey("cards.id"), primary_key=True),
-        Column("subtype_id", Integer, ForeignKey("subtypes.id"),
-               primary_key=True),
+    Column("card_id", Integer, ForeignKey("cards.id"), primary_key=True),
+    Column("subtype_id", Integer, ForeignKey("subtypes.id"), primary_key=True),
+)
+
+cardsupertype_table = Table("cardsupertypes", Base.metadata,
+    Column("card_id", Integer, ForeignKey("cards.id"), primary_key=True),
+    Column("supertype_id", Integer, ForeignKey("supertypes.id"),
+           primary_key=True),
 )
 
 
@@ -41,29 +46,37 @@ class Card(Base):
 
     power = Column(String(3))
     toughness = Column(String(3))
+    loyalty = Column(Integer)
 
     ability_objects = relationship("Ability", backref="card")
 
     subtype_objects = relationship("Subtype", secondary=cardsubtype_table,
                                    backref="cards")
 
+    supertype_objects = relationship("Supertype",
+                                     secondary=cardsupertype_table,
+                                     backref="cards")
+
     abilities = association_proxy("ability_objects", "description")
     decks = association_proxy("deck_appearances", "deck")
     sets = association_proxy("set_appearances", "set")
     subtypes = association_proxy("subtype_objects", "name")
+    supertypes = association_proxy("supertype_objects", "name")
 
     def __init__(self, name, type, mana_cost=None, abilities=(), subtypes=(),
-                 power=None, toughness=None):
+                 supertypes=(), power=None, toughness=None, loyalty=None):
         super(Card, self).__init__()
 
         self.abilities = list(abilities)
         self.mana_cost = mana_cost
         self.name = name
-        self.subtypes = list(subtypes)
+        self.subtypes = set(subtypes)
+        self.supertypes = set(supertypes)
         self.type = type
 
         self.power = power
         self.toughness = toughness
+        self.loyalty = loyalty
 
     def __repr__(self):
         return "<Card Model: {.name}>".format(self)
@@ -197,6 +210,22 @@ class Subtype(Base):
 
     def __repr__(self):
         return "<Subtype Model: {0.name}>".format(self)
+
+
+class Supertype(Base):
+
+    __tablename__ = "supertypes"
+
+    id = Column(Integer, primary_key=True)
+    card_id = Column(Integer, ForeignKey("cards.id"))
+    name = Column(String)
+
+    def __init__(self, name):
+        super(Supertype, self).__init__()
+        self.name = name
+
+    def __repr__(self):
+        return "<Supertype Model: {0.name}>".format(self)
 
 
 Base.metadata.create_all()

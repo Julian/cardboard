@@ -124,7 +124,7 @@ ABBR = {
 
         }
 
-def load(f):
+def load(f=None):
     """
     Lazily yields each parsed card from a card listing file.
 
@@ -133,10 +133,16 @@ def load(f):
 
     """
 
+    responsible_for_closing = False
+
+    if f is None:
+        responsible_for_closing = True
+        f = open(os.path.join(os.path.dirname(__file__), "cards.txt"))
+
     buffer = deque()
 
     for line in f:
-        line = line.strip()
+        line = line.strip().partition("#")[0]
 
         if not line:
             card_dict = parse(buffer)
@@ -151,6 +157,9 @@ def load(f):
     last_one = parse(buffer)
     if last_one is not None:
         yield last_one
+
+    if responsible_for_closing:
+        f.close()
 
 def parse(c):
     """
@@ -206,6 +215,8 @@ def parse(c):
         return
     elif "Creature" in card["type"] and not card["type"].startswith("Enchant"):
         card["power"], card["toughness"] = c.popleft().split("/")
+    elif "Planeswalker" in card["type"]:
+        card["loyalty"] = c.popleft()
 
     card["abilities"] = list(c)
 
