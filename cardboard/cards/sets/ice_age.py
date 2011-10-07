@@ -3,7 +3,7 @@ from cardboard.cards import card, ability
 @card("Brainstorm")
 def brainstorm(card):
 
-    @ability
+    @ability(card, card.abilities[0])
     def ability(self):
         self.owner.draw(3)
         discard = self.owner.frontend.select_cards(self.owner.hand,
