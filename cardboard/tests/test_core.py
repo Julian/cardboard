@@ -264,6 +264,13 @@ class TestGame(GameTestCase):
         event = {"event" : events["game"]["started"]}
         self.assertEqual(self.events.trigger.call_args_list[0], [event])
 
+        # can't start a started game
+        self.resetEvents()
+        with self.assertRaises(exceptions.RequirementNotMet):
+            self.game.start()
+
+        self.assertFalse(self.events.trigger.called)
+
     def test_shuffles(self):
         """
         The game start shuffles the players' libraries.

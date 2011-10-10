@@ -324,6 +324,7 @@ class Game(object):
 
         """
 
+        self.require(started=False)
         self.events.trigger(event=events["game"]["started"])
         self._start()
 
