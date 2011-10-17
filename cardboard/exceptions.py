@@ -35,6 +35,13 @@ class InvalidAction(CardboardRuntimeError):
     """
 
 
+class BadSelection(InvalidAction):
+    """
+    An invalid selection was made.
+
+    """
+
+
 class NoSuchObject(InvalidAction):
     """
     An action was attempted on an object that does not exist in the game.
