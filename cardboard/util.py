@@ -3,12 +3,15 @@ Utilities of use for the creation of game objects.
 
 """
 
-import logging
+from twisted.python import log
 
 from cardboard import exceptions
 
 
-__all__ = ["do_subscriptions", "log", "requirements", "match"]
+__all__ = ["ANY", "do_subscriptions", "log_events", "requirements"]
+
+
+ANY = lambda _ : True
 
 
 def do_subscriptions(self, game=None):
@@ -26,8 +29,8 @@ def do_subscriptions(self, game=None):
         game.events.subscribe(method, **subscription_options)
 
 
-def log(game):
-    event_log = logging.getLogger("Event Logger")
+def log_events(game):
+    pass
 
 
 def requirements(messages=None):
