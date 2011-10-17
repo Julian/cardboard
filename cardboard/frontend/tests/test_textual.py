@@ -20,15 +20,17 @@ class TestTextualFrontend(GameTestCase):
     def test_input(self):
         self.p1.frontend.in_file = StringIO(u"hello\n")
         self.assertEqual(self.tf.input(), "hello")
+        self.assertEqual(self.f.getvalue(), self.tf.PS1.encode("utf-8"))
 
     def test_prompt(self):
-        # no trailing newline for empty msg
-        self.tf.prompt(u"")
-        self.assertFalse(self.f.getvalue())
-
         msg = u"héllo world"
         self.tf.prompt(msg)
         self.assertEqual(self.f.getvalue(), msg.encode("utf-8") + "\n")
+
+        self.f = self.p1.frontend.out_file = StringIO()
+        msg = "hello"
+        self.tf.prompt(u"hello", end=u" world\n")
+        self.assertEqual(self.f.getvalue(), u"hello world\n".encode("utf-8"))
 
     def test_formatted_prompt(self):
         msg = [u"foo", u"bar", u"baz"]
@@ -65,14 +67,46 @@ class TestTextualFrontend(GameTestCase):
         c = [Thing(u"bar"), Thing(u"foo"), Thing(u"baz")]
 
         sel = self.tf.select(c)
-        p = u"Select 1 choice.\n\n    1. bar\n    2. baz\n    3. foo\n\n▸▸▸ "
-        print p
+        p = u"Select 1 choice.\n\n    1. bar\n    2. foo\n    3. baz\n\n▸▸▸ "
         self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
-
         self.assertEqual(sel, [c[0]])
 
-        sel = self.tf.select(c, how_many=2)
-        self.assertEqual(sel, [c[0], c[1]])
+        self.assertEqual(self.tf.select(c, how_many=2), [c[0], c[2]])
+
+    def test_select_cards(self):
+        self.tf.select = mock.Mock()
+        self.tf.select_cards(range(8), match=lambda i : i % 2 == 0, how_many=2)
+
+        args, kwargs = self.tf.select.call_args
+        kwargs["choices"] = list(kwargs["choices"])
+
+        self.assertFalse(args)
+        self.assertEqual(
+            kwargs, dict(choices=[0, 2, 4, 6], how_many=2, duplicates=False)
+        )
+
+    def test_select_players(self):
+        self.tf.select = mock.Mock()
+        self.tf.select_players(match=lambda p : p == self.p1, how_many=3)
+
+        args, kwargs = self.tf.select.call_args
+        kwargs["choices"] = list(kwargs["choices"])
+
+        self.assertFalse(args)
+        self.assertEqual(
+            kwargs, dict(choices=[self.p1], how_many=3, duplicates=False)
+        )
+
+    def test_select_range(self):
+        self.p1.frontend.in_file = StringIO(u"13\n2, 6, 4\n")
+
+        sel = self.tf.select_range(1, 21)
+
+        p = u"Select a number between 1 and 20.\n▸▸▸ "
+        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
+        self.assertEqual(sel, [13])
+
+        self.assertEqual(self.tf.select_range(1, 10, how_many=3), [2, 6, 4])
 
     def test_card_info(self):
         class Bar(mock.Mock):

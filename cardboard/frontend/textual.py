@@ -4,71 +4,79 @@ import textwrap
 
 import zope.interface
 
-from cardboard.frontend import FrontendMixin, IFrontend
+from cardboard.frontend import (FrontendMixin, IFrontend, IInfoDisplay,
+                                ISelector)
+from cardboard.util import ANY
 
 
 # FIXME : > 2 Players
 class TextualFrontend(FrontendMixin):
 
-    zope.interface.implements(IFrontend)
+    zope.interface.implements(IFrontend, IInfoDisplay, ISelector)
 
+    PS1 = u"▸▸▸ "
     in_file, out_file = sys.stdin, sys.stdout
 
     def input(self):
+        self.prompt(self.PS1, end="")
         return self.in_file.readline().rstrip()
 
     def priority_granted(self):
         pass
 
     def prompt(self, msg, end=u"\n"):
-        if not msg:
-            return
-
         self.out_file.write(msg.encode("utf-8"))
         self.out_file.write(end.encode("utf-8"))
 
-    def formatted_prompt(self, body, header="", footer="", end="\n"):
-        if header:
-            header = header + u"\n"
-        if footer:
-            footer = u"\n" + footer
+    def formatted_prompt(self, body, header=None, footer=None, end=""):
+        if header is not None:
+            self.prompt(header, end=u"\n\n")
         if header or footer:
             body = (u"    " + line for line in body)
-
-        self.prompt(header)
         for line in body:
             self.prompt(line)
-        self.prompt(footer, end=end)
+        if footer is not None:
+            self.prompt(u"\n" + footer)
+        self.prompt(end, end="")
 
     def select(self, choices, how_many=1, duplicates=False):
-        choices = sorted(choices, key=str)
         num = u"your" if how_many is None else how_many
         s = u"s" if how_many is not None and how_many != 1 else ""
 
         self.formatted_prompt(
             header=u"Select {} choice{}.".format(num, s),
             body=(u"{}. {}".format(i, c) for i, c in enumerate(choices, 1)),
-            footer=u"▸▸▸ ",
-            end="",
+            end="\n"
         )
 
         selections = [int(s) for s in self.input().split(",")]
         return [choices[i - 1] for i in selections]
 
+    def select_cards(self, zone, match=ANY, how_many=1, duplicates=False):
+        return self.select(
+            choices=(card for card in zone if match(card)),
+            how_many=how_many,
+            duplicates=duplicates,
+        )
+
+    def select_players(self, match=ANY, how_many=1, duplicates=False):
+        return self.select(
+            choices=(player for player in self.game.players if match(player)),
+            how_many=how_many,
+            duplicates=duplicates,
+        )
+
+    def select_range(self, start, stop, how_many=1, duplicates=False):
+        self.prompt(
+            u"Select a number between {} and {}.".format(start, stop - 1)
+        )
+        return [int(s) for s in self.input().split(",")]
+
     def started_running(self):
         return self.main_menu()
 
-    def menu(self, title, preamble, *choices):
-        self.prompt("\n{}:".format(title), end="\n\n")
-
-        if preamble:
-            self.prompt("    {}".format(preamble), end="\n\n")
-
-        selection, = self.select(dict(enumerate(choices, 1)))
-        return selection
-
     def main_menu(self):
-        selection = self.menu("Main Menu", self.player_info(), "Zone Info")
+        selection = self.formatted_prompt("Main Menu", self.player_info(), "Zone Info")
         getattr(self, selection.lower().replace(" ", "_"))()
 
     def card_info(self, card):
