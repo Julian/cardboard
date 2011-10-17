@@ -1,58 +1,61 @@
 # coding: utf-8
-from __future__ import print_function, unicode_literals
-
-import logging
+import sys
 import textwrap
+
+import zope.interface
+
+from cardboard.frontend import FrontendMixin, IFrontend
 
 
 # FIXME : > 2 Players
-class TextualFrontend(object):
-    def __init__(self, player):
-        super(TextualFrontend, self).__init__()
+class TextualFrontend(FrontendMixin):
 
-        self._debug = False
+    zope.interface.implements(IFrontend)
 
-        self.game = player.game
-        self.player = player
+    in_file, out_file = sys.stdin, sys.stdout
 
-    def __repr__(self):
-        return "<TextualFrontend to {}>".format(self.player)
+    def input(self):
+        return self.in_file.readline().rstrip()
 
     def priority_granted(self):
         pass
 
-    def prompt(self, *args, **kwargs):
-        args = (arg.encode("utf-8") for arg in args)
-        print(*args, **kwargs)
+    def prompt(self, msg, end=u"\n"):
+        if not msg:
+            return
+
+        self.out_file.write(msg.encode("utf-8"))
+        self.out_file.write(end.encode("utf-8"))
+
+    def formatted_prompt(self, body, header="", footer="", end="\n"):
+        if header:
+            header = header + u"\n"
+        if footer:
+            footer = u"\n" + footer
+        if header or footer:
+            body = (u"    " + line for line in body)
+
+        self.prompt(header)
+        for line in body:
+            self.prompt(line)
+        self.prompt(footer, end=end)
 
     def select(self, choices, how_many=1, duplicates=False):
-        choices = {str(k) : v for k, v in choices.iteritems()}
+        choices = sorted(choices, key=str)
+        num = u"your" if how_many is None else how_many
+        s = u"s" if how_many is not None and how_many != 1 else ""
 
-        for index, choice in sorted(choices.iteritems()):
-            self.prompt("    {}. {}".format(index, choice))
+        self.formatted_prompt(
+            header=u"Select {} choice{}.".format(num, s),
+            body=(u"{}. {}".format(i, c) for i, c in enumerate(choices, 1)),
+            footer=u"▸▸▸ ",
+            end="",
+        )
 
-        self.prompt("\n")
+        selections = [int(s) for s in self.input().split(",")]
+        return [choices[i - 1] for i in selections]
 
-        while True:
-            if how_many is not None and how_many != 1:
-                self.prompt("Select {} choices.".format(how_many))
-
-            self.prompt(">>|", end=" ")
-
-            selections = [s.strip() for s in raw_input().split(",")]
-
-            # TODO: how_many = None
-            if len(selections) < how_many:
-                self.prompt("Not enough selections.")
-            elif not duplicates and len(set(selections)) < len(selections):
-                self.prompt("Can't duplicate selections.")
-            else:
-                try:
-                    return [choices[selection] for selection in selections]
-                except KeyError as e:
-                    self.prompt("{} is not a valid choice.".format(e[0]))
-
-    def run(self):
+    def started_running(self):
         return self.main_menu()
 
     def menu(self, title, preamble, *choices):
@@ -69,27 +72,27 @@ class TextualFrontend(object):
         getattr(self, selection.lower().replace(" ", "_"))()
 
     def card_info(self, card):
-        mana_cost = card.mana_cost or ""
-        subtypes = pt = ""
+        mana_cost = card.mana_cost or u""
+        subtypes = pt = u""
 
         if card.subtypes:
-            subtypes = " — {}".format(", ".join(card.subtypes))
+            subtypes = u" — {}".format(", ".join(card.subtypes))
 
         if card.power or card.toughness:
-            pt = "\n{card.power}/{card.toughness}".format(card=card)
+            pt = u"\n{card.power}/{card.toughness}".format(card=card)
 
         abilities = "\n".join(card.abilities)
 
-        return textwrap.dedent("""
-                               {0.name:<20}{mana_cost}
-                               {0.type}{subtypes}
+        return textwrap.dedent(u"""
+                                {0.name:<20}{mana_cost}
+                                {0.type}{subtypes}
 
-                               {abilities}{pt}
-                               """).strip("\n").format(card,
-                                                       mana_cost=mana_cost,
-                                                       subtypes=subtypes,
-                                                       abilities=abilities,
-                                                       pt=pt)
+                                {abilities}{pt}
+                                """).strip("\n").format(card,
+                                                        mana_cost=mana_cost,
+                                                        subtypes=subtypes,
+                                                        abilities=abilities,
+                                                        pt=pt)
 
     def player_info(self):
         self.game.require(started=True)

@@ -1,5 +1,7 @@
 # coding: utf-8
-from __future__ import print_function
+
+from StringIO import StringIO
+from textwrap import dedent
 
 import mock
 
@@ -11,30 +13,74 @@ from cardboard.tests.util import GameTestCase
 class TestTextualFrontend(GameTestCase):
     def setUp(self):
         super(TestTextualFrontend, self).setUp()
+
         self.p1.frontend = self.tf = t.TextualFrontend(self.p1)
+        self.f = self.p1.frontend.out_file = StringIO()
 
-    def test_repr(self):
-        rpr = "<TextualFrontend to {}>".format(self.p1)
-        self.assertEqual(repr(self.tf), rpr)
-
-    def test_init(self):
-        self.assertFalse(self.tf._debug)
-        self.assertIs(self.tf.player, self.p1)
+    def test_input(self):
+        self.p1.frontend.in_file = StringIO(u"hello\n")
+        self.assertEqual(self.tf.input(), "hello")
 
     def test_prompt(self):
-        with mock.patch.object(t, "print", spec=print, create=True) as prnt:
-            self.tf.prompt(u"hello", u"world", sep="", end="\n\n")
+        # no trailing newline for empty msg
+        self.tf.prompt(u"")
+        self.assertFalse(self.f.getvalue())
 
-        h, w = u"hello".encode("utf-8"), u"world".encode("utf-8")
-        prnt.assert_called_once_with(h, w, sep="", end="\n\n")
+        msg = u"héllo world"
+        self.tf.prompt(msg)
+        self.assertEqual(self.f.getvalue(), msg.encode("utf-8") + "\n")
+
+    def test_formatted_prompt(self):
+        msg = [u"foo", u"bar", u"baz"]
+
+        self.tf.formatted_prompt(msg)
+        formatted_msg = u"foo\nbar\nbaz\n"
+        self.assertEqual(self.f.getvalue(), formatted_msg)
+
+        self.f = self.p1.frontend.out_file = StringIO()
+        self.tf.formatted_prompt(msg, header=u"Foo")
+        formatted_msg = u"Foo\n\n    foo\n    bar\n    baz\n"
+        self.assertEqual(self.f.getvalue(), formatted_msg)
+
+        self.f = self.p1.frontend.out_file = StringIO()
+        self.tf.formatted_prompt(msg, header=u"Foo", footer=u"Bla")
+        formatted_msg = u"Foo\n\n    foo\n    bar\n    baz\n\nBla\n"
+        self.assertEqual(self.f.getvalue(), formatted_msg)
+
+        self.f = self.p1.frontend.out_file = StringIO()
+        self.tf.formatted_prompt(msg, footer=u"Bla")
+        formatted_msg = u"    foo\n    bar\n    baz\n\nBla\n"
+        self.assertEqual(self.f.getvalue(), formatted_msg)
+
+    def test_select(self):
+        self.p1.frontend.in_file = StringIO(u"1\n1, 3\n")
+
+        class Thing(object):
+            def __init__(self, name):
+                self.name = name
+
+            def __str__(self):
+                return self.name
+
+        c = [Thing(u"bar"), Thing(u"foo"), Thing(u"baz")]
+
+        sel = self.tf.select(c)
+        p = u"Select 1 choice.\n\n    1. bar\n    2. baz\n    3. foo\n\n▸▸▸ "
+        print p
+        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
+
+        self.assertEqual(sel, [c[0]])
+
+        sel = self.tf.select(c, how_many=2)
+        self.assertEqual(sel, [c[0], c[1]])
 
     def test_card_info(self):
         class Bar(mock.Mock):
-            name = "Bar"
-            type = "Land"
+            name = u"Bar"
+            type = u"Land"
             subtypes = []
             mana_cost = None
-            abilities = ["T: Do bar."]
+            abilities = [u"T: Do bar."]
             power = toughness = None
 
         # NOTE: don't really care at the moment but maybe later trim spaces
