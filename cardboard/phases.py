@@ -96,13 +96,16 @@ def declare_attackers(game):
         targets |= {card for card in opponent.battlefield
                     if card.type == "Planeswalker"}
 
-    attackers = game.turn.active_player.frontend.select_cards(game.battlefield,
-                                                              how_many=None)
-    attacks = {k : game.turn.active_player.frontend.select_combined()
-               for k in attackers}
+    # attackers = game.turn.active_player.frontend.select.cards(
+    #     game.battlefield, how_many=None
+    # )
+    # attacks = {
+    #    k : game.turn.active_player.frontend.select.combined(attackers)
+    #    for k in attackers
+    # }
 
-    for card in attacks:
-        card.tap()
+    # for card in attacks:
+    #     card.tap()
 
     game.grant_priority()
     game.events.trigger(
