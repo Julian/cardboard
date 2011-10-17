@@ -1,13 +1,15 @@
 import unittest
 
+import mock
+
 from cardboard.frontend import testing as t
 from cardboard.tests.util import GameTestCase
 
 
-class TestSelector(unittest.TestCase):
-    def test_selector(self):
+class TestMockSelector(unittest.TestCase):
+    def test_mock_selector(self):
         class Foo(object):
-            foo = t.selector("foo")
+            foo = t.mock_selector("foo")
 
         f = Foo()
 
@@ -22,24 +24,6 @@ class TestSelector(unittest.TestCase):
 
             self.assertEqual(f.foo(how_many=3), (10, 11, 12))
 
-        # arbitrary selection doesn't check return value
-        with f.foo.will_return(10, 11, 12):
-            self.assertEqual(f.foo(), (10, 11, 12))
-            self.assertEqual(f.foo(how_many=None), (10, 11, 12))
-
-        with f.foo.will_return():
-            self.assertEqual(f.foo(), ())
-
-        # select without setting a selection return value returns empty select
-        with self.assertRaises(t.SelectionError):
-            with f.foo.will_return():
-                f.foo(how_many=1)
-
-        # can't return more selections than how_many
-        with self.assertRaises(t.SelectionError):
-            with f.foo.will_return(10, 11, 12):
-                s = f.foo(how_many=2)
-
         self.assertEqual(f.foo.__name__, "foo")
 
 
@@ -49,10 +33,8 @@ class TestTestingFrontend(GameTestCase):
         self.t = t.TestingFrontend(self.p1)
         self.p1.frontend = self.t
 
-    def test_repr(self):
-        name = self.p1.name
-        self.assertEqual(repr(self.t), "<Testing Frontend to {}>".format(name))
+    def test_prompt(self):
+        with mock.patch("cardboard.frontend.testing.log") as log:
+            self.t.prompt("Testing 123")
 
-    def test_init(self):
-        self.assertIs(self.t.game, self.p1.game)
-        self.assertIs(self.t.player, self.p1)
+        log.msg.assert_called_once_with("Testing 123")

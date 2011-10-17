@@ -7,10 +7,6 @@ from cardboard.frontend import none as n
 
 
 class TestNoFrontend(unittest.TestCase):
-    def test_repr(self):
-        f = n.NoFrontend(mock.Mock())
-        self.assertEqual(repr(f), "<No Frontend Connected>")
-
     def test_no_frontend(self):
         f = n.NoFrontend(mock.Mock())
 
