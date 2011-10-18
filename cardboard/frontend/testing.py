@@ -30,15 +30,24 @@ def mock_selector(name):
     return select
 
 
+class TestingSelector(object):
+
+    choice = mock_selector("choice")
+    cards = mock_selector("cards")
+    players = mock_selector("players")
+    combined = mock_selector("combined")
+    range = mock_selector("range")
+
+    def __init__(self, frontend):
+        super(TestingSelector, self).__init__()
+
+
 class TestingFrontend(FrontendMixin):
 
     implements(IFrontend)
 
-    select = mock_selector("select")
-    select_cards = mock_selector("select_cards")
-    select_players = mock_selector("select_players")
-    select_combined = mock_selector("select_combined")
-    select_range = mock_selector("select_range")
+    info = lambda _, __ : None
+    select = TestingSelector
 
     def prompt(self, msg):
         log.msg(msg)
