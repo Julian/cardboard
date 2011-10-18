@@ -47,3 +47,45 @@ class TestFrontendMixin(unittest.TestCase):
         # can't run a running frontend
         with self.assertRaises(exceptions.RequirementNotMet):
             self.frontend.run()
+
+
+class TestValidate(unittest.TestCase):
+
+    @c.validate_selection
+    def select(self, whatever, how_many, duplicates):
+        return whatever
+
+    def test_how_many(self):
+        self.select([2])
+        self.select([2], how_many=1)
+        self.select([2, 3, 4], how_many=3)
+
+        with self.assertRaises(exceptions.BadSelection):
+            self.select([2, 3])
+
+        with self.assertRaises(exceptions.BadSelection):
+            self.select([2, 3], how_many=1)
+
+        with self.assertRaises(exceptions.BadSelection):
+            self.select([2, 3, 4], how_many=2)
+
+    def test_duplicates(self):
+        self.select([2, 2], how_many=2, duplicates=True)
+        self.select([2, 3, 3, 5, 2], how_many=5, duplicates=True)
+
+        with self.assertRaisesRegexp(exceptions.BadSelection, "duplicate"):
+            self.select([2, 2], how_many=2)
+
+        with self.assertRaisesRegexp(exceptions.BadSelection, "duplicate"):
+            self.select([2, 2], how_many=2, duplicates=False)
+
+        with self.assertRaisesRegexp(exceptions.BadSelection, "duplicate"):
+            self.select([2, 3, 3, 2], how_many=4)
+
+    def test_arbitrary_selection(self):
+        self.select([], how_many=None)
+        self.select([2], how_many=None)
+        self.select([2, 3], how_many=None)
+
+        self.select([2, 2], how_many=None, duplicates=True)
+        self.select([2, 3, 3, 5, 2], how_many=None, duplicates=True)

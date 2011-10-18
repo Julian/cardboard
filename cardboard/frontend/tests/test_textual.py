@@ -165,7 +165,7 @@ class TestSelector(unittest.TestCase):
         self.assertEqual(self.s(c, how_many=2), [c[0], c[2]])
 
     def test_select_cards(self):
-        self.s.choice = mock.Mock()
+        self.s.choice = mock.Mock(return_value=[2, 4])
         self.s.cards(range(8), match=lambda i : i % 2 == 0, how_many=2)
 
         args, kwargs = self.s.choice.call_args
@@ -177,15 +177,17 @@ class TestSelector(unittest.TestCase):
         )
 
     def test_select_players(self):
-        self.s.choice = mock.Mock()
-        self.s.players(match=lambda p : p == self.p1, how_many=3)
+        self.s.choice = mock.Mock(return_value=[self.p1, self.p1, self.p1])
+        self.s.players(
+            match=lambda p : p == self.p1, how_many=3, duplicates=True
+        )
 
         args, kwargs = self.s.choice.call_args
         kwargs["choices"] = list(kwargs["choices"])
 
         self.assertFalse(args)
         self.assertEqual(
-            kwargs, dict(choices=[self.p1], how_many=3, duplicates=False)
+            kwargs, dict(choices=[self.p1], how_many=3, duplicates=True)
         )
 
     def test_select_range(self):
@@ -210,3 +212,10 @@ class TestSelector(unittest.TestCase):
         p = u"Select some numbers between 1 and 5.\n▸▸▸ "
         self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
         self.assertEqual(sel, [1, 2, 3, 4, 5])
+
+        # invalid ranges
+        with self.assertRaises(ValueError):
+            self.s.range(5, 2)
+
+        with self.assertRaisesRegexp(ValueError, "empty"):
+            self.s.range(2, 2)

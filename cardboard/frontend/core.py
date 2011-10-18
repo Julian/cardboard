@@ -2,6 +2,7 @@ from functools import wraps
 
 from zope.interface import implements
 
+from cardboard import exceptions
 from cardboard.util import requirements
 from cardboard.frontend.interfaces import IRunnable
 
@@ -38,16 +39,24 @@ class FrontendMixin(object):
 
 
 def validate_selection(fn):
+
     @wraps(fn)
-    def validate(*args, **kwargs):
-        # TODO: how_many = None
-        if len(selections) < how_many:
-            self.prompt("Not enough selections.")
-        elif not duplicates and len(set(selections)) < len(selections):
-            self.prompt("Can't duplicate selections.")
-        else:
-            try:
-                return [choices[selection] for selection in selections]
-            except KeyError as e:
-                self.prompt("{} is not a valid choice.".format(e[0]))
-    return validate
+    def validated(*args, **kwargs):
+        how_many = kwargs.setdefault("how_many", 1)
+        duplicates = kwargs.setdefault("duplicates", False)
+
+        selections = fn(*args, **kwargs)
+        got = len(selections)
+
+        if how_many is not None and got != how_many:
+            raise exceptions.BadSelection(
+                "Expected {} selections, got {}.".format(how_many, got)
+            )
+
+        if not duplicates:
+            if len(set(selections)) != got:
+                raise exceptions.BadSelection("Cannot duplicate selections.")
+
+        return selections
+
+    return validated

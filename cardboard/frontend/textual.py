@@ -5,7 +5,7 @@ from textwrap import dedent
 import zope.interface
 
 from cardboard.card import characteristics
-from cardboard.frontend import FrontendMixin
+from cardboard.frontend import FrontendMixin, validate_selection
 from cardboard.frontend.interfaces import IFrontend, IInfoDisplay, ISelector
 from cardboard.util import ANY
 
@@ -84,6 +84,7 @@ class TextualSelector(object):
         self.frontend = frontend
         self.game = frontend.game
 
+    @validate_selection
     def choice(self, choices, how_many=1, duplicates=False):
         num = u"your" if how_many is None else how_many
         s = u"s" if how_many is not None and how_many != 1 else ""
@@ -99,6 +100,7 @@ class TextualSelector(object):
 
     __call__ = choice
 
+    @validate_selection
     def cards(self, zone, match=ANY, how_many=1, duplicates=False):
         return self.choice(
             choices=(card for card in zone if match(card)),
@@ -106,6 +108,7 @@ class TextualSelector(object):
             duplicates=duplicates,
         )
 
+    @validate_selection
     def players(self, match=ANY, how_many=1, duplicates=False):
         return self.choice(
             choices=(player for player in self.game.players if match(player)),
@@ -113,7 +116,12 @@ class TextualSelector(object):
             duplicates=duplicates,
         )
 
+    @validate_selection
     def range(self, start, stop, how_many=1, duplicates=False):
+
+        if stop <= start:
+            raise ValueError("Cannot select from an empty range.")
+
         if how_many is None:
             num = u"some"
             s = u"s"
