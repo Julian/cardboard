@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 from zope.interface import Attribute, Interface
 
 from cardboard.util import ANY
@@ -19,6 +21,13 @@ class IFrontend(Interface):
 
     _debug = Attribute("Designates whether the frontend is in debug mode")
     running = Attribute("Specifies if the frontend is currently running")
+
+    info = Attribute(
+        "A provider of {IInfoDisplay} to be instantiated for each instance."
+    )
+    select = Attribute(
+        "A provider of {ISelector} to be instantiated for each instance."
+    )
 
     game = Attribute("The game object which the frontend is currently attached"
                      "to")
