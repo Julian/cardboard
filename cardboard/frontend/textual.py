@@ -5,8 +5,8 @@ from textwrap import dedent
 import zope.interface
 
 from cardboard.card import characteristics
-from cardboard.frontend import (FrontendMixin, IFrontend, IInfoDisplay,
-                                ISelector)
+from cardboard.frontend import FrontendMixin
+from cardboard.frontend.interfaces import IFrontend, IInfoDisplay, ISelector
 from cardboard.util import ANY
 
 
@@ -46,7 +46,8 @@ class TextualInfoDisplay(object):
                        {pt}
                        """).format(**info).strip()
 
-    def player(self):
+    @property
+    def player_overview(self):
         self.game.require(started=True)
 
         s = "s" if len(self.frontend.player.opponents) > 1 else ""
@@ -69,19 +70,8 @@ class TextualInfoDisplay(object):
 
         return "\n".join(info)
 
-    def zone(self):
-        choices = {"Field" : set(self.game.battlefield),
-                   "Exile" : set(self.player.exile),
-                   "Graveyard" : list(self.player.graveyard),
-                   "Hand" : set(self.player.hand)}
-
-        if self._debug:
-            choices["Library"] = list(self.player.library)
-
-        selection = self.menu("Zone Info", None, *sorted(choices))
-
-        selection = self.menu(selection, None, *choices[selection])
-        self.prompt(self.card_info(selection))
+    def zone(self, zone):
+        return "\n".join(str(card) for card in zone)
 
 
 class TextualSelector(object):

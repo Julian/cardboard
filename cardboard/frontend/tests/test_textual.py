@@ -56,7 +56,6 @@ class TestTextualFrontend(GameTestCase):
         self.assertEqual(self.f.getvalue(), formatted_msg)
 
 
-
 class TestTextualInfoDisplay(unittest.TestCase):
 
     tf = mock.Mock()
@@ -100,11 +99,13 @@ class TestTextualInfoDisplay(unittest.TestCase):
 
         self.assertEqual(self.info.card(Foo), foo_info)
 
-    def test_player_info(self):
-        self.assertEqual(self.info.player(),
-                         u"You: {0.p1}\nOpponent: {0.p2}".format(self))
+    def test_player_overview(self):
+        self.assertEqual(
+            self.info.player_overview,
+            u"You: {0.p1}\nOpponent: {0.p2}".format(self)
+        )
 
-    def test_player_info_multiple_opponents(self):
+    def test_player_overview_multiple_opponents(self):
         g = mock.Mock()
         g.players = g.turn.order = [mock.Mock(), mock.Mock(), mock.Mock()]
         tf = t.TextualFrontend(g.players[0])
@@ -113,7 +114,7 @@ class TestTextualInfoDisplay(unittest.TestCase):
         g.players[0].opponents = g.players[1:]
 
         self.assertEqual(
-            info.player(),
+            info.player_overview,
             u"You: {}\nOpponents: {}, {}".format(*g.turn.order)
         )
 
@@ -128,6 +129,9 @@ class TestTextualInfoDisplay(unittest.TestCase):
         p.__str__.return_value = "First Main"
         p.__len__.return_value = 1
         self.assertEqual(self.info.turn, u"Phase: First Main")
+
+    def test_zone_info(self):
+        self.assertEqual(self.info.zone([1, 2, 3]), "1\n2\n3")
 
 
 class TestSelector(unittest.TestCase):
