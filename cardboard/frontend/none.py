@@ -7,6 +7,16 @@ from cardboard import exceptions
 from cardboard.frontend import FrontendMixin
 
 
-class NoFrontend(FrontendMixin):
+class NoFrontend(object):
+    def __init__(self, player, debug=False):
+        super(NoFrontend, self).__init__()
+
+        self._debug = debug
+        self.game = player.game
+        self.player = player
+
+    def __repr__(self):
+        return "<No Frontend connected to {.player}>".format(self)
+
     def __getattr__(self, attr):
         raise exceptions.NoFrontendConnected(self.player)
