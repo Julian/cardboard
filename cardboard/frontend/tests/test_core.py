@@ -7,7 +7,8 @@ from cardboard.frontend import core as c
 
 
 class TestFrontend(c.FrontendMixin):
-    pass
+    info = mock.Mock()
+    select = mock.Mock()
 
 
 class TestFrontendMixin(unittest.TestCase):
@@ -24,6 +25,14 @@ class TestFrontendMixin(unittest.TestCase):
     def test_init(self):
         self.assertIs(self.frontend.player, self.player)
         self.assertIs(self.frontend.game, self.player.game)
+
+        self.assertIs(
+            self.frontend.info, self.frontend.__class__.info.return_value
+        )
+
+        self.assertIs(
+            self.frontend.select, self.frontend.__class__.select.return_value
+        )
 
         self.assertFalse(self.frontend._debug)
 
