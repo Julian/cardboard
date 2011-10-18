@@ -55,25 +55,40 @@ class IInfoDisplay(Interface):
 
     """
 
-    def card_info(card):
+    @property
+    def player_overview():
         """
-        Display a card.
+        Display an overview of all players' information.
 
         """
 
-    def player_info(player):
-        """
-        Display a player's information.
-
-        """
-
-    def turn_info():
+    @property
+    def turn():
         """
         Display information about the current turn and phase.
 
         """
 
-    def zone_info(zone):
+    @property
+    def zone_overview():
+        """
+        Display an overview of all zones' contents.
+
+        """
+
+    def card(card):
+        """
+        Display a card.
+
+        """
+
+    def player(player):
+        """
+        Display a player's information.
+
+        """
+
+    def zone(zone):
         """
         Display a zone's contents.
 
