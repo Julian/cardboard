@@ -122,11 +122,11 @@ class TestTextualInfoDisplay(unittest.TestCase):
         p = self.game.turn.phase = mock.MagicMock()
         s = self.game.turn.step = mock.MagicMock()
 
-        p.__str__.return_value, s.__name__ = "Beginning", "untap"
+        p.__unicode__.return_value, s.__name__ = "Beginning", "untap"
         p.__len__.return_value = 2
         self.assertEqual(self.info.turn, u"Phase: Beginning\nStep: Untap")
 
-        p.__str__.return_value = "First Main"
+        p.__unicode__.return_value = "First Main"
         p.__len__.return_value = 1
         self.assertEqual(self.info.turn, u"Phase: First Main")
 

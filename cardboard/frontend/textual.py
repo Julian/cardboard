@@ -24,18 +24,18 @@ class TextualInfoDisplay(object):
         info = {k : v or u"" for k, v in characteristics(card).iteritems()}
 
         if card.mana_cost:
-            info["name"] = info["name"].ljust(20)
-            info["mana_cost"] = info["mana_cost"].rjust(5)
+            info[u"name"] = info[u"name"].ljust(20)
+            info[u"mana_cost"] = info[u"mana_cost"].rjust(5)
 
         if card.subtypes:
-            info["subtypes"] = u" — {}".format(", ".join(card.subtypes))
+            info[u"subtypes"] = u" — {}".format(", ".join(card.subtypes))
 
         if card.power or card.toughness:
-            info["pt"] = u"{power}/{toughness}".format(**info).rjust(25)
+            info[u"pt"] = u"{power}/{toughness}".format(**info).rjust(25)
         else:
-            info["pt"] = u""
+            info[u"pt"] = u""
 
-        info["abilities"] = u"\n\n".join(info["abilities"])
+        info[u"abilities"] = u"\n\n".join(info[u"abilities"])
 
         return dedent(u"""
                        {name}{mana_cost}
@@ -50,28 +50,28 @@ class TextualInfoDisplay(object):
     def player_overview(self):
         self.game.require(started=True)
 
-        s = "s" if len(self.frontend.player.opponents) > 1 else ""
-        opponents = ", ".join(str(o) for o in self.game.turn.order
-                                     if o in self.frontend.player.opponents)
+        s = u"s" if len(self.frontend.player.opponents) > 1 else ""
+        opponents = u", ".join(str(o) for o in self.game.turn.order
+                                      if o in self.frontend.player.opponents)
 
-        return dedent("""
-                      You: {}
-                      Opponent{}: {}
-                      """).format(self.frontend.player, s, opponents).strip()
+        return dedent(u"""
+                       You: {}
+                       Opponent{}: {}
+                       """).format(self.frontend.player, s, opponents).strip()
 
     @property
     def turn(self):
         phase = self.game.turn.phase
-        info = ["Phase: {}".format(phase)]
+        info = [u"Phase: {}".format(phase)]
 
         if len(phase) > 1:
             step = self.game.turn.step.__name__
-            info.append("Step: {}".format(step.replace("_", " ").title()))
+            info.append(u"Step: {}".format(step.replace("_", " ").title()))
 
-        return "\n".join(info)
+        return u"\n".join(info)
 
     def zone(self, zone):
-        return "\n".join(str(card) for card in zone)
+        return u"\n".join(str(card) for card in zone)
 
 
 class TextualSelector(object):
@@ -92,10 +92,10 @@ class TextualSelector(object):
         self.frontend.formatted_prompt(
             header=u"Select {} choice{}.".format(num, s),
             body=(u"{}. {}".format(i, c) for i, c in enumerate(choices, 1)),
-            end="\n"
+            end=u"\n"
         )
 
-        selections = [int(s) for s in self.frontend.input().split(",")]
+        selections = [int(s) for s in self.frontend.input().split(u",")]
         return [choices[i - 1] for i in selections]
 
     __call__ = choice
@@ -169,9 +169,9 @@ class TextualFrontend(FrontendMixin):
             self.prompt(u"\n" + footer)
         self.prompt(end, end="")
 
-    def started_running(self):
-        return self.main_menu()
-
     def main_menu(self):
-        selection = self.formatted_prompt("Main Menu", self.player_info(), "Zone Info")
-        getattr(self, selection.lower().replace(" ", "_"))()
+        # XXX
+        menu = {"Game Information" : "", "Player Info" : ""}
+        return menu[self.select(sorted(menu))[0]]
+
+    started_running = main_menu
