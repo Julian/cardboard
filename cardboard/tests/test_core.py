@@ -3,6 +3,7 @@ import mock
 from cardboard import core as c, exceptions, phases
 from cardboard.events import events
 from cardboard.tests.util import GameTestCase
+from cardboard.frontend.testing import TestingFrontend
 
 
 class TestManaPool(GameTestCase):
@@ -472,6 +473,12 @@ class TestStateBasedEffects(GameTestCase):
 
 
 class TestTurnManager(GameTestCase):
+    def setUp(self):
+        super(TestTurnManager, self).setUp()
+
+        for player in self.p1, self.p2, self.p3:
+            player.frontend = TestingFrontend(player)
+
     def test_initialize_turn_and_phase(self):
         self.game.start()
         self.assertIn(self.game.turn.active_player, {self.p1, self.p2})
