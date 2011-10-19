@@ -15,7 +15,7 @@ class TestAbility(unittest.TestCase):
              "da dahhh, da dahhh. Ba da ba da padah rdah dah HEY da na na nah")
 
         b = m.Ability(s)
-        self.assertEqual(repr(b), "<Ability Model: {} ... >".format(s[:50]))
+        self.assertEqual(repr(b), "<Ability Model: {:.50} ... >".format(s))
 
 
 class TestCard(unittest.TestCase):

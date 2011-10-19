@@ -32,7 +32,7 @@ class Ability(Base):
 
     def __repr__(self):
         elip = " ... " if len(self.description) > 50 else ""
-        return "<Ability Model: {}{}>".format(self.description[:50], elip)
+        return "<Ability Model: {.description:.50}{}>".format(self, elip)
 
 
 class Card(Base):
