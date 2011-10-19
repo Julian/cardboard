@@ -13,10 +13,8 @@ ZONE_EVENTS = {"entered" : object(), "left" : object()}
 
 
 class ZoneTest(GameTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(ZoneTest, cls).setUpClass()
-        cls.card = mock.Mock(spec=c.Card)
+
+    card = mock.Mock(spec=c.Card)
 
     def setUp(self):
         super(ZoneTest, self).setUp()
