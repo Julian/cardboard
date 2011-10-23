@@ -181,7 +181,13 @@ class EventHandlerTestCase(unittest.TestCase):
 
 class GameTestCase(EventHandlerTestCase):
 
-    libraries = [[mock.Mock(spec=Card) for _ in range(60)] for _ in range(4)]
+    TEST_LIBRARY_SIZE = 10
+
+    libraries = [
+        [mock.Mock(spec=Card) for _ in range(TEST_LIBRARY_SIZE)]
+        for _ in range(4)
+    ]
+
     library = libraries[-1]
 
     def setUp(self):

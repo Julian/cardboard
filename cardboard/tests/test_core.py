@@ -196,18 +196,18 @@ class TestPlayer(GameTestCase):
 
         self.resetEvents()
 
-        top = self.p2.library[-5:]
-        self.p2.draw(5)
+        top = self.p2.library[-3:]
+        self.p2.draw(3)
 
         for card in top:
             self.assertIn(card, self.p2.hand)
 
-        self.assertTriggered([{"event" : events["player"]["draw"]}] * 5)
+        self.assertTriggered([{"event" : events["player"]["draw"]}] * 3)
 
     def test_draw_zero(self):
         self.game.start()
 
-        self.p1.draw(53)
+        self.p1.draw(3)
         self.assertFalse(self.p1.library)
         self.assertFalse(self.p1.dead)
 
@@ -221,7 +221,7 @@ class TestPlayer(GameTestCase):
 
         self.p1.draw(100)
 
-        self.assertEqual(len(self.p1.hand), 60)
+        self.assertEqual(len(self.p1.hand), self.TEST_LIBRARY_SIZE)
         self.assertFalse(self.p1.library)
         self.assertTrue(self.p1._drew_from_empty_library)
 

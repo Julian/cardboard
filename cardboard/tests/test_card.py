@@ -18,22 +18,19 @@ def mock_card(type, abilities=(), mana_cost=""):
 
 
 class TestCard(GameTestCase):
+
+    creature_db_card = mock_card(types.CREATURE)
+    instant_db_card = mock_card(types.INSTANT)
+    land_db_card = mock_card(types.LAND)
+
+    creature = c.Card(creature_db_card)
+    instant = c.Card(instant_db_card)
+    land = c.Card(land_db_card)
+
     def setUp(self):
         super(TestCard, self).setUp()
-
-        self.creature_db_card = mock_card(types.CREATURE)
-        self.instant_db_card = mock_card(types.INSTANT)
-        self.land_db_card = mock_card(types.LAND)
-
-        self.creature = c.Card(self.creature_db_card)
-        self.instant = c.Card(self.instant_db_card)
-        self.land = c.Card(self.land_db_card)
-
-        self.game.add_existing_player(self.p3)
-
         self.library[-3:] = [self.creature, self.instant, self.land]
         self.p4 = self.game.add_player(library=self.library)
-
         self.game.start()
 
     def test_repr_str(self):
@@ -54,14 +51,14 @@ class TestCard(GameTestCase):
         self.assertIsNone(card.zone)
 
     def test_sort(self):
-        self.creature_db_card.name = "Foo"
         c1 = c.Card(self.creature_db_card)
+        c1.name = "Foo"
 
-        self.creature_db_card.name = "Bar"
         c2 = c.Card(self.creature_db_card)
+        c2.name = "Bar"
 
-        self.creature_db_card.name = "Baz"
         c3 = c.Card(self.creature_db_card)
+        c3.name = "Baz"
 
         self.assertEqual(sorted([c1, c2, c3]), [c2, c3, c1])
 
@@ -120,8 +117,8 @@ class TestCard(GameTestCase):
             def is_permanent(self):
                 return mt()
 
-        self.creature_db_card.type = MockType()
         card = c.Card(self.creature_db_card)
+        card.type = MockType()
         card.is_permanent
         mt.assert_called_once_with()
 

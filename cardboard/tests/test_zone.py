@@ -259,15 +259,15 @@ class TestOrderedZone(ZoneTest):
             self.assertEqual(o.count(e), i)
 
     def test_index(self):
-        e = self.library[13]
-        self.assertEqual(self.o.index(e), 13)
+        e = self.library[9]
+        self.assertEqual(self.o.index(e), 9)
 
     def test_pop_index(self):
         self.o.pop(0)
-        self.o.pop(13)
+        self.o.pop(4)
 
         self.library.pop(0)
-        self.library.pop(13)
+        self.library.pop(4)
 
         self.assertEqual(list(self.o), self.library)
         self.assertLastEventsWere([{"event" : ZONE_EVENTS["left"]}] * 2)
