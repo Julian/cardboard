@@ -259,8 +259,8 @@ class TestOrderedZone(ZoneTest):
             self.assertEqual(o.count(e), i)
 
     def test_index(self):
-        e = self.library[9]
-        self.assertEqual(self.o.index(e), 9)
+        e = self.library[4]
+        self.assertEqual(self.o.index(e), 4)
 
     def test_pop_index(self):
         self.o.pop(0)
