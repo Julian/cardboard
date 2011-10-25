@@ -181,7 +181,7 @@ class EventHandlerTestCase(unittest.TestCase):
 
 class GameTestCase(EventHandlerTestCase):
 
-    TEST_LIBRARY_SIZE = 10
+    TEST_LIBRARY_SIZE = 12
 
     libraries = [
         [mock.Mock(spec=Card) for _ in range(TEST_LIBRARY_SIZE)]

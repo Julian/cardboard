@@ -207,7 +207,7 @@ class TestPlayer(GameTestCase):
     def test_draw_zero(self):
         self.game.start()
 
-        self.p1.draw(3)
+        self.p1.draw(len(self.p1.library))
         self.assertFalse(self.p1.library)
         self.assertFalse(self.p1.dead)
 
