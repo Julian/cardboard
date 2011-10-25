@@ -99,7 +99,7 @@ class ISelector(Interface):
 
     __call__ = choice
 
-    def cards(zone=None, match=ANY, how_many=1, duplicates=False):
+    def cards(zone=None, match=ANY, how_many=1, duplicates=False, bad=True):
         """
         Select cards from a given zone.
 
@@ -107,22 +107,24 @@ class ISelector(Interface):
         * match : filter cards by a callable (default no filtering)
         * how_many : how many selections to request (default=1)
         * duplicates : allow duplicates (default=False)
+        * bad : is this selection for something "bad" (default=True)
 
         """
 
-    def players(match=ANY, how_many=1, duplicates=False):
+    def players(match=ANY, how_many=1, duplicates=False, bad=True):
         """
         Select a matching player.
 
         * match : filter players by a callable (default no filtering)
         * how_many : how many selections to request (default=1)
         * duplicates : allow duplicates (default=False)
+        * bad : is this selection for something "bad" (default=True)
 
         """
 
     def combined(zone=None, match_cards=ANY, how_many_cards=1,
                  duplicate_cards=False, match_players=ANY, how_many_players=1,
-                 duplicate_players=False):
+                 duplicate_players=False, bad=True):
         """
         Simultaneously select from a given set of cards and a set of players.
 
@@ -134,6 +136,8 @@ class ISelector(Interface):
         * match_players : filter players by a callable (default no filtering)
         * how_many_players : how many player selections to request (default=1)
         * duplicate_players : allow duplicate players (default=False)
+
+        * bad : is this selection for something "bad" (default=True)
 
         """
 
