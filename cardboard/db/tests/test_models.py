@@ -24,7 +24,7 @@ class TestCard(unittest.TestCase):
         self.assertEqual(repr(c), "<Card Model: Test Card>")
 
     def test_init(self):
-        d = dict(name="Card", type=types.CREATURE, mana_cost="UUWB",
+        d = dict(name="Card", types=[types.CREATURE], mana_cost="UUWB",
                  abilities=["Does stuff"], subtypes=["Test"],
                  supertypes=["Thing"], power=2, toughness=4, loyalty=4)
 
@@ -44,9 +44,6 @@ class TestDeck(unittest.TestCase):
         d = m.Deck("Test", [c])
         self.assertEqual(d.name, "Test")
         self.assertEqual(d.cards, [c])
-
-    def test_load(self):
-        pass
 
 
 class TestDeckAppearance(unittest.TestCase):

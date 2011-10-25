@@ -7,11 +7,13 @@ MANA_COSTS.update(W=u"Ⓦ", U=u"Ⓤ", B=u"Ⓑ", R=u"Ⓡ", G=u"Ⓖ")
 
 
 def type_line(card):
+    types = " ".join(sorted(card.types))
+
     if card.subtypes:
         subtypes = u", ".join(card.subtypes)
-        return u"{.type} — {}".format(card, subtypes)
+        return u"{} — {}".format(types, subtypes)
     else:
-        return card.type
+        return types
 
 
 def unicost(mana_cost):

@@ -70,13 +70,12 @@ class Card(object):
         self._zone = None
 
         for attr in {"name", "loyalty", "mana_cost",
-                     "type", "subtypes", "supertypes"}:
+                     "types", "subtypes", "supertypes"}:
             setattr(self, attr, getattr(db_card, attr))
 
         if self.name in _cards:
             self.abilities = _cards[self.name](self, db_card.abilities)
         else:
-            # XXX : make this better
             self.abilities = [Ability.NotImplemented] * len(db_card.abilities)
 
         self.power = self.base_power = db_card.power
@@ -118,10 +117,6 @@ class Card(object):
                 {i for i in self.mana_cost or "" if i.isalpha()})
 
     @property
-    def is_permanent(self):
-        return self.type.is_permanent
-
-    @property
     def zone(self):
         if self.game is None or not self.game.started:
             return
@@ -149,7 +144,7 @@ class Card(object):
 
         self.game.require(started=True)
 
-        if self.type == types.LAND:
+        if types.LAND in self.types:
             if self.owner.lands_this_turn < self.owner.lands_per_turn:
                 self.owner.lands_this_turn += 1
                 # TODO: event trigger?
@@ -251,7 +246,7 @@ class Token(object):
     """
 
     def __init__(self, name="", mana_cost="", colors=(), abilities=None,
-                 type=None, subtypes=(), supertypes=(),
+                 types=(), subtypes=(), supertypes=(),
                  power=None, toughness=None, loyalty=None):
 
         super(Token, self).__init__()
@@ -263,7 +258,7 @@ class Token(object):
         self.mana_cost = str(mana_cost)
         self.colors = set(colors)
         self.abilities = list(abilities)
-        self.type = type
+        self.types = set(types)
         self.subtypes, self.supertypes = set(subtypes), set(supertypes)
         self.power, self.toughness = power, toughness
         self.loyalty = loyalty
@@ -289,7 +284,7 @@ def characteristics(mtg_object):
 
     """
 
-    CHARS = ["name", "mana_cost", "colors", "type", "subtypes", "supertypes",
+    CHARS = ["name", "mana_cost", "colors", "types", "subtypes", "supertypes",
              "abilities", "power", "toughness", "loyalty"]
 
     chars = {c : getattr(mtg_object, c) for c in CHARS}

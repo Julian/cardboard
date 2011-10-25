@@ -6,6 +6,7 @@ import zope.interface
 
 from cardboard.card import characteristics
 from cardboard.frontend import FrontendMixin, validate_selection
+from cardboard.frontend.util import type_line
 from cardboard.frontend.interfaces import IFrontend, IInfoDisplay, ISelector
 from cardboard.util import ANY
 
@@ -27,8 +28,7 @@ class TextualInfoDisplay(object):
             info[u"name"] = info[u"name"].ljust(20)
             info[u"mana_cost"] = info[u"mana_cost"].rjust(5)
 
-        if card.subtypes:
-            info[u"subtypes"] = u" — {}".format(", ".join(card.subtypes))
+        info[u"type_line"] = type_line(card)
 
         if card.power or card.toughness:
             info[u"pt"] = u"{power}/{toughness}".format(**info).rjust(25)
@@ -39,7 +39,7 @@ class TextualInfoDisplay(object):
 
         return dedent(u"""
                        {name}{mana_cost}
-                       {type}{subtypes}
+                       {type_line}
 
                        {abilities}
 

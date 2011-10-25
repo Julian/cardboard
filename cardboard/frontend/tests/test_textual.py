@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from StringIO import StringIO
-from textwrap import dedent
 import unittest
 
 import mock
@@ -68,7 +67,7 @@ class TestTextualInfoDisplay(unittest.TestCase):
     def test_card_info(self):
         class Bar(mock.Mock):
             name = u"Bar"
-            type = u"Land"
+            types = {u"Land"}
             subtypes = []
             supertypes = []
             colors = ""
@@ -81,8 +80,8 @@ class TestTextualInfoDisplay(unittest.TestCase):
 
         class Foo(mock.Mock):
             name = u"Foo"
-            type = u"Creature"
-            subtypes = [u"Thing"]
+            types = {u"Creature"}
+            subtypes = {u"Thing"}
             supertypes = []
             colors = "B"
             mana_cost = u"2BB"

@@ -6,6 +6,7 @@ from sqlalchemy.orm import backref, reconstructor, relationship
 
 from cardboard.db import Base, Session
 
+
 cardsubtype_table = Table("cardsubtypes", Base.metadata,
     Column("card_id", Integer, ForeignKey("cards.id"), primary_key=True),
     Column("subtype_id", Integer, ForeignKey("subtypes.id"), primary_key=True),
@@ -42,7 +43,7 @@ class Card(Base):
     id = Column(Integer, primary_key=True)
     mana_cost = Column(String)
     name = Column(String, nullable=False, unique=True)
-    type = Column(String, nullable=False)
+    types = Column(String, nullable=False)
 
     power = Column(String(3))
     toughness = Column(String(3))
@@ -50,12 +51,13 @@ class Card(Base):
 
     ability_objects = relationship("Ability", backref="card")
 
-    subtype_objects = relationship("Subtype", secondary=cardsubtype_table,
-                                   backref="cards")
+    subtype_objects = relationship(
+        "Subtype", secondary=cardsubtype_table, backref="cards",
+    )
 
-    supertype_objects = relationship("Supertype",
-                                     secondary=cardsupertype_table,
-                                     backref="cards")
+    supertype_objects = relationship(
+        "Supertype", secondary=cardsupertype_table, backref="cards",
+    )
 
     abilities = association_proxy("ability_objects", "description")
     decks = association_proxy("deck_appearances", "deck")
@@ -63,16 +65,16 @@ class Card(Base):
     subtypes = association_proxy("subtype_objects", "name")
     supertypes = association_proxy("supertype_objects", "name")
 
-    def __init__(self, name, type, mana_cost=None, abilities=(), subtypes=(),
+    def __init__(self, name, types, mana_cost=None, abilities=(), subtypes=(),
                  supertypes=(), power=None, toughness=None, loyalty=None):
         super(Card, self).__init__()
 
         self.abilities = list(abilities)
         self.mana_cost = mana_cost
         self.name = name
-        self.subtypes = set(subtypes)
-        self.supertypes = set(supertypes)
-        self.type = type
+        self.types = list(types)
+        self.subtypes = list(subtypes)
+        self.supertypes = list(supertypes)
 
         self.power = power
         self.toughness = toughness

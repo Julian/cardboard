@@ -12,7 +12,7 @@ from cardboard.tests.util import GameTestCase
 def mock_card(type, abilities=(), mana_cost=""):
     name = "Test {}".format(type)
     card = mock.Mock()
-    card.name, card.type, card.abilities = name, type, list(abilities)
+    card.name, card.types, card.abilities = name, {type}, list(abilities)
     card.mana_cost, card.subtypes, card.supertypes = mana_cost, set(), set()
     return card
 
@@ -51,7 +51,7 @@ class TestCard(GameTestCase):
         self.assertEqual(card.name, self.creature_db_card.name)
         self.assertEqual(card.loyalty, self.creature_db_card.loyalty)
         self.assertEqual(card.mana_cost, self.creature_db_card.mana_cost)
-        self.assertEqual(card.type, self.creature_db_card.type)
+        self.assertEqual(card.types, self.creature_db_card.types)
         self.assertEqual(card.subtypes, self.creature_db_card.subtypes)
         self.assertEqual(card.supertypes, self.creature_db_card.supertypes)
         self.assertEqual(card.abilities, abilities)
@@ -120,23 +120,6 @@ class TestCard(GameTestCase):
         self.creature.mana_cost = "10"
         self.assertEqual(self.creature.colors, set())
 
-    def test_is_permanent(self):
-        """
-        `is_permanent` delegates to Card.type.
-
-        """
-
-        mt = mock.Mock()
-        class MockType(mock.Mock):
-            @property
-            def is_permanent(self):
-                return mt()
-
-        card = c.Card(self.creature_db_card)
-        card.type = MockType()
-        card.is_permanent
-        mt.assert_called_once_with()
-
     def test_play_land(self):
         self.assertEqual(self.land.owner.lands_this_turn, 0)
         self.assertEqual(self.land.owner.lands_per_turn, 1)
@@ -186,7 +169,7 @@ class TestCharacteristics(unittest.TestCase):
             "name" : o.name,
             "mana_cost" : o.mana_cost,
             "colors" : o.colors,
-            "type" : o.type,
+            "types" : o.types,
             "subtypes" : o.subtypes,
             "supertypes" : o.supertypes,
             "abilities" : o.abilities,
@@ -382,7 +365,7 @@ class TestToken(GameTestCase):
         """
 
         t = c.Token(power=1, toughness=1, colors="G",
-                    type=types.CREATURE, subtypes={"Saproling"})
+                    types={types.CREATURE}, subtypes={"Saproling"})
 
         self.assertEqual(t.mana_cost, "")
         self.assertEqual(t.supertypes, set())
