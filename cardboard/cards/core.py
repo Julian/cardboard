@@ -3,9 +3,6 @@ Contains functionality to map a card name to functions implementing behavior.
 
 """
 
-from cardboard import exceptions
-
-
 cards = {}
 
 

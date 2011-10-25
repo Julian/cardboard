@@ -1,11 +1,11 @@
-from cardboard.cards import card, ability
+from cardboard.card import Ability
+from cardboard.cards import card, common
+
 
 @card("Brainstorm")
-def brainstorm(card):
+def brainstorm(card, abilities):
+    @Ability.spell(description=abilities[0])
+    def ability():
+        return common.draw_discard(card.owner, 3, 2, card.owner.library)
 
-    @ability(card, card.abilities[0])
-    def ability(self):
-        self.owner.draw(3)
-        discard = self.owner.frontend.select_cards(self.owner.hand,
-                                                   how_many=2, ordered=True)
-        self.owner.library.move(*discard)
+    return [ability]

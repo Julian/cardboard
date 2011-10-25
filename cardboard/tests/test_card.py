@@ -45,7 +45,7 @@ class TestCard(GameTestCase):
 
     def test_init(self):
         abilities = [mock.Mock(), mock.Mock()]
-        cards = {self.creature_db_card.name : lambda card : abilities}
+        cards = {self.creature_db_card.name : lambda card, abils : abilities}
         card = c.Card(self.creature_db_card, _cards=cards)
 
         self.assertEqual(card.name, self.creature_db_card.name)
@@ -309,8 +309,8 @@ class TestAbility(GameTestCase):
     def test_call(self):
         m = mock.Mock()
         a = c.Ability(description="", action=m, type="spell")
-        a(m.card)
-        m.assert_called_once_with(m.card)
+        a()
+        m.assert_called_once_with()
 
     def test_abilities(self):
         m = mock.Mock()
@@ -341,7 +341,7 @@ class TestAbility(GameTestCase):
         n = c.Ability.NotImplemented
         self.assertEqual(repr(n), "<Ability Not Implemented>")
         with self.assertRaises(exceptions.NotImplemented):
-            n(mock.Mock())
+            n()
 
 
 class TestSpell(GameTestCase):

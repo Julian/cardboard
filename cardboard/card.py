@@ -1,6 +1,7 @@
 import functools
 
-from cardboard import cards, exceptions, types
+from cardboard import exceptions, types
+from cardboard.cards import cards
 from cardboard.core import COLORS_ABBR
 from cardboard.db import models, Session
 from cardboard.events import events
@@ -59,7 +60,7 @@ class Card(object):
                                " zone, not '{got}'."}},
     )
 
-    def __init__(self, db_card, _cards=cards.cards):
+    def __init__(self, db_card, _cards=cards):
         super(Card, self).__init__()
 
         self.game = None
@@ -73,7 +74,7 @@ class Card(object):
             setattr(self, attr, getattr(db_card, attr))
 
         if self.name in _cards:
-            self.abilities = _cards[self.name](self)
+            self.abilities = _cards[self.name](self, db_card.abilities)
         else:
             # XXX : make this better
             self.abilities = [Ability.NotImplemented] * len(db_card.abilities)
@@ -162,7 +163,7 @@ class Card(object):
 
 
 class _AbilityNotImplemented(object):
-    def __call__(self, card):
+    def __call__(self):
         raise exceptions.NotImplemented("Ability is not implemented.")
 
     def __repr__(self):
@@ -181,8 +182,8 @@ class Ability(object):
         self.description = description
         self.type = type
 
-    def __call__(self, card):
-        self.action(card)
+    def __call__(self):
+        self.action()
 
     def __repr__(self):
         elipsis = " ... " if len(self.description) > 40 else ""
