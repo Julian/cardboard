@@ -41,28 +41,25 @@ def status(name, on_event, off_event, default=True):
     return get, toggle(turn_on=True), toggle(turn_on=False)
 
 
+_tap = status("is_tapped", "tapped", "untapped", default=False)
+_flip = status("is_flipped", "flipped", "unflipped", default=False)
+_turn = status("is_face_up", "turned_face_up", "turned_face_down", True)
+_phase = status("is_phased_in", "phased_in", "phased_out", default=True)
+
+
 class Card(object):
 
-    is_tapped, tap, untap = status(name="is_tapped", on_event="tapped",
-                                   off_event="untapped", default=False)
-
-    is_flipped, flip, unflip = status(name="is_flipped", on_event="flipped",
-                                      off_event="unflipped", default=False)
-
-    is_face_up, turn_face_up, turn_face_down = status("is_face_up",
-                                                      "turned_face_up",
-                                                      "turned_face_down",
-                                                      default=True)
-
-    is_phased_in, phase_in, phase_out = status("is_phased_in", "phased_in",
-                                               "phased_out", default=True)
+    is_tapped, tap, untap = _tap
+    is_flipped, flip, unflip = _flip
+    is_face_up, turn_face_up, turn_face_down = _turn
+    is_phased_in, phase_in, phase_out = _phase
 
     require = requirements(
         {"zone" : {"default" : "{self} was expected to be in a {expected.name}"
                                " zone, not '{got}'."}},
     )
 
-    def __init__(self, db_card, _card_behaviors=cards.cards):
+    def __init__(self, db_card, _cards=cards.cards):
         super(Card, self).__init__()
 
         self.game = None
@@ -75,16 +72,17 @@ class Card(object):
                      "type", "subtypes", "supertypes"}:
             setattr(self, attr, getattr(db_card, attr))
 
-        self.abilities = list(db_card.abilities)
+        if self.name in _cards:
+            self.abilities = _cards[self.name](self)
+        else:
+            # XXX : make this better
+            self.abilities = [Ability.NotImplemented] * len(db_card.abilities)
 
         self.power = self.base_power = db_card.power
         self.toughness = self.base_toughness = db_card.toughness
 
         self.damage = 0
         self._changed_colors = set()
-
-        # XXX: Overly simplistic, this will evolve as I write more cards
-        self._execute = _card_behaviors.get(self.name, cards.not_implemented)
 
     def __lt__(self, other):
         """
@@ -163,9 +161,18 @@ class Card(object):
         self.game.events.trigger(event=events["card"]["cast"])
 
 
+class _AbilityNotImplemented(object):
+    def __call__(self, card):
+        raise exceptions.NotImplemented("Ability is not implemented.")
+
+    def __repr__(self):
+        return "<Ability Not Implemented>"
+
+
 class Ability(object):
 
     TYPES = frozenset({"spell", "activated", "triggered", "static"})
+    NotImplemented = _AbilityNotImplemented()
 
     def __init__(self, action, description, type):
         super(Ability, self).__init__()

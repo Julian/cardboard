@@ -2,7 +2,7 @@ import unittest
 
 import mock
 
-from cardboard import core as k, card as c, zone as z
+from cardboard import card as c
 from cardboard import exceptions, types
 from cardboard.db import models as m
 from cardboard.events import events
@@ -20,7 +20,7 @@ def mock_card(type, abilities=(), mana_cost=""):
 class TestCard(GameTestCase):
 
     creature_db_card = mock_card(types.CREATURE)
-    instant_db_card = mock_card(types.INSTANT)
+    instant_db_card = mock_card(types.INSTANT, abilities=["foo", "bar"])
     land_db_card = mock_card(types.LAND)
 
     creature = c.Card(creature_db_card)
@@ -44,7 +44,9 @@ class TestCard(GameTestCase):
         self.assertEqual(unicode(self.instant), u"Test Instant")
 
     def test_init(self):
-        card = c.Card(self.creature_db_card)
+        abilities = [mock.Mock(), mock.Mock()]
+        cards = {self.creature_db_card.name : lambda card : abilities}
+        card = c.Card(self.creature_db_card, _cards=cards)
 
         self.assertEqual(card.name, self.creature_db_card.name)
         self.assertEqual(card.loyalty, self.creature_db_card.loyalty)
@@ -52,12 +54,16 @@ class TestCard(GameTestCase):
         self.assertEqual(card.type, self.creature_db_card.type)
         self.assertEqual(card.subtypes, self.creature_db_card.subtypes)
         self.assertEqual(card.supertypes, self.creature_db_card.supertypes)
-        self.assertEqual(card.abilities, self.creature_db_card.abilities)
+        self.assertEqual(card.abilities, abilities)
 
         self.assertIsNone(card.game)
         self.assertIsNone(card.controller)
         self.assertIsNone(card.owner)
         self.assertIsNone(card.zone)
+
+    def test_not_implemented_card(self):
+        card = c.Card(self.instant_db_card, _cards={})
+        self.assertEqual(card.abilities, [c.Ability.NotImplemented] * 2)
 
     def test_sort(self):
         c1 = c.Card(self.creature_db_card)
@@ -330,6 +336,12 @@ class TestAbility(GameTestCase):
         self.assertEqual(a.action, m)
         self.assertEqual(a.description, "Foo")
         self.assertEqual(a.type, "static")
+
+    def test_not_implemented(self):
+        n = c.Ability.NotImplemented
+        self.assertEqual(repr(n), "<Ability Not Implemented>")
+        with self.assertRaises(exceptions.NotImplemented):
+            n(mock.Mock())
 
 
 class TestSpell(GameTestCase):
