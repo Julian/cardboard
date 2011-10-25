@@ -3,9 +3,10 @@ from cardboard.cards import card, common
 
 
 @card("Brainstorm")
-def brainstorm(card, abilities):
+def brainstorm(self, abilities):
+
     @Ability.spell(description=abilities[0])
     def ability():
-        return common.draw_discard(card.owner, 3, 2, card.owner.library)
+        return common.draw_discard(self.owner, 3, 2, self.owner.library)
 
     return [ability]

@@ -175,8 +175,7 @@ class EventHandlerTestCase(unittest.TestCase):
         return _CheckRequirementsContext(self, method, *args, **kwargs)
 
     def resetEvents(self):
-        self.events.trigger.call_args_list[:] = []
-        self.events.trigger.called = False
+        self.events.reset_mock()
 
 
 class GameTestCase(EventHandlerTestCase):

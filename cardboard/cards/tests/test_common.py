@@ -1,16 +1,13 @@
 import mock
 
 from cardboard.tests.util import GameTestCase
-from cardboard.core import Game
 from cardboard.cards import common as c
 from cardboard.frontend.testing import TestingFrontend
 
 
 class TestCommon(GameTestCase):
-
     def setUp(self):
         super(TestCommon, self).setUp()
-        self.p1 = self.game.add_player(library=self.library, name=u"1")
         self.p1.frontend = TestingFrontend(self.p1)
         self.game.start()
 
