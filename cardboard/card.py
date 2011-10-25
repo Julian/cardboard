@@ -1,4 +1,4 @@
-from operator import attrgetter
+import functools
 
 from cardboard import cards, exceptions, types
 from cardboard.core import COLORS_ABBR
@@ -75,7 +75,7 @@ class Card(object):
                      "type", "subtypes", "supertypes"}:
             setattr(self, attr, getattr(db_card, attr))
 
-        self.abilities = dict.fromkeys(db_card.abilities)
+        self.abilities = list(db_card.abilities)
 
         self.power = self.base_power = db_card.power
         self.toughness = self.base_toughness = db_card.toughness
@@ -163,6 +163,55 @@ class Card(object):
         self.game.events.trigger(event=events["card"]["cast"])
 
 
+class Ability(object):
+
+    TYPES = frozenset({"spell", "activated", "triggered", "static"})
+
+    def __init__(self, action, description, type):
+        super(Ability, self).__init__()
+
+        self.action = action
+        self.description = description
+        self.type = type
+
+    def __call__(self, card):
+        self.action(card)
+
+    def __repr__(self):
+        elipsis = " ... " if len(self.description) > 40 else ""
+        type = self.type.title()
+        return "<{} Ability: {.description:.40}{}>".format(type, self, elipsis)
+
+    def __str__(self):
+        return self.description
+
+    @classmethod
+    def spell(cls, description):
+        return functools.partial(cls, description=description, type="spell")
+
+    @classmethod
+    def activated(cls, cost, description):
+        @functools.wraps(cls)
+        def activated_ability(action):
+            a = cls(action=action, description=description, type="activated")
+            a.cost = cost
+            return a
+        return activated_ability
+
+    @classmethod
+    def triggered(cls, description, **event_params):
+        @functools.wraps(cls)
+        def triggered_ability(action):
+            a = cls(action=action, description=description, type="triggered")
+            a.trigger = event_params
+            return a
+        return triggered_ability
+
+    @classmethod
+    def static(cls, description):
+        return functools.partial(cls, description=description, type="static")
+
+
 class Spell(object):
     """
     A spell is a card or copy of a card that is placed on the stack.
@@ -205,7 +254,7 @@ class Token(object):
         self.name = name
         self.mana_cost = str(mana_cost)
         self.colors = set(colors)
-        self.abilities = abilities  # non-card tokens should be ability dicts
+        self.abilities = list(abilities)
         self.type = type
         self.subtypes, self.supertypes = set(subtypes), set(supertypes)
         self.power, self.toughness = power, toughness
@@ -214,6 +263,11 @@ class Token(object):
     @classmethod
     def from_card(cls, card, **new_characteristics):
         card_chars = characteristics(card)
+
+        # tokens don't have expansions or rules text
+        card_chars.pop("expansion")
+        card_chars.pop("rules_text")
+
         card_chars.update(**new_characteristics)
         return cls(**card_chars)
 
@@ -227,6 +281,11 @@ def characteristics(mtg_object):
 
     """
 
-    chars = ["name", "mana_cost", "colors", "type", "subtypes", "supertypes",
+    CHARS = ["name", "mana_cost", "colors", "type", "subtypes", "supertypes",
              "abilities", "power", "toughness", "loyalty"]
-    return {c : getattr(mtg_object, c) for c in chars}
+
+    chars = {c : getattr(mtg_object, c) for c in CHARS}
+    chars["expansion"] = getattr(mtg_object, "expansion", "")
+    chars["rules_text"] = getattr(mtg_object, "rules_text", "")
+
+    return chars
