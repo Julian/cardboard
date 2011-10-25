@@ -167,13 +167,15 @@ class TestSelector(unittest.TestCase):
     def test_select_cards(self):
         self.s.choice = mock.Mock(return_value=[2, 4])
         self.s.cards(range(8), match=lambda i : i % 2 == 0, how_many=2)
+        self.s.choice.assert_called_with(
+            choices=[0, 2, 4, 6], how_many=2, duplicates=False
+        )
 
-        args, kwargs = self.s.choice.call_args
-        kwargs["choices"] = list(kwargs["choices"])
-
-        self.assertFalse(args)
-        self.assertEqual(
-            kwargs, dict(choices=[0, 2, 4, 6], how_many=2, duplicates=False)
+        # default is to select from game.battlefield
+        self.s.game.battlefield = [1, 2, 3]
+        self.s.cards(how_many=2)
+        self.s.choice.assert_called_with(
+            choices=self.s.game.battlefield, how_many=2, duplicates=False,
         )
 
     def test_select_players(self):

@@ -87,7 +87,7 @@ class ISelector(Interface):
 
     """
 
-    def select(choices, how_many=1, duplicates=False):
+    def choice(choices, how_many=1, duplicates=False):
         """
         Select from a given set of choices.
 
@@ -97,18 +97,20 @@ class ISelector(Interface):
 
         """
 
-    def select_cards(zone, match=ANY, how_many=1, duplicates=False):
+    __call__ = choice
+
+    def cards(zone=None, match=ANY, how_many=1, duplicates=False):
         """
         Select cards from a given zone.
 
-        * zone : the zone to select cards from
+        * zone : the zone to select cards from (default=self.game.battlefield)
         * match : filter cards by a callable (default no filtering)
         * how_many : how many selections to request (default=1)
         * duplicates : allow duplicates (default=False)
 
         """
 
-    def select_players(match=ANY, how_many=1, duplicates=False):
+    def players(match=ANY, how_many=1, duplicates=False):
         """
         Select a matching player.
 
@@ -118,13 +120,13 @@ class ISelector(Interface):
 
         """
 
-    def select_combined(zone, match_cards=ANY, how_many_cards=1,
-                        duplicate_cards=False, match_players=ANY,
-                        how_many_players=1, duplicate_players=False):
+    def combined(zone=None, match_cards=ANY, how_many_cards=1,
+                 duplicate_cards=False, match_players=ANY, how_many_players=1,
+                 duplicate_players=False):
         """
         Simultaneously select from a given set of cards and a set of players.
 
-        * zone : the zone to select cards from
+        * zone : the zone to select cards from (default=self.game.battlefield)
         * match_cards : filter cards by a callable (default no filtering)
         * how_many_cards : how many card selections to request (default=1)
         * duplicate_cards : allow duplicate cards (default=False)
@@ -135,7 +137,7 @@ class ISelector(Interface):
 
         """
 
-    def select_range(start, stop, how_many=1, duplicates=False):
+    def range(start, stop, how_many=1, duplicates=False):
         """
         Select from a given range of numbers.
 

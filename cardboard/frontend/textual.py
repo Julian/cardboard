@@ -101,9 +101,12 @@ class TextualSelector(object):
     __call__ = choice
 
     @validate_selection
-    def cards(self, zone, match=ANY, how_many=1, duplicates=False):
+    def cards(self, zone=None, match=ANY, how_many=1, duplicates=False):
+        if zone is None:
+            zone = self.game.battlefield
+
         return self.choice(
-            choices=(card for card in zone if match(card)),
+            choices=[card for card in zone if match(card)],
             how_many=how_many,
             duplicates=duplicates,
         )

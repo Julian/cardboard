@@ -6,10 +6,6 @@ MANA_COSTS = dict(zip(
 MANA_COSTS.update(W=u"Ⓦ", U=u"Ⓤ", B=u"Ⓑ", R=u"Ⓡ", G=u"Ⓖ")
 
 
-def convert_ability_costs(abilities):
-    pass
-
-
 def type_line(card):
     if card.subtypes:
         subtypes = u", ".join(card.subtypes)
