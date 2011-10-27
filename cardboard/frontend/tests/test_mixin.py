@@ -3,10 +3,10 @@ import unittest
 import mock
 
 from cardboard import exceptions
-from cardboard.frontend import core as c
+from cardboard.frontend import mixin as m
 
 
-class TestFrontend(c.FrontendMixin):
+class TestFrontend(m.FrontendMixin):
     info = mock.Mock()
     select = mock.Mock()
 
@@ -51,7 +51,7 @@ class TestFrontendMixin(unittest.TestCase):
 
 class TestValidate(unittest.TestCase):
 
-    @c.validate_selection
+    @m.validate_selection
     def select(self, whatever, how_many, duplicates):
         return whatever
 

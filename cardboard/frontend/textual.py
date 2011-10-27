@@ -2,18 +2,18 @@
 import sys
 from textwrap import dedent
 
-import zope.interface
+from zope.interface import implements
 
 from cardboard.card import characteristics
-from cardboard.frontend import FrontendMixin, validate_selection
+from cardboard.frontend import interfaces
+from cardboard.frontend.mixin import FrontendMixin, validate_selection
 from cardboard.frontend.util import type_line
-from cardboard.frontend.interfaces import IFrontend, IInfoDisplay, ISelector
 from cardboard.util import ANY
 
 
 class TextualInfoDisplay(object):
 
-    zope.interface.implements(IInfoDisplay)
+    implements(interfaces.IInfoDisplay)
 
     def __init__(self, frontend):
         super(TextualInfoDisplay, self).__init__()
@@ -76,7 +76,7 @@ class TextualInfoDisplay(object):
 
 class TextualSelector(object):
 
-    zope.interface.implements(ISelector)
+    implements(interfaces.ISelector)
 
     def __init__(self, frontend):
         super(TextualSelector, self).__init__()
@@ -144,7 +144,7 @@ class TextualSelector(object):
 
 class TextualFrontend(FrontendMixin):
 
-    zope.interface.implements(ISelector)
+    implements(interfaces.ISelector)
 
     info = TextualInfoDisplay
     select = TextualSelector

@@ -8,7 +8,7 @@ import random
 
 from cardboard import exceptions, types
 from cardboard.events import events
-from cardboard.frontend.none import NoFrontend
+from cardboard.frontend._none import NoFrontend
 from cardboard.phases import phases
 from cardboard.util import requirements
 from cardboard.zone import zone
@@ -19,6 +19,189 @@ __all__ = ["COLORS", "COLORS_ABBR",
 
 COLORS = ("white", "blue", "black", "red", "green")
 COLORS_ABBR = dict(zip("WUBRG", COLORS))
+
+
+class Game(object):
+    """
+    The Game object maintains information about the current game state.
+
+    """
+
+    require = requirements({"started" : {True : "{self} has already started.",
+                                         False : "{self} has not started."}})
+
+    def __init__(self, handler):
+        """
+        Initialize a new game state object.
+
+        """
+
+        super(Game, self).__init__()
+
+        self.events = handler
+
+        self.ended = None
+
+        self.battlefield = zone["battlefield"](game=self)
+        self.stack = zone["stack"](game=self)
+
+        self.teams = []
+        self.turn = TurnManager(self)
+
+    def __repr__(self):
+        return "<{} Player Game>".format(len(self.players))
+
+    @property
+    def frontends(self):
+        return {player : player.frontend for player in self.players}
+
+    @property
+    def players(self):
+        return set().union(*self.teams)
+
+    @property
+    def started(self):
+        return self.ended is not None
+
+    @property
+    def zones(self):
+        zones = {"shared" : {self.battlefield, self.stack}}
+        zones.update((p, {p.exile, p.graveyard, p.hand, p.library})
+                     for p in self.players)
+        return zones
+
+    def add_player(self, team=None, **kwargs):
+        """
+        Add a new player to the game.
+
+        """
+
+        player = Player(game=self, **kwargs)
+        self.add_existing_player(player, team)
+        return player
+
+    def add_existing_player(self, player, team=None):
+        """
+        Add an existing Player object to the game.
+
+        """
+
+        self.require(started=False)
+
+        if team is None:
+            self.teams.append({player})
+        else:
+            if team not in self.teams:
+                raise ValueError("{} has no such team {}".format(self, team))
+
+            team.add(player)
+
+    def _start(self):
+        """
+        Perform the internal steps necessary to get the game ready to start.
+
+        """
+
+        self.require(
+            self.players, msg="Starting the game requires at least one player."
+        )
+
+        self.ended = False
+        self.turn._start()  # Tell the turn manager that the game is starting.
+
+    def start(self):
+        """
+        Start the game.
+
+        """
+
+        self.require(started=False)
+        self.events.trigger(event=events["game"]["started"])
+        self._start()
+
+        for player in self.players:
+            player.library.shuffle()
+            player.draw(player.hand_size)
+
+    def _check_for_win(self):
+        """
+        Check if there is a player that has won the game via last man standing.
+
+        """
+
+        for player in self.players:
+            if all(opponent.dead for opponent in player.opponents):
+                self.end()
+
+    def end(self):
+        """
+        End the game unconditionally.
+
+        """
+
+        self.ended = True
+        # TODO: Stop all other events
+        self.events.trigger(event=events["game"]["ended"])
+
+    def grant_priority(self, to=None):
+        """
+        Grant priority to a player.
+
+        .. seealso::
+            :ref:`grant-priority`
+
+        """
+
+        if to is None:
+            to = self.turn.active_player
+
+        self._check_state_based_actions()
+        # TODO: Put triggered abilities on the stack
+        to.frontend.priority_granted()
+
+    def _check_state_based_actions(self):
+        """
+        Check for state based actions.
+
+        .. seealso::
+            :ref:`sba-list`
+
+        """
+
+        for player in self.players:
+            if player.life <= 0:
+                player.die(reason="life")
+            elif player._drew_from_empty_library:
+                player.die(reason="library")
+            elif player.poison >= 10:
+                player.die(reason="poison")
+
+        # TODO: if any spells are anywhere but the stack: cease to exist
+        #       if any cards are anywhere but battlefield or stack: ""
+        #       :ref:`planeswalker-uniqueness-rule`
+        #       :ref:`legend-rule`
+        #       :ref:`world-rule`
+        #       The rest of them in :ref:`sba-list`
+        #
+        #       As per :ref:`sba-replacement` and the rest of the section,
+        #           these should not be iterative, and should check replacement
+
+        for card in self.battlefield:
+
+            if card.type == types.CREATURE:
+                if card.toughness <= 0:
+                    card.owner.graveyard.move(card)
+                elif card.damage >= card.toughness or card._deathtouch_damage:
+                    # TODO: Regenerate
+                    card.owner.graveyard.move(card)
+
+            elif card.type == types.PLANESWALKER:
+                if not card.loyalty:
+                    card.owner.graveyard.move(card)
+            elif card.type == types.ENCHANTMENT:
+                # if types.enchantment.subtypes["Aura"] in card.subtypes:
+                if card.attached_to is None:
+                    card.owner.graveyard.move(card)
 
 
 def _make_color(name):
@@ -229,188 +412,6 @@ class Player(object):
             for i in range(cards):
                 self.hand.add(self.library.pop())
                 self.game.events.trigger(event=events["player"]["draw"])
-
-
-class Game(object):
-    """
-    The Game object maintains information about the current game state.
-
-    """
-
-    require = requirements({"started" : {True : "{self} has already started.",
-                                         False : "{self} has not started."}})
-
-    def __init__(self, handler):
-        """
-        Initialize a new game state object.
-
-        """
-
-        super(Game, self).__init__()
-
-        self.events = handler
-
-        self.ended = None
-
-        self.battlefield = zone["battlefield"](game=self)
-        self.stack = zone["stack"](game=self)
-
-        self.teams = []
-        self.turn = TurnManager(self)
-
-    def __repr__(self):
-        return "<{} Player Game>".format(len(self.players))
-
-    @property
-    def frontends(self):
-        return {player : player.frontend for player in self.players}
-
-    @property
-    def players(self):
-        return set().union(*self.teams)
-
-    @property
-    def started(self):
-        return self.ended is not None
-
-    @property
-    def zones(self):
-        zones = {"shared" : {self.battlefield, self.stack}}
-        zones.update((p, {p.exile, p.graveyard, p.hand, p.library})
-                     for p in self.players)
-        return zones
-
-    def add_player(self, team=None, **kwargs):
-        """
-        Add a new player to the game.
-
-        """
-
-        player = Player(game=self, **kwargs)
-        self.add_existing_player(player, team)
-        return player
-
-    def add_existing_player(self, player, team=None):
-        """
-        Add an existing Player object to the game.
-
-        """
-
-        self.require(started=False)
-
-        if team is None:
-            self.teams.append({player})
-        else:
-            if team not in self.teams:
-                raise ValueError("{} has no such team {}".format(self, team))
-
-            team.add(player)
-
-    def _start(self):
-        """
-        Perform the internal steps necessary to get the game ready to start.
-
-        """
-
-        self.require(self.players, msg="Starting the game requires at least "
-                                       "one player.")
-
-        self.ended = False
-        self.turn._start()  # Tell the turn manager that the game is starting.
-
-    def start(self):
-        """
-        Start the game.
-
-        """
-
-        self.require(started=False)
-        self.events.trigger(event=events["game"]["started"])
-        self._start()
-
-        for player in self.players:
-            player.library.shuffle()
-            player.draw(player.hand_size)
-
-    def _check_for_win(self):
-        """
-        Check if there is a player that has won the game via last man standing.
-
-        """
-
-        for player in self.players:
-            if all(opponent.dead for opponent in player.opponents):
-                self.end()
-
-    def end(self):
-        """
-        End the game unconditionally.
-
-        """
-
-        self.ended = True
-        # TODO: Stop all other events
-        self.events.trigger(event=events["game"]["ended"])
-
-    def grant_priority(self, to=None):
-        """
-        Grant priority to a player.
-
-        .. seealso::
-            :ref:`grant-priority`
-
-        """
-
-        if to is None:
-            to = self.turn.active_player
-
-        self._check_state_based_actions()
-        # TODO: Put triggered abilities on the stack
-        to.frontend.priority_granted()
-
-    def _check_state_based_actions(self):
-        """
-        Check for state based actions.
-
-        .. seealso::
-            :ref:`sba-list`
-
-        """
-
-        for player in self.players:
-            if player.life <= 0:
-                player.die(reason="life")
-            elif player._drew_from_empty_library:
-                player.die(reason="library")
-            elif player.poison >= 10:
-                player.die(reason="poison")
-
-        # TODO: if any spells are anywhere but the stack: cease to exist
-        #       if any cards are anywhere but battlefield or stack: ""
-        #       :ref:`planeswalker-uniqueness-rule`
-        #       :ref:`legend-rule`
-        #       :ref:`world-rule`
-        #       The rest of them in :ref:`sba-list`
-        #
-        #       As per :ref:`sba-replacement` and the rest of the section,
-        #           these should not be iterative, and should check replacement
-
-        for card in self.battlefield:
-
-            if card.type == types.CREATURE:
-                if card.toughness <= 0:
-                    card.owner.graveyard.move(card)
-                elif card.damage >= card.toughness or card._deathtouch_damage:
-                    # TODO: Regenerate
-                    card.owner.graveyard.move(card)
-
-            elif card.type == types.PLANESWALKER:
-                if not card.loyalty:
-                    card.owner.graveyard.move(card)
-            elif card.type == types.ENCHANTMENT:
-                # if types.enchantment.subtypes["Aura"] in card.subtypes:
-                if card.attached_to is None:
-                    card.owner.graveyard.move(card)
 
 
 class TurnManager(object):

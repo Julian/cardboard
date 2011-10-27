@@ -1,9 +1,11 @@
 import unittest
 
+from zope.interface import interface, verify
 import mock
 
 from cardboard import exceptions
-from cardboard.frontend import none as n
+from cardboard.frontend.interfaces import IFrontend
+from cardboard.frontend import _none as n
 
 
 class TestNoFrontend(unittest.TestCase):
@@ -13,8 +15,18 @@ class TestNoFrontend(unittest.TestCase):
         self.assertEqual(repr(f), "<No Frontend connected to {}>".format(g))
 
     def test_no_frontend(self):
+        verify.verifyClass(IFrontend, n.NoFrontend)
+
+        # attributes raise NoFrontendConnected
         f = n.NoFrontend(mock.Mock())
 
-        for attr in "select", "select_cards", "priority_granted", "foo":
-            with self.assertRaises(exceptions.NoFrontendConnected):
-                getattr(f, attr)
+        # some attributes we actually do want to have
+        DONT_FAIL = {"_debug", "game", "player"}
+
+        for k in DONT_FAIL:
+            getattr(f, k)
+
+        for k, v in IFrontend.namesAndDescriptions():
+            if not isinstance(v, interface.Method) and k not in DONT_FAIL:
+                with self.assertRaises(exceptions.NoFrontendConnected):
+                    getattr(f, k)

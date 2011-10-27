@@ -4,7 +4,7 @@ from zope.interface import implements
 
 from cardboard import exceptions
 from cardboard.util import requirements
-from cardboard.frontend.interfaces import IRunnable
+from cardboard.frontend import interfaces
 
 
 __all__ = ["FrontendMixin", "validate_selection"]
@@ -12,7 +12,7 @@ __all__ = ["FrontendMixin", "validate_selection"]
 
 class FrontendMixin(object):
 
-    implements(IRunnable)
+    implements(interfaces.IRunnable)
 
     _require = requirements({"running" : {True : "{self} is already running.",
                                           False : "{self} is not running."}})

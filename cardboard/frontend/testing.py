@@ -8,7 +8,8 @@ import contextlib
 from twisted.python import log
 from zope.interface import implements
 
-from cardboard.frontend import FrontendMixin, IFrontend
+from cardboard.frontend import interfaces
+from cardboard.frontend.mixin import FrontendMixin
 
 
 def mock_selector(name):
@@ -44,7 +45,7 @@ class TestingSelector(object):
 
 class TestingFrontend(FrontendMixin):
 
-    implements(IFrontend)
+    implements(interfaces.IFrontend)
 
     info = lambda _, __ : None
     select = TestingSelector
