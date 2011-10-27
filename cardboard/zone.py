@@ -104,14 +104,15 @@ class UnorderedZone(ZoneMixin):
         self._contents.add(e)
 
         if not silent:
-            self.game.events.trigger(event=self._events["entered"])
+            self.game.events.trigger(event=self._events["entered"], card=e)
 
     def pop(self, silent=False):
         try:
-            return self._contents.pop()
+            e = self._contents.pop()
+            return e
         finally:
             if not silent:
-                self.game.events.trigger(event=self._events["left"])
+                self.game.events.trigger(event=self._events["left"], card=e)
 
     def remove(self, e, silent=False):
         try:
@@ -120,7 +121,7 @@ class UnorderedZone(ZoneMixin):
             raise ValueError("'{}' is not in the {} zone.".format(e, self))
         else:
             if not silent:
-                self.game.events.trigger(event=self._events["left"])
+                self.game.events.trigger(event=self._events["left"], card=e)
 
 
 class OrderedZone(ZoneMixin):
@@ -171,7 +172,7 @@ class OrderedZone(ZoneMixin):
         self._order.append(e)
 
         if not silent:
-            self.game.events.trigger(event=self._events["entered"])
+            self.game.events.trigger(event=self._events["entered"], card=e)
 
     def count(self, e):
         return self._order.count(e)
@@ -188,7 +189,7 @@ class OrderedZone(ZoneMixin):
         self._contents.remove(e)
 
         if not silent:
-            self.game.events.trigger(event=self._events["left"])
+            self.game.events.trigger(event=self._events["left"], card=e)
 
         return e
 
@@ -200,7 +201,7 @@ class OrderedZone(ZoneMixin):
         self._order.remove(e)
 
         if not silent:
-            self.game.events.trigger(event=self._events["left"])
+            self.game.events.trigger(event=self._events["left"], card=e)
 
     def reverse(self):
         self._order.reverse()

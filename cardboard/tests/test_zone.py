@@ -7,6 +7,7 @@ import mock
 from cardboard import card as c, zone as z
 from cardboard.events import events
 from cardboard.tests.util import GameTestCase
+from cardboard.util import ANY
 
 
 ZONE_EVENTS = {"entered" : object(), "left" : object()}
@@ -62,10 +63,10 @@ class TestZones(ZoneTest):
         self.assertEqual(len(self.o), len(self.library))
 
     def test_add(self):
-        with self.assertTriggers(event=ZONE_EVENTS["entered"]):
+        with self.assertTriggers(event=ZONE_EVENTS["entered"], card=30):
             self.u.add(30)
 
-        with self.assertTriggers(event=ZONE_EVENTS["entered"]):
+        with self.assertTriggers(event=ZONE_EVENTS["entered"], card=30):
             self.o.add(30)
 
         self.assertEqual(set(self.u), set(self.library) | {30})
@@ -129,13 +130,13 @@ class TestZones(ZoneTest):
         self.o.add(self.card)
         self.card.zone = self.o  # on actual cards this is a property
 
-        with self.assertTriggers(event=ZONE_EVENTS["entered"]):
+        with self.assertTriggers(event=ZONE_EVENTS["entered"], card=self.card):
             self.u.move(self.card)
             self.card.zone = self.u
 
         self.assertIn(self.card, self.u)
 
-        with self.assertTriggers(event=ZONE_EVENTS["entered"]):
+        with self.assertTriggers(event=ZONE_EVENTS["entered"], card=self.card):
             self.o.move(self.card)
 
         self.assertIn(self.card, self.o)
@@ -157,11 +158,13 @@ class TestZones(ZoneTest):
         self.assertFalse(self.events.trigger.called)
 
     def test_pop(self):
-        with self.assertTriggers(event=ZONE_EVENTS["left"]):
-            e = self.u.pop()
+        self.resetEvents()
+        e = self.u.pop()
+        self.assertLastEventsWere([dict(event=ZONE_EVENTS["left"], card=e)])
 
-        with self.assertTriggers(event=ZONE_EVENTS["left"]):
-            self.o.pop()
+        self.resetEvents()
+        f = self.o.pop()
+        self.assertLastEventsWere([dict(event=ZONE_EVENTS["left"], card=f)])
 
         self.assertEqual(set(self.u), set(self.library) - {e})
         self.assertEqual(list(self.o), self.library[:-1])
@@ -170,10 +173,10 @@ class TestZones(ZoneTest):
         e = self.library[-7]
         self.library.remove(e)
 
-        with self.assertTriggers(event=ZONE_EVENTS["left"]):
+        with self.assertTriggers(event=ZONE_EVENTS["left"], card=e):
             self.u.remove(e)
 
-        with self.assertTriggers(event=ZONE_EVENTS["left"]):
+        with self.assertTriggers(event=ZONE_EVENTS["left"], card=e):
             self.o.remove(e)
 
         self.assertEqual(set(self.u), set(self.library))
@@ -189,7 +192,9 @@ class TestZones(ZoneTest):
             self.assertIn(i, self.u)
 
         self.assertEqual(len(self.u), len(self.library) + 4)
-        self.assertLastEventsWere([{"event" : ZONE_EVENTS["entered"]}] * 4)
+
+        evs = [dict(event=ZONE_EVENTS["entered"], card=i) for i in range(4)]
+        self.assertLastEventsWere(evs)
 
         self.resetEvents()
 
@@ -198,8 +203,7 @@ class TestZones(ZoneTest):
 
         self.assertEqual(len(self.o), len(self.library) + 4)
 
-        event = {"event" : ZONE_EVENTS["entered"]}
-        self.assertLastEventsWere([event] * 4)
+        self.assertLastEventsWere(evs)
 
     def test_silent(self):
         self.o.add(self.card)
@@ -263,14 +267,17 @@ class TestOrderedZone(ZoneTest):
         self.assertEqual(self.o.index(e), 4)
 
     def test_pop_index(self):
-        self.o.pop(0)
-        self.o.pop(4)
+        e1 = self.o.pop(0)
+        e2 = self.o.pop(4)
 
         self.library.pop(0)
         self.library.pop(4)
 
         self.assertEqual(list(self.o), self.library)
-        self.assertLastEventsWere([{"event" : ZONE_EVENTS["left"]}] * 2)
+        self.assertLastEventsWere([
+            {"event" : ZONE_EVENTS["left"], "card" : e1},
+            {"event" : ZONE_EVENTS["left"], "card" : e2},
+        ])
 
     def test_reverse(self):
         self.o.reverse()
