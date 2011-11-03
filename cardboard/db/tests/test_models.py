@@ -8,25 +8,25 @@ from cardboard.db import models as m
 
 class TestAbility(unittest.TestCase):
     def test_repr(self):
-        a = m.Ability("Does stuff.")
+        a = m.Ability(description="Does stuff.")
         self.assertEqual(repr(a), "<Ability Model: Does stuff.>")
 
         s = ("Dum dah dahhh, dah nahhh, dah nahhhh. Ba dum dah dahhhh, da dahh"
              "da dahhh, da dahhh. Ba da ba da padah rdah dah HEY da na na nah")
 
-        b = m.Ability(s)
+        b = m.Ability(description=s)
         self.assertEqual(repr(b), "<Ability Model: {:.50} ... >".format(s))
 
 
 class TestCard(unittest.TestCase):
     def test_repr(self):
-        c = m.Card("Test Card", "Creature")
+        c = m.Card(name="Test Card")
         self.assertEqual(repr(c), "<Card Model: Test Card>")
 
     def test_init(self):
-        d = dict(name="Card", types=[types.CREATURE], mana_cost="UUWB",
-                 abilities=["Does stuff"], subtypes=["Test"],
-                 supertypes=["Thing"], power=2, toughness=4, loyalty=4)
+        d = dict(
+            name="Card", mana_cost="UUWB", power="2", toughness="4", loyalty=4
+        )
 
         c = m.Card(**d)
 
@@ -36,26 +36,26 @@ class TestCard(unittest.TestCase):
 
 class TestDeck(unittest.TestCase):
     def test_repr(self):
-        d = m.Deck("Test", [])
+        d = m.Deck(name="Test", cards=[])
         self.assertEqual(repr(d), "<Deck Model: Test>")
 
     def test_init(self):
-        c = m.Card("Card", "Creature")
-        d = m.Deck("Test", [c])
+        c = m.Card()
+        d = m.Deck(name="Test", cards=[c])
         self.assertEqual(d.name, "Test")
         self.assertEqual(d.cards, [c])
 
 
 class TestDeckAppearance(unittest.TestCase):
     def test_repr(self):
-        c = m.Card("Test Card", "Creature")
-        d = m.Deck("Test Deck")
+        c = m.Card(name="Test Card")
+        d = m.Deck(name="Test Deck")
         a = m.DeckAppearance(c, d, 2)
         self.assertEqual(repr(a), "<Test Deck: Test Card (2)>")
 
     def test_init(self):
-        c = m.Card("Test Card", "Creature")
-        d = m.Deck("Test Deck")
+        c = m.Card(name="Test Card")
+        d = m.Deck(name="Test Deck")
         a = m.DeckAppearance(c, d, 3)
 
         self.assertEqual(a.card, c)
@@ -65,37 +65,26 @@ class TestDeckAppearance(unittest.TestCase):
 
 class TestSet(unittest.TestCase):
     def test_repr(self):
-        s = m.Set("Test", "Te")
+        s = m.Set(name="Test", code="TE")
         self.assertEqual(repr(s), "<Set Model: Test>")
 
     def test_init(self):
-        s = m.Set("Test", "Te")
+        s = m.Set(name="Test", code="TE")
         self.assertEqual(s.name, "Test")
-        self.assertEqual(s.code, "Te")
-
-    def test_cards(self):
-        c = m.Card("Card", "Creature")
-        d = m.Card("Other Card", "Instant")
-        s = m.Set("Test", "Te", cards=[(c, "C"), (d, "U")])
-
-        self.assertEqual(s.cards, [c, d])
-
-        self.assertEqual(len(s.card_appearances), 2)
-        self.assertEqual(s.card_appearances[0].rarity, "C")
-        self.assertEqual(s.card_appearances[1].rarity, "U")
+        self.assertEqual(s.code, "TE")
 
 
 class TestSetAppearance(unittest.TestCase):
     def test_repr(self):
-        c = m.Card("Test Card", "Creature")
-        s = m.Set("Test Set", "Te")
-        a = m.SetAppearance(c, s, "C")
-        self.assertEqual(repr(a), "<Test Card (Te-C)>")
+        c = m.Card(name="Test Card")
+        s = m.Set(name="Test Set", code="TE")
+        a = m.SetAppearance(card=c, set=s, rarity="C")
+        self.assertEqual(repr(a), "<Test Card (TE-C)>")
 
     def test_init(self):
-        c = m.Card("Test Card", "Creature")
-        s = m.Set("Test Set", "Te")
-        a = m.SetAppearance(c, s, "R")
+        c = m.Card(name="Test Card")
+        s = m.Set(name="Test Set", code="TE")
+        a = m.SetAppearance(card=c, set=s, rarity="R")
 
         self.assertEqual(a.card, c)
         self.assertEqual(a.set, s)
@@ -105,7 +94,19 @@ class TestSetAppearance(unittest.TestCase):
         pass
 
 
+class TestType(unittest.TestCase):
+    def test_repr(self):
+        c = m.Type(name="Goblin")
+        self.assertEqual(repr(c), "<Type Model: Goblin>")
+
+
+class TestSupertype(unittest.TestCase):
+    def test_repr(self):
+        c = m.Supertype(name="Goblin")
+        self.assertEqual(repr(c), "<Supertype Model: Goblin>")
+
+
 class TestSubtype(unittest.TestCase):
     def test_repr(self):
-        c = m.Subtype("Goblin")
+        c = m.Subtype(name="Goblin")
         self.assertEqual(repr(c), "<Subtype Model: Goblin>")
