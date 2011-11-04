@@ -3,6 +3,7 @@ import os.path
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import backref, reconstructor, relationship
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from cardboard.db import Base, Session
 
@@ -48,19 +49,41 @@ class Card(Base):
     name = Column(String, nullable=False, primary_key=True)
     mana_cost = Column(String)
 
-    types = relationship("Type", backref="cards", secondary=card_type)
-    subtypes = relationship("Subtype", backref="cards", secondary=card_subtype)
-    supertypes = relationship(
-        "Supertype", backref="cards", secondary=card_supertype
+    type_objects = relationship("Type",
+        backref=backref("cards", lazy="dynamic"), secondary=card_type
+    )
+    subtype_objects = relationship("Subtype",
+        backref=backref("cards", lazy="dynamic"), secondary=card_subtype
+    )
+    supertype_objects = relationship("Supertype",
+        backref=backref("cards", lazy="dynamic"), secondary=card_supertype
     )
 
-    abilities = relationship(
-        "Ability", backref="cards", secondary=card_ability
+    ability_objects = relationship("Ability",
+        backref=backref("cards", lazy="dynamic"), secondary=card_ability
+    )
+
+    types = association_proxy(
+        "type_objects", "name", creator=lambda name : Type(name=name)
+    )
+    subtypes = association_proxy(
+        "subtype_objects", "name", creator=lambda name : Subtype(name=name)
+    )
+    supertypes = association_proxy(
+        "supertype_objects", "name", creator=lambda name : Supertype(name=name)
+    )
+    abilities = association_proxy(
+        "ability_objects", "description",
+        creator=lambda description : Ability(description=description)
     )
 
     power = Column(String(3))
     toughness = Column(String(3))
     loyalty = Column(Integer)
+
+    sets = association_proxy(
+        "set_appearances", "set", creator=lambda (n, c) : Set(name=n, code=c)
+    )
 
     def __repr__(self):
         return "<Card Model: {.name}>".format(self)
@@ -71,7 +94,10 @@ class Deck(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
 
-    cards = association_proxy("card_appearances", "card")
+    cards = association_proxy(
+        "card_appearances", "card",
+        creator=lambda k, v : DeckAppearance(card=k, quantity=v)
+    )
 
     def __repr__(self):
         return "<Deck Model: {.name}>".format(self)
@@ -107,20 +133,25 @@ class Deck(Base):
 
 class DeckAppearance(Base):
 
-    quantity = Column(Integer)
-
     card_name = Column(String, ForeignKey("card.name"), primary_key=True)
     deck_id = Column(Integer, ForeignKey("deck.id"), primary_key=True)
 
-    card = relationship("Card", backref="deck_appearances")
-    deck = relationship("Deck", backref="card_appearances")
+    quantity = Column(Integer)
 
-    def __init__(self, card=None, deck=None, quantity=1):
-        super(DeckAppearance, self).__init__()
+    card = relationship(
+        Card, backref=backref("deck_appearances", cascade="all, delete-orphan")
+    )
 
-        self.card = card
-        self.deck = deck
-        self.quantity = quantity
+    deck = relationship(
+        Deck, backref=backref(
+            "card_appearances",
+            collection_class=attribute_mapped_collection("quantity"),
+            cascade="all, delete-orphan"
+        )
+    )
+
+    def __init__(self, quantity=1, **kwargs):
+        super(DeckAppearance, self).__init__(quantity=quantity, **kwargs)
 
     def __repr__(self):
         return "<{0.deck.name}: {0.card.name} ({0.quantity})>".format(self)
@@ -139,13 +170,18 @@ class Set(Base):
 
 class SetAppearance(Base):
 
-    rarity = Column(String(1))
-
     card_name = Column(Integer, ForeignKey("card.name"), primary_key=True)
     set_code = Column(Integer, ForeignKey("set.code"), primary_key=True)
 
-    card = relationship("Card", backref="set_appearances")
-    set = relationship("Set", backref="card_appearances")
+    rarity = Column(String(1))
+
+    card = relationship(
+        Card, backref=backref("set_appearances", cascade="all, delete-orphan")
+    )
+
+    set = relationship(
+        Set, backref=backref("card_appearances", cascade="all, delete-orphan")
+    )
 
     def __repr__(self):
         return "<{0.card.name} ({0.set.code}-{0.rarity})>".format(self)
@@ -156,7 +192,7 @@ class Type(Base):
     name = Column(String, primary_key=True)
 
     def __repr__(self):
-        return "<Type Model: {0.name}>".format(self)
+        return "<Type Model: {.name}>".format(self)
 
 
 class Subtype(Base):
@@ -164,7 +200,7 @@ class Subtype(Base):
     name = Column(String, primary_key=True)
 
     def __repr__(self):
-        return "<Subtype Model: {0.name}>".format(self)
+        return "<Subtype Model: {.name}>".format(self)
 
 
 class Supertype(Base):
@@ -172,7 +208,7 @@ class Supertype(Base):
     name = Column(String, primary_key=True)
 
     def __repr__(self):
-        return "<Supertype Model: {0.name}>".format(self)
+        return "<Supertype Model: {.name}>".format(self)
 
 
 Base.metadata.create_all()

@@ -50,13 +50,13 @@ class TestDeckAppearance(unittest.TestCase):
     def test_repr(self):
         c = m.Card(name="Test Card")
         d = m.Deck(name="Test Deck")
-        a = m.DeckAppearance(c, d, 2)
+        a = m.DeckAppearance(card=c, deck=d, quantity=2)
         self.assertEqual(repr(a), "<Test Deck: Test Card (2)>")
 
     def test_init(self):
         c = m.Card(name="Test Card")
         d = m.Deck(name="Test Deck")
-        a = m.DeckAppearance(c, d, 3)
+        a = m.DeckAppearance(card=c, deck=d, quantity=3)
 
         self.assertEqual(a.card, c)
         self.assertEqual(a.deck, d)
