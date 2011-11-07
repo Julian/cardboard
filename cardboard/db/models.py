@@ -46,7 +46,7 @@ class Ability(Base):
 
 class Card(Base):
 
-    name = Column(String, nullable=False, primary_key=True)
+    name = Column(String, primary_key=True)
     mana_cost = Column(String)
 
     type_objects = relationship("Type",
@@ -82,84 +82,17 @@ class Card(Base):
     loyalty = Column(Integer)
 
     sets = association_proxy(
-        "set_appearances", "set", creator=lambda (n, c) : Set(name=n, code=c)
+        "set_appearances", "set",
+        creator=lambda (s, r) : SetAppearance(set=s, rarity=r)
     )
 
     def __repr__(self):
         return "<Card Model: {.name}>".format(self)
 
 
-class Deck(Base):
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False, unique=True)
-
-    cards = association_proxy(
-        "card_appearances", "card",
-        creator=lambda k, v : DeckAppearance(card=k, quantity=v)
-    )
-
-    def __repr__(self):
-        return "<Deck Model: {.name}>".format(self)
-
-    @classmethod
-    def load(cls, session, f, name=None):
-        """
-        Load a deck from a file.
-
-        """
-
-        if name is None:
-            name = os.path.splitext(os.path.basename(f.name))[0]
-
-        deck = cls(name)
-
-        for line in f:
-
-            line = line.strip()
-
-            if line == "Sideboard":
-                # TODO: Sideboard
-                return deck
-            else:
-                q, c = line.split(None, 1)
-
-                quantity = int(q)
-                card = session.query(Card).filter_by(name=c).one()
-                appearance = DeckAppearance(card, deck, quantity)
-
-        return deck
-
-
-class DeckAppearance(Base):
-
-    card_name = Column(String, ForeignKey("card.name"), primary_key=True)
-    deck_id = Column(Integer, ForeignKey("deck.id"), primary_key=True)
-
-    quantity = Column(Integer)
-
-    card = relationship(
-        Card, backref=backref("deck_appearances", cascade="all, delete-orphan")
-    )
-
-    deck = relationship(
-        Deck, backref=backref(
-            "card_appearances",
-            collection_class=attribute_mapped_collection("quantity"),
-            cascade="all, delete-orphan"
-        )
-    )
-
-    def __init__(self, quantity=1, **kwargs):
-        super(DeckAppearance, self).__init__(quantity=quantity, **kwargs)
-
-    def __repr__(self):
-        return "<{0.deck.name}: {0.card.name} ({0.quantity})>".format(self)
-
-
 class Set(Base):
 
-    code = Column(String(2), nullable=False, primary_key=True)
+    code = Column(String(5), primary_key=True)
     name = Column(String, nullable=False, unique=True)
 
     cards = association_proxy("card_appearances", "card")

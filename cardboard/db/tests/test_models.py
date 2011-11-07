@@ -34,35 +34,6 @@ class TestCard(unittest.TestCase):
             self.assertEqual(getattr(c, k), v)
 
 
-class TestDeck(unittest.TestCase):
-    def test_repr(self):
-        d = m.Deck(name="Test", cards=[])
-        self.assertEqual(repr(d), "<Deck Model: Test>")
-
-    def test_init(self):
-        c = m.Card()
-        d = m.Deck(name="Test", cards=[c])
-        self.assertEqual(d.name, "Test")
-        self.assertEqual(d.cards, [c])
-
-
-class TestDeckAppearance(unittest.TestCase):
-    def test_repr(self):
-        c = m.Card(name="Test Card")
-        d = m.Deck(name="Test Deck")
-        a = m.DeckAppearance(card=c, deck=d, quantity=2)
-        self.assertEqual(repr(a), "<Test Deck: Test Card (2)>")
-
-    def test_init(self):
-        c = m.Card(name="Test Card")
-        d = m.Deck(name="Test Deck")
-        a = m.DeckAppearance(card=c, deck=d, quantity=3)
-
-        self.assertEqual(a.card, c)
-        self.assertEqual(a.deck, d)
-        self.assertEqual(a.quantity, 3)
-
-
 class TestSet(unittest.TestCase):
     def test_repr(self):
         s = m.Set(name="Test", code="TE")
