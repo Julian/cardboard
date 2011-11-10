@@ -14,7 +14,7 @@ import itertools
 import os.path
 
 from cardboard import types
-from cardboard.db import models, Session
+from cardboard.db import models as m, Session
 
 
 DEFAULT_CARDS_FILE = "cards.txt"
@@ -158,7 +158,11 @@ def parse(card_info, ignore=IGNORE_TYPES):
 
     """
 
-    card = {}
+    card = dict(
+        types=[], supertypes=[], subtypes=[], appearances=[], abilities=[],
+        mana_cost=None, loyalty=None, power=None, toughness=None,
+    )
+
     lines = iter(card_info)
     card["name"] = next(lines)
     return _parse_mana_cost(next(lines), lines, card)
@@ -184,7 +188,7 @@ def _parse_type_line(line, rest, card):
         if token not in types.SUPERTYPES:
             super_and_types = itertools.chain([token], super_and_types)
             break
-        card.setdefault("supertypes", []).append(token)
+        card["supertypes"].append(token)
     return _parse_types(super_and_types, rest, card)
 
 
@@ -197,7 +201,7 @@ def _parse_types(card_types, rest, card):
         elif type == types.PLANESWALKER:
             card["loyalty"] = next(rest)
 
-        card.setdefault("types", []).append(type)
+        card["types"].append(type)
 
     return _parse_rest(rest, card)
 
@@ -216,7 +220,7 @@ def _is_new_block(line):
     return line.isspace() or line.startswith("#")
 
 
-def load(in_file=None, _parse=parse):
+def load_cards(in_file=None, _parse=parse):
     """
     Lazily yields each parsed card from a card listing file.
 
@@ -241,19 +245,34 @@ def load(in_file=None, _parse=parse):
         in_file.close()
 
 
-def populate(using, session=None):
-    if session is None:
-        session = Session()
+def populate(cards_info):
+    """
+    Populate the database using a collection of cards.
 
-    sets = {}
+    cards_info: an iterable of dict-like objects in the format returned by
+                `parse` each containing the information about a given card
 
-    for card in using:
+    """
+
+    s = Session()
+
+    for card in cards_info:
         appearances = card.pop("appearances")
-        card = models.Card(**card)
-        session.add(card)
 
-        for set, rarity in appearances:
-            set = sets.setdefault(set, models.Set(name=SET_ABBR[set], code=set))
-            session.add(models.SetAppearance(card, set, rarity))
+        if "types" in card:
+            card["types"] = [s.query(m.Type).get(t) for t in card["types"]]
+        if "subtypes" in card:
+            sub = card["subtypes"]
+            card["subtypes"] = [s.query(m.Subtype).get(t) for t in sub]
+        if "supertypes" in card:
+            super = card["supertypes"]
+            card["supertypes"] = [s.query(m.Supertypes).get(t) for t in super]
 
-    return session
+        card = m.Card(**card)
+        s.add(card)
+
+        card.sets.extend(
+            (s.query(m.Set).get(set), rar) for set, rar in appearances
+        )
+
+    s.commit()

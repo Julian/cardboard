@@ -98,9 +98,20 @@ class TestParser(unittest.TestCase):
 
         ]
 
+        defaults = {
+            "types" : [], "supertypes" : [], "subtypes" : [],
+            "appearances" : [], "abilities" : [],
+
+            "mana_cost" : None, "loyalty" : None, "power" : None,
+            "toughness" : None,
+
+            "name" : "Test Card",
+        }
+
         for example, answer in itertools.izip_longest(examples, answers):
-            answer["name"] = "Test Card"
-            self.assertEqual(p.parse(["Test Card"] + example), answer)
+            expected = dict(defaults)
+            expected.update(answer)
+            self.assertEqual(p.parse(["Test Card"] + example), expected)
 
     def test_parse_ignore(self):
         self.assertEqual(
@@ -110,26 +121,26 @@ class TestParser(unittest.TestCase):
         for type in p.IGNORE_TYPES:
             self.assertIsNone(p.parse(["Test", "UU", type, "TE-R"]))
 
-    def test_load(self):
+    def test_load_cards(self):
         fbb = ["Foo", "Bar", "Baz"]
 
         parse = mock.mocksignature(p.parse)
 
-        for l, f in itertools.izip_longest(p.load(S, _parse=parse), fbb):
+        for l, f in itertools.izip_longest(p.load_cards(S, _parse=parse), fbb):
             self.assertEqual(list(parse.mock.call_args[0][0]), [f] * 3)
 
-    def test_load_default_file(self):
+    def test_load_cards_default_file(self):
         with mock.patch("cardboard.db.populate.open", create=True) as m:
             m.return_value = mock.MagicMock(spec=file)
-            cards = list(p.load(_parse=mock.Mock()))
+            cards = list(p.load_cards(_parse=mock.Mock()))
 
         m.assert_called_once_with("cards.txt")
         self.assertTrue(m.return_value.close.called)
 
 
 class LoadIntegrationTest(unittest.TestCase):
-    def test_load(self):
-        parsed = p.load(SAMPLE)
+    def test_load_cards(self):
+        parsed = p.load_cards(SAMPLE)
 
         self.assertEqual(
             next(parsed),
@@ -138,8 +149,10 @@ class LoadIntegrationTest(unittest.TestCase):
                 "mana_cost" : "2RRR",
                 "types" : ["Creature"],
                 "subtypes" : ["Human", "Berserker"],
+                "supertypes" : [],
                 "power" : "2",
                 "toughness" : "4",
+                "loyalty" : None,
                 "abilities" : [
                     "Rampage 3 (Whenever this creature becomes blocked, it "
                     "gets +3/+3 until end of turn for each creature blocking "
@@ -156,8 +169,10 @@ class LoadIntegrationTest(unittest.TestCase):
                 "mana_cost" : "1UU",
                 "types" : ["Creature"],
                 "subtypes" : ["Human", "Wizard"],
+                "supertypes" : [],
                 "power" : "2",
                 "toughness" : "2",
+                "loyalty" : None,
                 "abilities" : [
                     "When AEther Adept enters the battlefield, return target "
                     "creature to its owner's hand."
