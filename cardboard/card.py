@@ -144,7 +144,7 @@ class Card(object):
 
         self.game.require(started=True)
 
-        if types.LAND in self.types:
+        if types.land in self.types:
             if self.owner.lands_this_turn < self.owner.lands_per_turn:
                 self.owner.lands_this_turn += 1
                 # TODO: event trigger?

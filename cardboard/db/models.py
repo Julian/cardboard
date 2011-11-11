@@ -16,20 +16,20 @@ card_ability = Table("card_ability", Base.metadata,
 
 card_type = Table("card_type", Base.metadata,
     Column("card", String, ForeignKey("card.name"), primary_key=True),
-    Column("type", Integer, ForeignKey("type.name"), primary_key=True),
+    Column("type", String, ForeignKey("type.name"), primary_key=True),
 )
 
 
 card_subtype = Table("card_subtype", Base.metadata,
     Column("card", String, ForeignKey("card.name"), primary_key=True),
-    Column("subtype", Integer, ForeignKey("subtype.name"), primary_key=True),
+    Column("subtype", String, ForeignKey("subtype.name"), primary_key=True),
 )
 
 
 card_supertype = Table("card_supertype", Base.metadata,
     Column("card", String, ForeignKey("card.name"), primary_key=True),
     Column(
-        "supertype", Integer, ForeignKey("supertype.name"), primary_key=True
+        "supertype", String, ForeignKey("supertype.name"), primary_key=True
     ),
 )
 
@@ -131,6 +131,9 @@ class Type(Base):
 class Subtype(Base):
 
     name = Column(String, primary_key=True)
+    type_name = Column(String, ForeignKey("type.name"), primary_key=True)
+
+    type = relationship(Type, backref="subtypes")
 
     def __repr__(self):
         return "<Subtype Model: {.name}>".format(self)

@@ -4,7 +4,8 @@ import unittest
 
 import mock
 
-import cardboard.db.populate as p
+from cardboard import types
+from cardboard.db import populate as p
 
 
 class TestParser(unittest.TestCase):
@@ -114,11 +115,7 @@ class TestParser(unittest.TestCase):
             self.assertEqual(p.parse(["Test Card"] + example), expected)
 
     def test_parse_ignore(self):
-        self.assertEqual(
-            p.IGNORE_TYPES, {"Plane", "Scheme", "Tribal", "Vanguard"}
-        )
-
-        for type in p.IGNORE_TYPES:
+        for type in types.unimplemented:
             self.assertIsNone(p.parse(["Test", "UU", type, "TE-R"]))
 
     def test_load_cards(self):

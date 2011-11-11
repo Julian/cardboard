@@ -19,9 +19,9 @@ def mock_card(type, abilities=(), mana_cost=""):
 
 class TestCard(GameTestCase):
 
-    creature_db_card = mock_card(types.CREATURE)
-    instant_db_card = mock_card(types.INSTANT, abilities=["foo", "bar"])
-    land_db_card = mock_card(types.LAND)
+    creature_db_card = mock_card(types.creature)
+    instant_db_card = mock_card(types.instant, abilities=["foo", "bar"])
+    land_db_card = mock_card(types.land)
 
     creature = c.Card(creature_db_card)
     instant = c.Card(instant_db_card)
@@ -185,7 +185,7 @@ class TestStatus(GameTestCase):
     def setUp(self):
         super(TestStatus, self).setUp()
 
-        self.creature_db_card = mock_card(types.CREATURE)
+        self.creature_db_card = mock_card(types.creature)
         self.creature = c.Card(self.creature_db_card)
 
         self.library[-1] = self.creature
@@ -331,7 +331,7 @@ class TestSpell(GameTestCase):
     def setUp(self):
         super(TestSpell, self).setUp()
 
-        self.db_card = mock_card(types.CREATURE)
+        self.db_card = mock_card(types.creature)
         self.card = c.Card(self.db_card)
         self.spell = c.Spell(self.card)
 
@@ -348,7 +348,7 @@ class TestToken(GameTestCase):
     def setUp(self):
         super(TestToken, self).setUp()
 
-        self.db_card = mock_card(types.CREATURE)
+        self.db_card = mock_card(types.creature)
         self.card = c.Card(self.db_card)
 
     def test_from_card(self):
@@ -365,7 +365,7 @@ class TestToken(GameTestCase):
         """
 
         t = c.Token(power=1, toughness=1, colors="G",
-                    types={types.CREATURE}, subtypes={"Saproling"})
+                    types={types.creature}, subtypes={"Saproling"})
 
         self.assertEqual(t.mana_cost, "")
         self.assertEqual(t.supertypes, set())

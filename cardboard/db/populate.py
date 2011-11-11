@@ -14,13 +14,11 @@ import itertools
 import os.path
 
 from cardboard import types
-from cardboard.db import models as m, Session
+from cardboard.db import models as m, Session, get_or_create
 
 
 DEFAULT_CARDS_FILE = "cards.txt"
 
-IGNORE_TYPES = {"Plane", "Scheme", "Tribal", "Vanguard"}
-TYPES = types.TYPES | IGNORE_TYPES
 SET_ABBR = {
         "A" : "Limited Edition Alpha",
         "B" : "Limited Edition Beta",
@@ -126,7 +124,7 @@ SET_ABBR = {
         }
 
 
-def parse(card_info, ignore=IGNORE_TYPES):
+def parse(card_info):
     """
     Parse an iterable containing the lines of a single card into a dict.
 
@@ -153,8 +151,7 @@ def parse(card_info, ignore=IGNORE_TYPES):
         ...              "appearances" : [("US", "U"), ("M11", "U")]}
         True
 
-    The `ignore` argument specifies card types to ignore. This function will
-    return None if a card is parsed that is of an ignored type.
+    Returns None if a card is parsed that is of an unimplemented type.
 
     """
 
@@ -170,7 +167,7 @@ def parse(card_info, ignore=IGNORE_TYPES):
 
 def _parse_mana_cost(line, rest, card):
     # not a type line?
-    if line not in TYPES and " " not in line:
+    if line not in types.all | types.unimplemented and " " not in line:
         card["mana_cost"] = line
         line = next(rest)
     return _parse_type_line(line, rest, card)
@@ -185,7 +182,7 @@ def _parse_type_line(line, rest, card):
     super_and_types = iter(super_and_types.split())
 
     for token in super_and_types:
-        if token not in types.SUPERTYPES:
+        if token not in types.supertypes:
             super_and_types = itertools.chain([token], super_and_types)
             break
         card["supertypes"].append(token)
@@ -194,11 +191,11 @@ def _parse_type_line(line, rest, card):
 
 def _parse_types(card_types, rest, card):
     for type in card_types:
-        if type in IGNORE_TYPES:
+        if type in types.unimplemented:
             return
-        elif type == types.CREATURE:
+        elif type == types.creature:
             card["power"], card["toughness"] = next(rest).split("/")
-        elif type == types.PLANESWALKER:
+        elif type == types.planeswalker:
             card["loyalty"] = next(rest)
 
         card["types"].append(type)
@@ -259,20 +256,44 @@ def populate(cards_info):
     for card in cards_info:
         appearances = card.pop("appearances")
 
-        if "types" in card:
-            card["types"] = [s.query(m.Type).get(t) for t in card["types"]]
-        if "subtypes" in card:
-            sub = card["subtypes"]
-            card["subtypes"] = [s.query(m.Subtype).get(t) for t in sub]
-        if "supertypes" in card:
-            super = card["supertypes"]
-            card["supertypes"] = [s.query(m.Supertypes).get(t) for t in super]
+        card["types"] = [s.query(m.Type).get(name) for name in card["types"]]
+        card["supertypes"] = [
+            s.query(m.Supertype).get(name) for name in card["supertypes"]
+        ]
+
+        # TODO: this is slightly borked in theory due to needing to match type
+        card["subtypes"] = [
+            s.query(m.Subtype).get((name, next(iter(card["types"])).name))
+            for name in card["subtypes"]
+        ]
 
         card = m.Card(**card)
         s.add(card)
 
         card.sets.extend(
-            (s.query(m.Set).get(set), rar) for set, rar in appearances
+            (s.query(m.Set).get(set), rarity) for set, rarity in appearances
+        )
+
+    s.commit()
+
+
+def populate_fixtures():
+    """
+    Populate the tables in the db that contain static data.
+
+    """
+
+    s = Session()
+
+    s.add_all(m.Set(code=c, name=n) for n, c in SET_ABBR.iteritems())
+
+    s.add_all(m.Type(name=type) for type in types.all)
+    s.add_all(m.Supertype(name=supertype) for supertype in types.supertypes)
+
+    for type in types.all:
+        s.add_all(
+            m.Subtype(name=subtype, type_name=type)
+            for subtype in types.subtypes[type]
         )
 
     s.commit()
