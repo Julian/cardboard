@@ -93,32 +93,15 @@ class TestCard(GameTestCase):
             session.query(m.Card).filter_by.assert_called_with(name="Bar")
 
     def test_colors(self):
-        self.creature.mana_cost = "UU"
-        self.assertEqual(self.creature.colors, {"U"})
+        costs = [
+            ("UU", {"U"}), ("B", {"B"}), ("2R", {"R"}), ("WWW", {"W"}), 
+            ("G", {"G"}), ("GWR", {"G", "W", "R"}), ("GBB", {"G", "B"}),
+            ("3", set()), ("10", set()), ("0", set()), (None, set()),
+        ]
 
-        self.creature.mana_cost = "B"
-        self.assertEqual(self.creature.colors, {"B"})
-
-        self.creature.mana_cost = "2R"
-        self.assertEqual(self.creature.colors, {"R"})
-
-        self.creature.mana_cost = "WWW"
-        self.assertEqual(self.creature.colors, {"W"})
-
-        self.creature.mana_cost = "G"
-        self.assertEqual(self.creature.colors, {"G"})
-
-        self.creature.mana_cost = "GWR"
-        self.assertEqual(self.creature.colors, {"G", "W", "R"})
-
-        self.creature.mana_cost = "GBB"
-        self.assertEqual(self.creature.colors, {"G", "B"})
-
-        self.creature.mana_cost = "3"
-        self.assertEqual(self.creature.colors, set())
-
-        self.creature.mana_cost = "10"
-        self.assertEqual(self.creature.colors, set())
+        for cost, colors in costs:
+            self.creature.mana_cost = cost
+            self.assertEqual(self.creature.colors, colors)
 
     def test_play_land(self):
         self.assertEqual(self.land.owner.lands_this_turn, 0)
