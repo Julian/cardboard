@@ -106,12 +106,12 @@ class TestCard(GameTestCase):
     def test_converted_mana_cost(self):
         costs = [
             ("UU", 2), ("B", 1), ("2R", 3), ("WWW", 3), ("G", 1), ("GWR", 3),
-            ("GBB", 3), ("3", 3), ("10", 10), ("0", 0), (None, 0),
+            ("GBB", 3), ("3", 3), ("10", 10), ("0", 0), (None, 0), ("2XBR", 4),
         ]
 
         for cost, cmc in costs:
             self.creature.mana_cost = cost
-            self.assertEqual(self.creature.converted_mana_cost, cmc, cost)
+            self.assertEqual(self.creature.converted_mana_cost, cmc)
 
     def test_play_land(self):
         self.assertEqual(self.land.owner.lands_this_turn, 0)

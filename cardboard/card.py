@@ -132,7 +132,9 @@ class Card(object):
                 if d.isdigit():
                     digits.append(d)
                 else:
-                    cost += sum(1 for _ in mana_cost) + 1  # XXX: Phyrex/Hybrid
+                    if d not in "XY":
+                        cost += 1
+                    cost += sum(1 for _ in mana_cost)  # XXX: Phyrex/Hybrid
 
             cost += int("".join(digits) or 0)
 
