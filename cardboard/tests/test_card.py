@@ -94,7 +94,7 @@ class TestCard(GameTestCase):
 
     def test_colors(self):
         costs = [
-            ("UU", {"U"}), ("B", {"B"}), ("2R", {"R"}), ("WWW", {"W"}), 
+            ("UU", {"U"}), ("B", {"B"}), ("2R", {"R"}), ("WWW", {"W"}),
             ("G", {"G"}), ("GWR", {"G", "W", "R"}), ("GBB", {"G", "B"}),
             ("3", set()), ("10", set()), ("0", set()), (None, set()),
         ]
@@ -102,6 +102,16 @@ class TestCard(GameTestCase):
         for cost, colors in costs:
             self.creature.mana_cost = cost
             self.assertEqual(self.creature.colors, colors)
+
+    def test_converted_mana_cost(self):
+        costs = [
+            ("UU", 2), ("B", 1), ("2R", 3), ("WWW", 3), ("G", 1), ("GWR", 3),
+            ("GBB", 3), ("3", 3), ("10", 10), ("0", 0), (None, 0),
+        ]
+
+        for cost, cmc in costs:
+            self.creature.mana_cost = cost
+            self.assertEqual(self.creature.converted_mana_cost, cmc, cost)
 
     def test_play_land(self):
         self.assertEqual(self.land.owner.lands_this_turn, 0)

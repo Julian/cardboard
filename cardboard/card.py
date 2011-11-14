@@ -1,8 +1,12 @@
+"""
+This module implements the Magic: The Gathering game :term:`objects`.
+
+"""
+
 import functools
 
 from cardboard import exceptions, types
 from cardboard.cards import cards
-from cardboard.core import COLORS_ABBR
 from cardboard.db import models, Session
 from cardboard.events import events
 from cardboard.util import requirements
@@ -115,6 +119,24 @@ class Card(object):
     def colors(self):
         return (self._changed_colors or
                 {i for i in self.mana_cost or "" if i.isalpha()})
+
+    @property
+    def converted_mana_cost(self):
+        cost = 0
+
+        if self.mana_cost is not None:
+            mana_cost = iter(self.mana_cost)
+            digits = []
+
+            for d in mana_cost:
+                if d.isdigit():
+                    digits.append(d)
+                else:
+                    cost += sum(1 for _ in mana_cost) + 1  # XXX: Phyrex/Hybrid
+
+            cost += int("".join(digits) or 0)
+
+        return cost
 
     @property
     def zone(self):
