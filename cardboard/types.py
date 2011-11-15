@@ -59,11 +59,11 @@ subtypes = {
     enchantment : frozenset({u"Aura", u"Shrine"}),
     instant : frozenset({u"Arcane", u"Trap"}),
 
-    "Basic Land" : frozenset({
+    u"Basic Land" : frozenset({
         u"Forest", u"Island", u"Mountain", u"Plains", u"Swamp"
     }),
 
-    "Non-Basic Land" : frozenset({
+    u"Non-Basic Land" : frozenset({
         u"Desert", u"Lair", u"Locus", u"Mine",
         u"Power-Plant", u"Tower", u"Urza's"
     }),
@@ -76,7 +76,7 @@ subtypes = {
 }
 
 subtypes[sorcery] = subtypes[instant]
-subtypes[land] = subtypes["Basic Land"] | subtypes["Non-Basic Land"]
+subtypes[land] = subtypes[u"Basic Land"] | subtypes[u"Non-Basic Land"]
 
 
 def is_permanent(type):
