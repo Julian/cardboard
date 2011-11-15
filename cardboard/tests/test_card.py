@@ -103,16 +103,6 @@ class TestCard(GameTestCase):
             self.creature.mana_cost = cost
             self.assertEqual(self.creature.colors, colors)
 
-    def test_converted_mana_cost(self):
-        costs = [
-            ("UU", 2), ("B", 1), ("2R", 3), ("WWW", 3), ("G", 1), ("GWR", 3),
-            ("GBB", 3), ("3", 3), ("10", 10), ("0", 0), (None, 0), ("2XBR", 4),
-        ]
-
-        for cost, cmc in costs:
-            self.creature.mana_cost = cost
-            self.assertEqual(self.creature.converted_mana_cost, cmc)
-
     def test_play_land(self):
         self.assertEqual(self.land.owner.lands_this_turn, 0)
         self.assertEqual(self.land.owner.lands_per_turn, 1)
@@ -155,7 +145,7 @@ class TestCard(GameTestCase):
         self.assertLastEventsWere([events["card"]["cast"]])
 
 
-class TestCharacteristics(unittest.TestCase):
+class TestMTGObjectFunctions(unittest.TestCase):
     def test_characteristics(self):
         o = mock.Mock()
         self.assertEqual(c.characteristics(o), {
@@ -172,6 +162,35 @@ class TestCharacteristics(unittest.TestCase):
             "expansion" : o.expansion,
             "rules_text" : o.rules_text
         })
+
+    def test_converted_mana_cost(self):
+        o = mock.Mock()
+        o.game.stack = set()
+
+        costs = [
+            ("UU", 2), ("B", 1), ("2R", 3), ("WWW", 3), ("G", 1), ("GWR", 3),
+            ("GBB", 3), ("3", 3), ("10", 10), ("0", 0), (None, 0), ("2XBR", 4),
+        ]
+
+        for cost, cmc in costs:
+            o.mana_cost = cost
+            self.assertEqual(c.converted_mana_cost(o), cmc)
+
+    def test_converted_mana_cost_stack(self):
+        """
+        On the stack, converted mana cost uses whatever was chosen for X.
+
+        """
+
+        o = mock.Mock()
+        o.game.stack = {o}
+        o.X = 4
+
+        costs = [("2XBR", 8)]
+
+        for cost, cmc in costs:
+            o.mana_cost = cost
+            self.assertEqual(c.converted_mana_cost(o), cmc)
 
 
 class TestStatus(GameTestCase):

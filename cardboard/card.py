@@ -121,26 +121,6 @@ class Card(object):
                 {i for i in self.mana_cost or "" if i.isalpha()})
 
     @property
-    def converted_mana_cost(self):
-        cost = 0
-
-        if self.mana_cost is not None:
-            mana_cost = iter(self.mana_cost)
-            digits = []
-
-            for d in mana_cost:
-                if d.isdigit():
-                    digits.append(d)
-                else:
-                    if d not in "XY":
-                        cost += 1
-                    cost += sum(1 for _ in mana_cost)  # XXX: Phyrex/Hybrid
-
-            cost += int("".join(digits) or 0)
-
-        return cost
-
-    @property
     def zone(self):
         if self.game is None or not self.game.started:
             return
@@ -299,20 +279,45 @@ class Token(object):
         return cls(**card_chars)
 
 
-def characteristics(mtg_object):
+def characteristics(object_):
     """
-    Return the characteristics of a M:TG object.
-
-    .. seealso::
-        :ref:`characteristics`
+    Get the :ref:`characteristics` of a M:TG :term:`object`.
 
     """
 
     CHARS = ["name", "mana_cost", "colors", "types", "subtypes", "supertypes",
              "abilities", "power", "toughness", "loyalty"]
 
-    chars = {c : getattr(mtg_object, c) for c in CHARS}
-    chars["expansion"] = getattr(mtg_object, "expansion", "")
-    chars["rules_text"] = getattr(mtg_object, "rules_text", "")
+    chars = {c : getattr(object_, c) for c in CHARS}
+    chars["expansion"] = getattr(object_, "expansion", "")
+    chars["rules_text"] = getattr(object_, "rules_text", "")
 
     return chars
+
+
+def converted_mana_cost(object_):
+    """
+    Calculate the :term:`converted mana cost` of a M:TG :term:`object`.
+
+    """
+
+    cost = 0
+
+    if object_.mana_cost is not None:
+        mana_cost = iter(object_.mana_cost)
+        digits = []
+
+        for d in mana_cost:
+            if d.isdigit():
+                digits.append(d)
+            else:
+                if d not in "XY":
+                    cost += 1
+                else:
+                    if object_ in object_.game.stack:
+                        cost += getattr(object_, d)
+                cost += sum(1 for _ in mana_cost)  # XXX: Phyrex/Hybrid
+
+        cost += int("".join(digits) or 0)
+
+    return cost
