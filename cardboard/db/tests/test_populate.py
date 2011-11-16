@@ -93,34 +93,31 @@ class TestParser(unittest.TestCase):
             {
                 u"mana_cost" : u"U", u"types" : {u"Artifact", u"Creature"},
                 u"power" : u"*", u"toughness" : u"*", u"abilities" : [u"Baz"],
-                u"subtypes" : {(u"Foo", u"Creature")},
-                u"appearances" : {(u"US", u"U")}
+                u"subtypes" : {u"Foo"}, u"appearances" : {(u"US", u"U")}
             },
 
             {
                 u"mana_cost" : u"0", u"types" : {u"Artifact"},
-                u"subtypes" : {(u"Thing", u"Artifact")},
-                u"abilities" : [u"Bar"], u"appearances" : {(u"US", u"U")}
+                u"subtypes" : {u"Thing"}, u"abilities" : [u"Bar"],
+                u"appearances" : {(u"US", u"U")}
             },
 
             {
                 u"mana_cost" : u"2", u"supertypes" : {u"Legendary"},
                 u"types" : {u"Enchantment"}, u"appearances" : {(u"SS", u"R")},
-                u"subtypes" : {(u"Aura", u"Enchantment")},
+                u"subtypes" : {u"Aura"},
             },
 
             {
                 u"mana_cost" : u"3", u"types" : {u"Artifact"},
-                u"subtypes" : {
-                    (u"Other", u"Artifact"), (u"Thing", u"Artifact")
-                }, u"appearances" : {(u"US", u"U")}
+                u"subtypes" : {u"Other", u"Thing"},
+                u"appearances" : {(u"US", u"U")}
             },
 
             {
                 u"types" : {u"Land", u"Creature"}, u"power" : "2",
-                u"toughness" : "1+*", u"subtypes" : {
-                    (u"Foo", u"Land"), (u"Bar", u"Creature")
-                }, u"appearances" : {(u"US", u"U")}
+                u"toughness" : "1+*", u"subtypes" : {u"Foo", u"Bar"},
+                u"appearances" : {(u"US", u"U")}
             },
 
         ]
@@ -173,9 +170,7 @@ class LoadIntegrationTest(unittest.TestCase):
                 u"name" : u"AErathi Berserker",
                 u"mana_cost" : u"2RRR",
                 u"types" : {u"Creature"},
-                u"subtypes" : {
-                    (u"Human", u"Creature"), (u"Berserker", u"Creature"),
-                },
+                u"subtypes" : {u"Human", u"Berserker"},
                 u"supertypes" : set(),
                 u"power" : u"2",
                 u"toughness" : u"4",
@@ -195,9 +190,7 @@ class LoadIntegrationTest(unittest.TestCase):
                 u"name" : u"AEther Adept",
                 u"mana_cost" : u"1UU",
                 u"types" : {u"Creature"},
-                u"subtypes" : {
-                    (u"Human", u"Creature"), (u"Wizard", u"Creature"),
-                },
+                u"subtypes" : {u"Human", u"Wizard"},
                 u"supertypes" : set(),
                 u"power" : u"2",
                 u"toughness" : u"2",

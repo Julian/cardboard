@@ -190,13 +190,8 @@ def _parse_type_line(line, rest, card):
         sepyt.append(supertypes.pop())
 
     card[u"supertypes"] = set(supertypes)
-
-    if len(sepyt) == len(subtypes):
-        card[u"subtypes"] = {st for st in zip(subtypes, reversed(sepyt))}
-    else:
-        card[u"subtypes"] = {(subtype, sepyt[0]) for subtype in subtypes}
-
     card[u"types"] = set(sepyt)
+    card[u"subtypes"] = set(subtypes)
 
     return _parse_rest(rest, card)
 
@@ -252,31 +247,43 @@ def populate(cards_info):
 
     s = Session()
 
+    sts = itertools.chain.from_iterable(types.subtypes.itervalues())
+
     sets = {c : m.Set(code=c, name=n) for c, n in SET_ABBR.iteritems()}
 
-    types = {type : m.Type(name=type) for type in types.all}
+    types_ = {type : m.Type(name=type) for type in types.all}
     supertypes = {st : m.Supertype(name=st) for st in types.supertypes}
-    subtypes = {}
+    subtypes = {st : m.Subtype(name=st) for st in sts}
 
-    for type in types.all:
-        subtypes.update(
-            ((name, type_name), m.Subtype(name=st, type_name=type))
-            for st in types.subtypes[type]
+    s.add_all(
+        itertools.chain.from_iterable(
+            i.itervalues() for i in (sets, types_, supertypes, subtypes)
         )
-
-    s.add_all(itertools.chain(sets, types, supertypes, subtypes))
+    )
 
     for card in cards_info:
-        appearances = card.pop(u"appearances")
+        # XXX: Split cards / Stupid multiple ability
+        if " // " in card[u"name"] or card[u"name"] == u"Seeds of Strength":
+            continue
 
-        card[u"types"] = {types[type] for type in card[u"types"]}
-        card[u"supertypes"] = {supertypes[st] for st in card[u"supertypes"]}
-        card[u"subtypes"] = {subtypes[st, t] for st in card[u"subtypes"]}
+        t, u, v = (card.pop(k) for k in [u"supertypes", u"types", u"subtypes"])
+
+        card[u"ability_objects"] = [
+            s.query(m.Ability).filter_by(description=d).first() or
+            m.Ability(description=d) for d in card.pop(u"abilities")
+        ]
+
+        card[u"supertype_objects"] = {supertypes[st] for st in t}
+        card[u"type_objects"] = {types_[type] for type in u}
+        card[u"subtype_objects"] = {subtypes[st] for st in v}
+
+        appearances = {
+            m.SetAppearance(set=sets[set], rarity=rarity)
+            for set, rarity in card.pop(u"appearances")
+        }
+
         card = m.Card(**card)
-
-        for name, rarity in appearances.iteritems():
-            set = s.query(m.Set).get(name=name)
-            card.set_appearances.add(set=set, rarity=rarity)
+        card.set_appearances.update(appearances)
 
         s.add(card)
 

@@ -15,7 +15,7 @@ unimplemented = frozenset({u"Plane", u"Scheme", u"Tribal", u"Vanguard"})
 
 supertypes = frozenset({u"Basic", u"Legendary", u"Ongoing", u"Snow", u"World"})
 subtypes = {
-    artifact : frozenset({u"Contraption", u"Equiptment", u"Fortification"}),
+    artifact : frozenset({u"Contraption", u"Equipment", u"Fortification"}),
     creature : frozenset({
         u"Advisor", u"Ally", u"Angel", u"Anteater", u"Antelope", u"Ape",
         u"Archer", u"Archon", u"Artificer", u"Assassin", u"Assembly-Worker",

@@ -46,14 +46,24 @@ class Card(Base):
     name = Column(Unicode, primary_key=True)
     mana_cost = Column(Unicode)
 
-    type_objects = relationship("Type",
-        backref=backref("cards", lazy="dynamic"), secondary=card_type
+    type_objects = relationship(
+        "Type", secondary=card_type, collection_class=set, backref=backref(
+            "cards", lazy="dynamic", collection_class=set,
+        ),
     )
-    subtype_objects = relationship("Subtype",
-        backref=backref("cards", lazy="dynamic"), secondary=card_subtype
+
+    subtype_objects = relationship(
+        "Subtype", secondary=card_subtype,
+        collection_class=set, backref=backref(
+            "cards", lazy="dynamic", collection_class=set,
+        ),
     )
-    supertype_objects = relationship("Supertype",
-        backref=backref("cards", lazy="dynamic"), secondary=card_supertype
+
+    supertype_objects = relationship(
+        "Supertype", secondary=card_supertype,
+        collection_class=set, backref=backref(
+            "cards", lazy="dynamic", collection_class=set,
+        ),
     )
 
     ability_objects = relationship("Ability",
@@ -64,8 +74,7 @@ class Card(Base):
         "type_objects", "name", creator=lambda name : Type(name=name)
     )
     subtypes = association_proxy(
-        "subtype_objects", "name",
-        creator=lambda (name, type) : Subtype(name=name, type=type)
+        "subtype_objects", "name", creator=lambda name : Subtype(name=name)
     )
     supertypes = association_proxy(
         "supertype_objects", "name", creator=lambda name : Supertype(name=name)
@@ -138,9 +147,6 @@ class Type(Base):
 class Subtype(Base):
 
     name = Column(Unicode, primary_key=True)
-    type_name = Column(Unicode, ForeignKey("type.name"), primary_key=True)
-
-    type = relationship(Type, backref="subtypes")
 
     def __repr__(self):
         return "<Subtype Model: {.name}>".format(self)
