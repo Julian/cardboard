@@ -1,6 +1,6 @@
 import os.path
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Table
+from sqlalchemy import Column, ForeignKey, Integer, Table, Unicode
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import backref, reconstructor, relationship
 from sqlalchemy.orm.collections import attribute_mapped_collection
@@ -9,27 +9,24 @@ from cardboard.db import Base, Session
 
 
 card_ability = Table("card_ability", Base.metadata,
-    Column("card", String, ForeignKey("card.name"), primary_key=True),
+    Column("card", Unicode, ForeignKey("card.name"), primary_key=True),
     Column("ability", Integer, ForeignKey("ability.id"), primary_key=True),
 )
 
-
 card_type = Table("card_type", Base.metadata,
-    Column("card", String, ForeignKey("card.name"), primary_key=True),
-    Column("type", String, ForeignKey("type.name"), primary_key=True),
+    Column("card", Unicode, ForeignKey("card.name"), primary_key=True),
+    Column("type", Unicode, ForeignKey("type.name"), primary_key=True),
 )
-
 
 card_subtype = Table("card_subtype", Base.metadata,
-    Column("card", String, ForeignKey("card.name"), primary_key=True),
-    Column("subtype", String, ForeignKey("subtype.name"), primary_key=True),
+    Column("card", Unicode, ForeignKey("card.name"), primary_key=True),
+    Column("subtype", Unicode, ForeignKey("subtype.name"), primary_key=True),
 )
 
-
 card_supertype = Table("card_supertype", Base.metadata,
-    Column("card", String, ForeignKey("card.name"), primary_key=True),
+    Column("card", Unicode, ForeignKey("card.name"), primary_key=True),
     Column(
-        "supertype", String, ForeignKey("supertype.name"), primary_key=True
+        "supertype", Unicode, ForeignKey("supertype.name"), primary_key=True
     ),
 )
 
@@ -37,7 +34,7 @@ card_supertype = Table("card_supertype", Base.metadata,
 class Ability(Base):
 
     id = Column(Integer, primary_key=True)
-    description = Column(String, unique=True)
+    description = Column(Unicode, unique=True)
 
     def __repr__(self):
         elip = " ... " if len(self.description) > 50 else ""
@@ -46,8 +43,8 @@ class Ability(Base):
 
 class Card(Base):
 
-    name = Column(String, primary_key=True)
-    mana_cost = Column(String)
+    name = Column(Unicode, primary_key=True)
+    mana_cost = Column(Unicode)
 
     type_objects = relationship("Type",
         backref=backref("cards", lazy="dynamic"), secondary=card_type
@@ -67,7 +64,8 @@ class Card(Base):
         "type_objects", "name", creator=lambda name : Type(name=name)
     )
     subtypes = association_proxy(
-        "subtype_objects", "name", creator=lambda name : Subtype(name=name)
+        "subtype_objects", "name",
+        creator=lambda (name, type) : Subtype(name=name, type=type)
     )
     supertypes = association_proxy(
         "supertype_objects", "name", creator=lambda name : Supertype(name=name)
@@ -77,13 +75,12 @@ class Card(Base):
         creator=lambda description : Ability(description=description)
     )
 
-    power = Column(String(3))
-    toughness = Column(String(3))
+    power = Column(Unicode(3))
+    toughness = Column(Unicode(3))
     loyalty = Column(Integer)
 
     sets = association_proxy(
-        "set_appearances", "set",
-        creator=lambda (s, r) : SetAppearance(set=s, rarity=r)
+        "set_appearances", "set", creator=lambda s : SetAppearance(set=s)
     )
 
     def __repr__(self):
@@ -92,10 +89,12 @@ class Card(Base):
 
 class Set(Base):
 
-    code = Column(String(5), primary_key=True)
-    name = Column(String, nullable=False, unique=True)
+    code = Column(Unicode(5), primary_key=True)
+    name = Column(Unicode, nullable=False, unique=True)
 
-    cards = association_proxy("card_appearances", "card")
+    cards = association_proxy(
+        "card_appearances", "card", creator=lambda c : SetAppearance(card=c),
+    )
 
     def __repr__(self):
         return "<Set Model: {.name}>".format(self)
@@ -106,14 +105,22 @@ class SetAppearance(Base):
     card_name = Column(Integer, ForeignKey("card.name"), primary_key=True)
     set_code = Column(Integer, ForeignKey("set.code"), primary_key=True)
 
-    rarity = Column(String(1))
+    rarity = Column(Unicode(1))
 
     card = relationship(
-        Card, backref=backref("set_appearances", cascade="all, delete-orphan")
+        Card, backref=backref(
+            "set_appearances",
+            collection_class=set,
+            cascade="all, delete-orphan"
+        )
     )
 
     set = relationship(
-        Set, backref=backref("card_appearances", cascade="all, delete-orphan")
+        Set, backref=backref(
+            "card_appearances",
+            collection_class=set,
+            cascade="all, delete-orphan"
+        )
     )
 
     def __repr__(self):
@@ -122,7 +129,7 @@ class SetAppearance(Base):
 
 class Type(Base):
 
-    name = Column(String, primary_key=True)
+    name = Column(Unicode, primary_key=True)
 
     def __repr__(self):
         return "<Type Model: {.name}>".format(self)
@@ -130,8 +137,8 @@ class Type(Base):
 
 class Subtype(Base):
 
-    name = Column(String, primary_key=True)
-    type_name = Column(String, ForeignKey("type.name"), primary_key=True)
+    name = Column(Unicode, primary_key=True)
+    type_name = Column(Unicode, ForeignKey("type.name"), primary_key=True)
 
     type = relationship(Type, backref="subtypes")
 
@@ -141,7 +148,7 @@ class Subtype(Base):
 
 class Supertype(Base):
 
-    name = Column(String, primary_key=True)
+    name = Column(Unicode, primary_key=True)
 
     def __repr__(self):
         return "<Supertype Model: {.name}>".format(self)

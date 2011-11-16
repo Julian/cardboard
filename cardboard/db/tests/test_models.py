@@ -33,6 +33,12 @@ class TestCard(unittest.TestCase):
         for k, v in d.iteritems():
             self.assertEqual(getattr(c, k), v)
 
+    def test_sets(self):
+        c = m.Card()
+        s = m.Set()
+        c.sets.add(s)
+        self.assertEqual(c.sets, {s})
+
 
 class TestSet(unittest.TestCase):
     def test_repr(self):
@@ -43,6 +49,12 @@ class TestSet(unittest.TestCase):
         s = m.Set(name="Test", code="TE")
         self.assertEqual(s.name, "Test")
         self.assertEqual(s.code, "TE")
+
+    def test_cards(self):
+        s = m.Set()
+        c = m.Card()
+        s.cards.add(c)
+        self.assertEqual(s.cards, {c})
 
 
 class TestSetAppearance(unittest.TestCase):
@@ -67,17 +79,17 @@ class TestSetAppearance(unittest.TestCase):
 
 class TestType(unittest.TestCase):
     def test_repr(self):
-        c = m.Type(name="Goblin")
-        self.assertEqual(repr(c), "<Type Model: Goblin>")
+        t = m.Type(name="Goblin")
+        self.assertEqual(repr(t), "<Type Model: Goblin>")
 
 
 class TestSupertype(unittest.TestCase):
     def test_repr(self):
-        c = m.Supertype(name="Goblin")
-        self.assertEqual(repr(c), "<Supertype Model: Goblin>")
+        s = m.Supertype(name="Goblin")
+        self.assertEqual(repr(s), "<Supertype Model: Goblin>")
 
 
 class TestSubtype(unittest.TestCase):
     def test_repr(self):
-        c = m.Subtype(name="Goblin")
-        self.assertEqual(repr(c), "<Subtype Model: Goblin>")
+        s = m.Subtype(name="Goblin")
+        self.assertEqual(repr(s), "<Subtype Model: Goblin>")
