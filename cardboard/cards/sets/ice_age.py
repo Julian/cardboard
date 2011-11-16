@@ -1,12 +1,11 @@
-from cardboard.card import Ability
-from cardboard.cards import card, common
+from cardboard.cards import card, common, spell, triggered, activated, static
 
 
 @card("Brainstorm")
-def brainstorm(self, abilities):
+def brainstorm(card, abilities):
 
-    @Ability.spell(description=abilities[0])
-    def ability():
-        return common.draw_discard(self.owner, 3, 2, self.owner.library)
+    @spell(description=abilities[0])
+    def brainstorm():
+        return common.draw_discard(card.owner, 3, 2, card.owner.library)
 
-    return [ability]
+    return brainstorm,

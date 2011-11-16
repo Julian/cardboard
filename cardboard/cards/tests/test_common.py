@@ -11,6 +11,11 @@ class TestCommon(GameTestCase):
         self.p1.frontend = TestingFrontend(self.p1)
         self.game.start()
 
+    def test_destroy(self):
+        m = mock.Mock()
+        c.destroy(m)
+        m.owner.graveyard.move.assert_called_once_with(m)
+
     def test_draw_discard(self):
         draw = self.p1.library[-3:]
         discard = list(self.p1.hand)[:2]

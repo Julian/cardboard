@@ -1,3 +1,18 @@
+"""
+Implementations of common card mechanics.
+
+"""
+
+
+def destroy(card):
+    """
+    Destroy a card.
+
+    """
+
+    card.owner.graveyard.move(card)
+
+
 def draw_discard(player, draw=1, discard=1, to=None):
     """
     Draw cards then select cards to discard to a given zone.

@@ -1,95 +1,97 @@
 from cardboard import types
-from cardboard.card import Ability
-from cardboard.cards import card, common
+from cardboard.cards import card, common, spell, triggered, activated, static
+from cardboard.cards.common import destroy, draw_discard
 
 
 @card("Brand")
-def brand(self, abilities):
+def brand(card, abilities):
 
-    @Ability.spell(description=abilities[0])
-    def ability():
-        for card in self.game.battlefield:
-            if card.owner == self.owner:
+    @spell(description=abilities[0])
+    def brand():
+        for card in card.game.battlefield:
+            if card.owner == card.owner:
                 card.controller = card.owner
 
     # XXX: Cycling 2
 
-    return [ability]
+    return brand,
 
 
 @card("Catalog")
-def catalog(self, abilities):
+def catalog(card, abilities):
 
-    @Ability.spell(description=abilities[0])
-    def ability():
-        return common.draw_discard(self.owner, 2, 1)
+    @spell(description=abilities[0])
+    def catalog():
+        return draw_discard(card.owner, draw=2, discard=1)
 
-    return [ability]
+    return catalog,
 
 
 @card("Clear")
-def clear(self, abilities):
+def clear(card, abilities):
 
-    @Ability.spell(description=abilities[0])
-    def ability():
-        target, = self.owner.frontend.select.card(match=is_enchantment)
-        target.owner.graveyard.move(target)
+    @spell(description=abilities[0])
+    def clear():
+        target, = card.owner.frontend.select.card(
+            match=lambda c : types.enchantment in c.types
+        )
+        destroy(target)
 
     # XXX: Cycling 2
 
-    return [ability]
+    return clear,
 
 
 @card("Congregate")
-def congregate(self, abilities):
+def congregate(card, abilities):
 
-    @Ability.spell(description=abilities[0])
-    def ability():
-        target, = self.owner.frontend.select.player(bad=False)
-        target.life += sum(2 for c in battlefield if c.type == types.CREATURE)
+    @spell(description=abilities[0])
+    def congregate():
+        target, = card.owner.frontend.select.player(bad=False)
+        target.life += sum(2 for c in battlefield if types.creature in c.types)
 
-    return [ability]
+    return congregate,
 
 
 @card("Curfew")
-def curfew(self, abilities):
+def curfew(card, abilities):
 
-    @Ability.spell(description=abilities[0])
-    def ability():
-        for player in self.game.turn.order:
+    @spell(description=abilities[0])
+    def curfew():
+        for player in card.game.turn.order:
             selection = player.frontend.select.card(match=is_creature)
 
             if selection:
                 player.hand.move(selection[0])
 
-    return [ability]
+    return curfew,
 
 
 @card("Expunge")
-def expunge(self, abilities):
+def expunge(card, abilities):
 
-    @Ability.spell(description=abilities[0])
-    def ability():
-        target, = self.owner.frontend.select.card(
-            match=lambda c : types.CREATURE in c.type and
-                             types.ARTIFACT not in c.type and
+    @spell(description=abilities[0])
+    def expunge():
+        target, = card.owner.frontend.select.card(
+            match=lambda c : types.creature in c.types and
+                             types.artifact not in c.types and
                              "B" not in c.colors
         )
-        target.owner.graveyard.move(target)
+        target.destroy()
 
     # XXX: Can't Regenerate
     # XXX: Cycling 2
 
-    return [ability]
+    return expunge,
 
 
 @card("Hibernation")
-def hibernation(self, abilities):
+def hibernation(card, abilities):
 
-    @Ability.spell(description=abilities[0])
-    def ability():
-        for card in self.game.battlefield:
+    @spell(description=abilities[0])
+    def hibernation():
+        for card in card.game.battlefield:
             if card.is_permanent and "G" in card.colors:
                 card.owner.hand.move(card)
 
-    return [ability]
+    return hibernation,
