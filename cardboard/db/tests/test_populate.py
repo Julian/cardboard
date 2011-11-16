@@ -1,4 +1,5 @@
-from cStringIO import StringIO
+from StringIO import StringIO
+import codecs
 import itertools
 import unittest
 
@@ -11,115 +12,140 @@ from cardboard.db import populate as p
 class TestParser(unittest.TestCase):
     def test_parse(self):
         examples = [
-            ["WUG", "Instant", "Foo", "UG-R"],
-            ["RG", "Enchantment", "Bar", "ST-C"],
-            ["BR", "Sorcery", "Foo", "Bar", "Baz", "UG-R"],
-            ["10GGG", "Creature", "1/1", "Bar", "UG-R, US-U, ST-C"],
-            ["1G", "Creature", "2/*", "ST-C"],
-            ["U", "Legendary Artifact Creature -- Foo", "*/*", "Baz", "US-U"],
-            ["0", "Artifact -- Thing", "Bar", "US-U"],
-            ["2", "Legendary Enchantment -- Aura", "SS-R"],
-            ["3", "Artifact -- Other Thing", "US-U"],
-            ["Land", "Do something.", "US-C"],
-            ["Land", "US-C"],
-            ["Basic Land", "Do something.", "US-C"],
-            ["1WU", "Planeswalker", "3", "Bar", "Baz", "ST-C"],
+            [u"WUG", u"Instant", u"Foo", u"UG-R"],
+            [u"RG", u"Enchantment", u"Bar", u"ST-C"],
+            [u"BR", u"Sorcery", u"Foo", u"Bar", u"Baz", u"UG-R"],
+            [u"10GGG", u"Creature", u"1/1", u"Bar", u"UG-R, US-U, ST-C"],
+            [u"1G", u"Creature", u"2/*", u"ST-C"],
+            [u"Land", u"Do something.", u"US-C"],
+            [u"Land", u"US-C"],
+            [u"Basic Land", u"Do something.", u"US-C"],
+            [u"1WU", u"Planeswalker", u"3", u"Bar", u"Baz", u"ST-C"],
+            [u"Legendary Land Creature", u"1/1", u"Baz", u"US-U"],
+
+            # subtypes are a bit stupid. Rule 205.3b and c mean that whether a
+            # card has multiple types decides if each subtype is correlated to
+            # the type or not (see the rules for examples)
+            [u"U", u"Artifact Creature -- Foo", u"*/*", u"Baz", u"US-U"],
+            [u"0", u"Artifact -- Thing", u"Bar", u"US-U"],
+            [u"2", u"Legendary Enchantment -- Aura", u"SS-R"],
+            [u"3", u"Artifact -- Other Thing", u"US-U"],
+            [u"Land Creature -- Foo Bar", u"2/1+*", u"US-U"],
+
         ]
 
         answers = [
             {
-                "mana_cost" : "WUG", "types" : ["Instant"],
-                "abilities" : ["Foo"], "appearances" : [["UG", "R"]]
+                u"mana_cost" : u"WUG", u"types" : {u"Instant"},
+                u"abilities" : [u"Foo"], u"appearances" : {(u"UG", u"R")}
             },
 
             {
-                "mana_cost" : "RG", "types" : ["Enchantment"],
-                "abilities" : ["Bar"], "appearances" : [["ST", "C"]]},
-
-            {
-                "mana_cost" : "BR", "types" : ["Sorcery"],
-                "abilities" : ["Foo", "Bar", "Baz"],
-                "appearances" : [["UG", "R"]]
+                u"mana_cost" : u"RG", u"types" : {u"Enchantment"},
+                u"abilities" : [u"Bar"], u"appearances" : {(u"ST", u"C")},
             },
 
             {
-                "mana_cost" : "10GGG", "types" : ["Creature"], "power" : "1",
-                "toughness" : "1", "abilities" : ["Bar"],
-                "appearances" : [["UG", "R"], ["US", "U"], ["ST", "C"]]
+                u"mana_cost" : u"BR", u"types" : {u"Sorcery"},
+                u"abilities" : [u"Foo", u"Bar", u"Baz"],
+                u"appearances" : {(u"UG", u"R")}
             },
 
             {
-                "mana_cost" : "1G", "types" : ["Creature"], "power" : "2",
-                "toughness" : "*", "appearances" : [["ST", "C"]]
+                u"mana_cost" : u"10GGG", u"types" : {u"Creature"},
+                u"power" : u"1", u"toughness" : u"1", u"abilities" : [u"Bar"],
+                u"appearances" : {(u"UG", u"R"), (u"US", u"U"), (u"ST", u"C")}
             },
 
             {
-                "mana_cost" : "U", "supertypes" : ["Legendary"],
-                "types" : ["Artifact", "Creature"], "power" : "*",
-                "toughness" : "*", "subtypes" : ["Foo"], "abilities" : ["Baz"],
-                "appearances" : [["US", "U"]]
+                u"mana_cost" : u"1G", u"types" : {u"Creature"},
+                u"power" : u"2", u"toughness" : u"*",
+                u"appearances" : {(u"ST", u"C")}
             },
 
             {
-                "mana_cost" : "0", "types" : ["Artifact"],
-                "subtypes" : ["Thing"], "abilities" : ["Bar"],
-                "appearances" : [["US", "U"]]
+                u"types" : {u"Land"}, u"abilities" : [u"Do something."],
+                u"appearances" : {(u"US", u"C")}
             },
 
             {
-                "mana_cost" : "2", "supertypes" : ["Legendary"],
-                "types" : ["Enchantment"], "subtypes" : ["Aura"],
-                "appearances" : [["SS", "R"]]
+                u"types" : {u"Land"}, u"appearances" : {(u"US", u"C")}
             },
 
             {
-                "mana_cost" : "3", "types" : ["Artifact"],
-                "subtypes" : ["Other", "Thing"], "appearances" : [["US", "U"]]
+                u"supertypes" : {u"Basic"}, u"types" : {u"Land"},
+                u"abilities" : [u"Do something."],
+                u"appearances" : {(u"US", u"C")}
             },
 
             {
-                "types" : ["Land"], "abilities" : ["Do something."],
-                "appearances" : [["US", "C"]]
+                u"mana_cost" : u"1WU", u"types" : {u"Planeswalker"},
+                u"loyalty" : u"3", u"abilities" : [u"Bar", u"Baz"],
+                u"appearances" : {(u"ST", u"C")}
             },
 
             {
-                "types" : ["Land"], "appearances" : [["US", "C"]]
+                u"supertypes" : {u"Legendary"}, u"abilities" : [u"Baz"],
+                u"types" : {u"Land", u"Creature"}, u"power" : u"1",
+                u"toughness" : u"1", u"appearances" : {(u"US", u"U")}
             },
 
             {
-                "supertypes" : ["Basic"], "types" : ["Land"],
-                "abilities" : ["Do something."], "appearances" : [["US", "C"]]
+                u"mana_cost" : u"U", u"types" : {u"Artifact", u"Creature"},
+                u"power" : u"*", u"toughness" : u"*", u"abilities" : [u"Baz"],
+                u"subtypes" : {(u"Foo", u"Creature")},
+                u"appearances" : {(u"US", u"U")}
             },
 
             {
-                "mana_cost" : "1WU", "types" : ["Planeswalker"],
-                "loyalty" : "3", "abilities" : ["Bar", "Baz"],
-                "appearances" : [["ST", "C"]]
+                u"mana_cost" : u"0", u"types" : {u"Artifact"},
+                u"subtypes" : {(u"Thing", u"Artifact")},
+                u"abilities" : [u"Bar"], u"appearances" : {(u"US", u"U")}
+            },
+
+            {
+                u"mana_cost" : u"2", u"supertypes" : {u"Legendary"},
+                u"types" : {u"Enchantment"}, u"appearances" : {(u"SS", u"R")},
+                u"subtypes" : {(u"Aura", u"Enchantment")},
+            },
+
+            {
+                u"mana_cost" : u"3", u"types" : {u"Artifact"},
+                u"subtypes" : {
+                    (u"Other", u"Artifact"), (u"Thing", u"Artifact")
+                }, u"appearances" : {(u"US", u"U")}
+            },
+
+            {
+                u"types" : {u"Land", u"Creature"}, u"power" : "2",
+                u"toughness" : "1+*", u"subtypes" : {
+                    (u"Foo", u"Land"), (u"Bar", u"Creature")
+                }, u"appearances" : {(u"US", u"U")}
             },
 
         ]
 
         defaults = {
-            "types" : [], "supertypes" : [], "subtypes" : [],
-            "appearances" : [], "abilities" : [],
+            u"types" : set(), u"supertypes" : set(), u"subtypes" : set(),
+            u"appearances" : set(), u"abilities" : [],
 
-            "mana_cost" : None, "loyalty" : None, "power" : None,
-            "toughness" : None,
+            u"mana_cost" : None, u"loyalty" : None, u"power" : None,
+            u"toughness" : None,
 
-            "name" : "Test Card",
+            u"name" : u"Test Card",
         }
 
         for example, answer in itertools.izip_longest(examples, answers):
             expected = dict(defaults)
             expected.update(answer)
-            self.assertEqual(p.parse(["Test Card"] + example), expected)
+            self.assertEqual(p.parse([u"Test Card"] + example), expected)
 
     def test_parse_ignore(self):
         for type in types.unimplemented:
-            self.assertIsNone(p.parse(["Test", "UU", type, "TE-R"]))
+            self.assertIsNone(p.parse([u"Test", u"UU", type, u"TE-R"]))
 
     def test_load_cards(self):
-        fbb = ["Foo", "Bar", "Baz"]
+        fbb = [u"Foo", u"Bar", u"Baz"]
 
         parse = mock.mocksignature(p.parse)
 
@@ -127,11 +153,13 @@ class TestParser(unittest.TestCase):
             self.assertEqual(list(parse.mock.call_args[0][0]), [f] * 3)
 
     def test_load_cards_default_file(self):
-        with mock.patch("cardboard.db.populate.open", create=True) as m:
+        codecs_open = u"cardboard.db.populate.codecs.open"
+
+        with mock.patch(codecs_open, create=True) as m:
             m.return_value = mock.MagicMock(spec=file)
             cards = list(p.load_cards(_parse=mock.Mock()))
 
-        m.assert_called_once_with("cards.txt")
+        m.assert_called_once_with(u"cards.txt", encoding=u"utf-8")
         self.assertTrue(m.return_value.close.called)
 
 
@@ -142,44 +170,48 @@ class LoadIntegrationTest(unittest.TestCase):
         self.assertEqual(
             next(parsed),
             {
-                "name" : "AErathi Berserker",
-                "mana_cost" : "2RRR",
-                "types" : ["Creature"],
-                "subtypes" : ["Human", "Berserker"],
-                "supertypes" : [],
-                "power" : "2",
-                "toughness" : "4",
-                "loyalty" : None,
-                "abilities" : [
-                    "Rampage 3 (Whenever this creature becomes blocked, it "
-                    "gets +3/+3 until end of turn for each creature blocking "
-                    "it beyond the first.)"
+                u"name" : u"AErathi Berserker",
+                u"mana_cost" : u"2RRR",
+                u"types" : {u"Creature"},
+                u"subtypes" : {
+                    (u"Human", u"Creature"), (u"Berserker", u"Creature"),
+                },
+                u"supertypes" : set(),
+                u"power" : u"2",
+                u"toughness" : u"4",
+                u"loyalty" : None,
+                u"abilities" : [
+                    u"Rampage 3 (Whenever this creature becomes blocked, it "
+                    u"gets +3/+3 until end of turn for each creature blocking "
+                    u"it beyond the first.)"
                 ],
-                "appearances" : [["LE", "U"]],
+                u"appearances" : {(u"LE", u"U")},
             }
         )
 
         self.assertEqual(
             next(parsed),
             {
-                "name" : "AEther Adept",
-                "mana_cost" : "1UU",
-                "types" : ["Creature"],
-                "subtypes" : ["Human", "Wizard"],
-                "supertypes" : [],
-                "power" : "2",
-                "toughness" : "2",
-                "loyalty" : None,
-                "abilities" : [
-                    "When AEther Adept enters the battlefield, return target "
-                    "creature to its owner's hand."
+                u"name" : u"AEther Adept",
+                u"mana_cost" : u"1UU",
+                u"types" : {u"Creature"},
+                u"subtypes" : {
+                    (u"Human", u"Creature"), (u"Wizard", u"Creature"),
+                },
+                u"supertypes" : set(),
+                u"power" : u"2",
+                u"toughness" : u"2",
+                u"loyalty" : None,
+                u"abilities" : [
+                    u"When AEther Adept enters the battlefield, return target "
+                    u"creature to its owner's hand."
                 ],
-                "appearances" : [["M11", "C"], ["M12", "C"]],
+                u"appearances" : {(u"M11", u"C"), (u"M12", u"C")},
             }
         )
 
 
-S = StringIO("""
+S = codecs.getreader("utf-8")(StringIO(u"""
 # Ignore
 # the
 # header
@@ -199,10 +231,10 @@ Bar
 Baz
 Baz
 Baz
-""")
+"""
+))
 
-
-SAMPLE = StringIO("""
+SAMPLE = codecs.getreader("utf-8")(StringIO(u"""
 #
 # Card Listing File
 #
@@ -228,4 +260,4 @@ Creature -- Human Wizard
 When AEther Adept enters the battlefield, return target creature to its owner's hand.
 M11-C, M12-C
 """
-)
+))

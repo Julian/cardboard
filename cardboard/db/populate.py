@@ -10,118 +10,118 @@ recent one.
 
 """
 
+import codecs
 import itertools
-import os.path
 
 from cardboard import types
-from cardboard.db import models as m, Session, get_or_create
+from cardboard.db import models as m, Session
 
 
 DEFAULT_CARDS_FILE = "cards.txt"
-
 SET_ABBR = {
-        "A" : "Limited Edition Alpha",
-        "B" : "Limited Edition Beta",
-        "U" : "Unlimited",
-        "RV" : "Revised",
-        "4E" : "Fourth Edition",
-        "5E" : "Fifth Edition",
-        "6E" : "Classic (Sixth Edition)",
-        "7E" : "Seventh Edition",
-        "8ED" : "Core Set - Eighth Edition",
-        "9ED" : "Core Set - Ninth Edition",
-        "10E" : "Core Set - Tenth Edition",
+        u"A" : u"Limited Edition Alpha",
+        u"B" : u"Limited Edition Beta",
+        u"U" : u"Unlimited",
+        u"RV" : u"Revised",
+        u"4E" : u"Fourth Edition",
+        u"5E" : u"Fifth Edition",
+        u"6E" : u"Classic (Sixth Edition)",
+        u"7E" : u"Seventh Edition",
+        u"8ED" : u"Core Set - Eighth Edition",
+        u"9ED" : u"Core Set - Ninth Edition",
+        u"10E" : u"Core Set - Tenth Edition",
 
-        "M10" : "Magic 2010",
-        "M11" : "Magic 2011",
-        "M12" : "Magic 2012",
+        u"M10" : u"Magic 2010",
+        u"M11" : u"Magic 2011",
+        u"M12" : u"Magic 2012",
 
-        "AN" : "Arabian Nights",
-        "AQ" : "Antiquities",
-        "LE" : "Legends",
-        "DK" : "The Dark",
-        "FE" : "Fallen Empires",
-        "HL" : "Homelands",
+        u"AN" : u"Arabian Nights",
+        u"AQ" : u"Antiquities",
+        u"LE" : u"Legends",
+        u"DK" : u"The Dark",
+        u"FE" : u"Fallen Empires",
+        u"HL" : u"Homelands",
 
-        "IA" : "Ice Age",
-        "AI" : "Alliances",
-        "CSP" : "Coldsnap",
+        u"IA" : u"Ice Age",
+        u"AI" : u"Alliances",
+        u"CSP" : u"Coldsnap",
 
-        "MI" : "Mirage",
-        "VI" : "Visions",
-        "WL" : "Weatherlight",
+        u"MI" : u"Mirage",
+        u"VI" : u"Visions",
+        u"WL" : u"Weatherlight",
 
-        "TE" : "Tempest",
-        "ST" : "Stronghold",
-        "EX" : "Exodus",
+        u"TE" : u"Tempest",
+        u"ST" : u"Stronghold",
+        u"EX" : u"Exodus",
 
-        "US" : "Urza's Saga",
-        "UL" : "Urza's Legacy",
-        "UD" : "Urza's Destiny",
+        u"US" : u"Urza's Saga",
+        u"UL" : u"Urza's Legacy",
+        u"UD" : u"Urza's Destiny",
 
-        "MM" : "Mercadian Masques",
-        "NE" : "Nemesis",
-        "PR" : "Prophecy",
+        u"MM" : u"Mercadian Masques",
+        u"NE" : u"Nemesis",
+        u"PR" : u"Prophecy",
 
-        "IN" : "Invasion",
-        "PS" : "Planeshift",
-        "AP" : "Apocalypse",
+        u"IN" : u"Invasion",
+        u"PS" : u"Planeshift",
+        u"AP" : u"Apocalypse",
 
-        "OD" : "Odyssey",
-        "TOR" : "Torment",
-        "JUD" : "Judgement",
+        u"OD" : u"Odyssey",
+        u"TOR" : u"Torment",
+        u"JUD" : u"Judgement",
 
-        "ONS" : "Onslaught",
-        "LGN" : "Legion",
-        "SCG" : "Scourge",
+        u"ONS" : u"Onslaught",
+        u"LGN" : u"Legion",
+        u"SCG" : u"Scourge",
 
-        "MRD" : "Mirrodin",
-        "DST" : "Darksteel",
-        "5DN" : "Fifth Dawn",
+        u"MRD" : u"Mirrodin",
+        u"DST" : u"Darksteel",
+        u"5DN" : u"Fifth Dawn",
 
-        "CHK" : "Champions of Kamigawa",
-        "BOK" : "Betrayers of Kamigawa",
-        "SOK" : "Saviors of Kamigawa",
+        u"CHK" : u"Champions of Kamigawa",
+        u"BOK" : u"Betrayers of Kamigawa",
+        u"SOK" : u"Saviors of Kamigawa",
 
-        "RAV" : "Ravnica: City of Guilds",
-        "GPT" : "Guildpact",
-        "DIS" : "Dissension",
+        u"RAV" : u"Ravnica: City of Guilds",
+        u"GPT" : u"Guildpact",
+        u"DIS" : u"Dissension",
 
-        "TSP" : "Time Spiral",
-        "PLC" : "Planar Chaos",
-        "FUT" : "Future Sight",
+        u"TSP" : u"Time Spiral",
+        u"PLC" : u"Planar Chaos",
+        u"FUT" : u"Future Sight",
 
-        "LRW" : "Lorwyn",
-        "MOR" : "Morningtide",
+        u"LRW" : u"Lorwyn",
+        u"MOR" : u"Morningtide",
 
-        "SHM" : "Shadowmoor",
-        "EVE" : "Eventide",
+        u"SHM" : u"Shadowmoor",
+        u"EVE" : u"Eventide",
 
-        "ALA" : "Shards of Alara",
-        "CON" : "Conflux",
-        "ARB" : "Alara Reborn",
+        u"ALA" : u"Shards of Alara",
+        u"CON" : u"Conflux",
+        u"ARB" : u"Alara Reborn",
 
-        "ZEN" : "Zendikar",
-        "WWK" : "Worldwake",
-        "ROE" : "Rise of the Eldrazi",
+        u"ZEN" : u"Zendikar",
+        u"WWK" : u"Worldwake",
+        u"ROE" : u"Rise of the Eldrazi",
 
-        "SOM" : "Scars of Mirrodin",
-        "MBS" : "Mirrodin Besieged",
-        "NPH" : "New Phyrexia",
+        u"SOM" : u"Scars of Mirrodin",
+        u"MBS" : u"Mirrodin Besieged",
+        u"NPH" : u"New Phyrexia",
 
-        "ARC" : "Archenemy",
-        "CH" : "Chronicles",
-        "CMD" : "Commander",
-        "HOP" : "Planechase",
-        "PROMO" : "Media Inserts",
-        "S99" : "Starter 1999",
-        "S00" : "Starter 2000",
+        u"ARC" : u"Archenemy",
+        u"CH" : u"Chronicles",
+        u"CMD" : u"Commander",
+        u"HOP" : u"Planechase",
+        u"PROMO" : u"Media Inserts",
+        u"S99" : u"Starter 1999",
+        u"S00" : u"Starter 2000",
 
-        "P1" : "Portal",
-        "P2" : "Portal Second Age",
-        "P3K" : "Portal Three Kingdoms",
+        u"P1" : u"Portal",
+        u"P2" : u"Portal Second Age",
+        u"P3K" : u"Portal Three Kingdoms",
 
         }
+TYPES = types.all | types.unimplemented
 
 
 def parse(card_info):
@@ -138,83 +138,78 @@ def parse(card_info):
 
     Any missing fields will be left out of the resulting information dict.
 
-        >>> s = ["Voltaic Key",
-        ...      "1",
-        ...      "Artifact",
-        ...      "{1}, {T}: Untap target artifact.",
-        ...      "US-U, M11-U"]
+        >>> s = [u"Voltaic Key",
+        ...      u"1",
+        ...      u"Artifact",
+        ...      u"{1}, {T}: Untap target artifact.",
+        ...      u"US-U, M11-U"]
 
-        >>> parse(s) == {"name" : "Voltaic Key",
-        ...              "types" : ["Artifact"],
-        ...              "mana_cost" : "1",
-        ...              "abilities" : ["{1}, {T}: Untap target artifact."],
-        ...              "appearances" : [("US", "U"), ("M11", "U")]}
+        >>> parse(s) == {u"name" : u"Voltaic Key",
+        ...              u"types" : [u"Artifact"],
+        ...              u"mana_cost" : u"1",
+        ...              u"abilities" : [u"{1}, {T}: Untap target artifact."],
+        ...              u"appearances" : [(u"US", u"U"), (u"M11", u"U")]}
         True
 
     Returns None if a card is parsed that is of an unimplemented type.
 
     """
 
-    card = dict(
-        types=[], supertypes=[], subtypes=[], appearances=[], abilities=[],
-        mana_cost=None, loyalty=None, power=None, toughness=None,
-    )
+    card = {
+        u"types" : set(), u"supertypes" : set(), u"subtypes" : set(),
+        u"appearances" : set(), u"abilities" : [], u"mana_cost" : None,
+        u"loyalty" : None, u"power" : None, u"toughness" : None,
+    }
 
     lines = iter(card_info)
-    card["name"] = next(lines)
+    card[u"name"] = next(lines)
     return _parse_mana_cost(next(lines), lines, card)
 
 
 def _parse_mana_cost(line, rest, card):
     # not a type line?
-    if line not in types.all | types.unimplemented and " " not in line:
-        card["mana_cost"] = line
+    if line not in TYPES and " " not in line:
+        card[u"mana_cost"] = line
         line = next(rest)
     return _parse_type_line(line, rest, card)
 
 
 def _parse_type_line(line, rest, card):
-    super_and_types, _, subtypes = line.partition(" -- ")
+    supertypes, _, subtypes = line.partition(u" -- ")
+    supertypes, sepyt, subtypes = supertypes.split(), [], subtypes.split()
 
-    if subtypes:
-        card["subtypes"] = subtypes.split()
-
-    super_and_types = iter(super_and_types.split())
-
-    for token in super_and_types:
-        if token not in types.supertypes:
-            super_and_types = itertools.chain([token], super_and_types)
+    for type in reversed(supertypes):
+        if type not in TYPES:
             break
-        card["supertypes"].append(token)
-    return _parse_types(super_and_types, rest, card)
-
-
-def _parse_types(card_types, rest, card):
-    for type in card_types:
-        if type in types.unimplemented:
+        elif type in types.unimplemented:
             return
         elif type == types.creature:
-            card["power"], card["toughness"] = next(rest).split("/")
+            card[u"power"], card[u"toughness"] = next(rest).split(u"/")
         elif type == types.planeswalker:
-            card["loyalty"] = next(rest)
+            card[u"loyalty"] = next(rest)
+        sepyt.append(supertypes.pop())
 
-        card["types"].append(type)
+    card[u"supertypes"] = set(supertypes)
+
+    if len(sepyt) == len(subtypes):
+        card[u"subtypes"] = {st for st in zip(subtypes, reversed(sepyt))}
+    else:
+        card[u"subtypes"] = {(subtype, sepyt[0]) for subtype in subtypes}
+
+    card[u"types"] = set(sepyt)
 
     return _parse_rest(rest, card)
 
 
 def _parse_rest(rest, card):
-    rest = list(rest)
-    card["appearances"] = [app.split("-") for app in rest.pop().split(", ")]
-
-    if rest:
-        card["abilities"] = rest
-
+    r = list(rest)
+    card[u"appearances"] = {tuple(a.split(u"-")) for a in r.pop().split(u", ")}
+    card[u"abilities"] = r
     return card
 
 
 def _is_new_block(line):
-    return line.isspace() or line.startswith("#")
+    return line.isspace() or line.startswith(u"#")
 
 
 def load_cards(in_file=None, _parse=parse):
@@ -224,12 +219,16 @@ def load_cards(in_file=None, _parse=parse):
     Chunks the file into blocks delimited by newlines that are parsed into
     dicts.
 
+    `in_file` is the sole public argument and should be a `codecs.open` wrapped
+    file (or some other file-like object) yielding unicode lines. The default
+    is to look for a cards file in the `DEFAULT_CARDS_FILE` location.
+
     """
 
     responsible_for_closing = False
 
     if in_file is None:
-        in_file = open(DEFAULT_CARDS_FILE)
+        in_file = codecs.open(DEFAULT_CARDS_FILE, encoding="utf-8")
         responsible_for_closing = True
 
     for from_old_block, block in itertools.groupby(in_file, key=_is_new_block):
@@ -253,47 +252,32 @@ def populate(cards_info):
 
     s = Session()
 
-    for card in cards_info:
-        appearances = card.pop("appearances")
+    sets = {c : m.Set(code=c, name=n) for c, n in SET_ABBR.iteritems()}
 
-        card["types"] = [s.query(m.Type).get(name) for name in card["types"]]
-        card["supertypes"] = [
-            s.query(m.Supertype).get(name) for name in card["supertypes"]
-        ]
-
-        # TODO: this is slightly borked in theory due to needing to match type
-        card["subtypes"] = [
-            s.query(m.Subtype).get((name, next(iter(card["types"])).name))
-            for name in card["subtypes"]
-        ]
-
-        card = m.Card(**card)
-        s.add(card)
-
-        card.sets.extend(
-            (s.query(m.Set).get(set), rarity) for set, rarity in appearances
-        )
-
-    s.commit()
-
-
-def populate_fixtures():
-    """
-    Populate the tables in the db that contain static data.
-
-    """
-
-    s = Session()
-
-    s.add_all(m.Set(code=c, name=n) for n, c in SET_ABBR.iteritems())
-
-    s.add_all(m.Type(name=type) for type in types.all)
-    s.add_all(m.Supertype(name=supertype) for supertype in types.supertypes)
+    types = {type : m.Type(name=type) for type in types.all}
+    supertypes = {st : m.Supertype(name=st) for st in types.supertypes}
+    subtypes = {}
 
     for type in types.all:
-        s.add_all(
-            m.Subtype(name=subtype, type_name=type)
-            for subtype in types.subtypes[type]
+        subtypes.update(
+            ((name, type_name), m.Subtype(name=st, type_name=type))
+            for st in types.subtypes[type]
         )
+
+    s.add_all(itertools.chain(sets, types, supertypes, subtypes))
+
+    for card in cards_info:
+        appearances = card.pop(u"appearances")
+
+        card[u"types"] = {types[type] for type in card[u"types"]}
+        card[u"supertypes"] = {supertypes[st] for st in card[u"supertypes"]}
+        card[u"subtypes"] = {subtypes[st, t] for st in card[u"subtypes"]}
+        card = m.Card(**card)
+
+        for name, rarity in appearances.iteritems():
+            set = s.query(m.Set).get(name=name)
+            card.set_appearances.add(set=set, rarity=rarity)
+
+        s.add(card)
 
     s.commit()
