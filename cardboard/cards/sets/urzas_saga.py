@@ -1,6 +1,12 @@
 from cardboard import types
-from cardboard.cards import card, common, spell, triggered, activated, static
-from cardboard.cards.common import destroy, draw_discard
+from cardboard.card import Ability
+from cardboard.cards import card, common
+
+
+spell = Ability.spell
+activated = Ability.activated
+triggered = Ability.triggered
+static = Ability.static
 
 
 @card("Brand")
@@ -8,9 +14,9 @@ def brand(card, abilities):
 
     @spell(description=abilities[0])
     def brand():
-        for card in card.game.battlefield:
-            if card.owner == card.owner:
-                card.controller = card.owner
+        for kard in card.game.battlefield:
+            if kard.owner == card.owner:
+                kard.controller = kard.owner
 
     # XXX: Cycling 2
 
@@ -35,7 +41,7 @@ def clear(card, abilities):
         target, = card.owner.frontend.select.card(
             match=lambda c : types.enchantment in c.types
         )
-        destroy(target)
+        common.destroy(target)
 
     # XXX: Cycling 2
 
@@ -77,7 +83,7 @@ def expunge(card, abilities):
                              types.artifact not in c.types and
                              "B" not in c.colors
         )
-        target.destroy()
+        common.destroy(target)
 
     # XXX: Can't Regenerate
     # XXX: Cycling 2

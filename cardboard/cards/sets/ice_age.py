@@ -1,4 +1,12 @@
-from cardboard.cards import card, common, spell, triggered, activated, static
+from cardboard import types
+from cardboard.card import Ability
+from cardboard.cards import card, common
+
+
+spell = Ability.spell
+activated = Ability.activated
+triggered = Ability.triggered
+static = Ability.static
 
 
 @card("Brainstorm")
