@@ -77,7 +77,3 @@ subtypes = {
 
 subtypes[sorcery] = subtypes[instant]
 subtypes[land] = subtypes[u"Basic Land"] | subtypes[u"Non-Basic Land"]
-
-
-def is_permanent(type):
-    return type in permanents
