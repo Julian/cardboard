@@ -7,6 +7,54 @@ from cardboard.cards import match as m
 
 
 class TestMatch(unittest.TestCase):
+    def test_and(self):
+        c = mock.Mock()
+
+        t = m.Match(name=u"foo") & m.is_creature
+
+        c.name, c.types = u"" , set()
+        self.assertFalse(t(c))
+
+        c.name = u"foo"
+        self.assertFalse(t(c))
+
+        c.types.add(u"Creature")
+        self.assertTrue(t(c))
+
+        c.types.add(u"bar")
+        self.assertTrue(t(c))
+
+    def test_invert(self):
+        c = mock.Mock()
+
+        t = ~m.Match(name=u"foo")
+
+        c.name = u"bar"
+        self.assertTrue(t(c))
+
+        c.name = u"foo"
+        self.assertFalse(t(c))
+
+    def test_or(self):
+        c = mock.Mock()
+
+        t = m.Match(lambda obj : u"Flash" in obj.abilities) | m.is_creature
+
+        c.abilities, c.types = set() , set()
+        self.assertFalse(t(c))
+
+        c.types.add(u"Creature")
+        self.assertTrue(t(c))
+
+        c.types.remove(u"Creature")
+        c.abilities.add(u"Flash")
+        self.assertTrue(t(c))
+
+        c.types.add(u"Creature")
+        self.assertTrue(t(c))
+
+
+class TestMatchers(unittest.TestCase):
     def test_has_types(self):
         c = mock.Mock()
 
@@ -57,60 +105,6 @@ class TestMatch(unittest.TestCase):
         self.assertTrue(m.is_planeswalker(c))
         self.assertTrue(m.is_sorcery(c))
 
-    def test_lacks_types(self):
-        c = mock.Mock()
-
-        t = m.lacks_types("Foo")
-        u = m.lacks_types("Foo", "Bar")
-
-        c.types = {"Foo"}
-        self.assertFalse(t(c))
-        self.assertFalse(u(c))
-
-        c.types.add("Bar")
-        self.assertFalse(t(c))
-        self.assertFalse(u(c))
-
-        c.types.remove("Foo")
-        self.assertTrue(t(c))
-        self.assertFalse(u(c))
-
-        c.types.remove("Bar")
-        self.assertTrue(t(c))
-        self.assertTrue(u(c))
-
-    def test_is_not_types(self):
-        c = mock.Mock()
-        c.types = set()
-
-        self.assertTrue(m.is_not_artifact(c))
-        self.assertTrue(m.is_not_creature(c))
-        self.assertTrue(m.is_not_enchantment(c))
-        self.assertTrue(m.is_not_instant(c))
-        self.assertTrue(m.is_not_land(c))
-        self.assertTrue(m.is_not_planeswalker(c))
-        self.assertTrue(m.is_not_sorcery(c))
-
-        c.types.update(types.permanents)
-
-        self.assertFalse(m.is_not_artifact(c))
-        self.assertFalse(m.is_not_creature(c))
-        self.assertFalse(m.is_not_enchantment(c))
-        self.assertTrue(m.is_not_instant(c))
-        self.assertFalse(m.is_not_land(c))
-        self.assertFalse(m.is_not_planeswalker(c))
-        self.assertTrue(m.is_not_sorcery(c))
-
-        c.types.update(types.nonpermanents)
-
-        self.assertFalse(m.is_not_artifact(c))
-        self.assertFalse(m.is_not_creature(c))
-        self.assertFalse(m.is_not_enchantment(c))
-        self.assertFalse(m.is_not_instant(c))
-        self.assertFalse(m.is_not_land(c))
-        self.assertFalse(m.is_not_planeswalker(c))
-        self.assertFalse(m.is_not_sorcery(c))
-
     def test_is_permanent(self):
         c = mock.Mock()
 
@@ -119,10 +113,8 @@ class TestMatch(unittest.TestCase):
 
             if type in types.permanents:
                 self.assertTrue(m.is_permanent(c))
-                self.assertFalse(m.is_nonpermanent(c))
             else:
                 self.assertFalse(m.is_permanent(c))
-                self.assertTrue(m.is_nonpermanent(c))
 
     def test_has_subtypes(self):
         c = mock.Mock()
@@ -156,3 +148,23 @@ class TestMatch(unittest.TestCase):
         c.supertypes.add(u"Basic")
         self.assertTrue(m.is_basic_land(c))
         self.assertFalse(m.is_nonbasic_land(c))
+
+    def test_is_color(self):
+        c = mock.Mock()
+        c.colors = set()
+
+        self.assertTrue(m.is_colorless(c))
+
+        for fn in m.is_white, m.is_blue, m.is_black, m.is_red, m.is_green:
+            self.assertFalse(fn(c))
+
+        c.colors.add("B")
+        self.assertTrue(m.is_black(c))
+        self.assertFalse(m.is_colorless(c))
+
+        c.colors.update("WURG")
+
+        for fn in m.is_white, m.is_blue, m.is_black, m.is_red, m.is_green:
+            self.assertTrue(fn(c))
+
+        self.assertFalse(m.is_colorless(c))

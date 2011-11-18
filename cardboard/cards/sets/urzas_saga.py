@@ -1,6 +1,6 @@
 from cardboard import types
 from cardboard.card import Ability
-from cardboard.cards import card, common
+from cardboard.cards import card, common, match
 
 
 spell = Ability.spell
@@ -38,9 +38,7 @@ def clear(card, abilities):
 
     @spell(description=abilities[0])
     def clear():
-        target, = card.owner.frontend.select.card(
-            match=lambda c : types.enchantment in c.types
-        )
+        target, = card.owner.frontend.select.card(match=match.is_enchantment)
         common.destroy(target)
 
     # XXX: Cycling 2
@@ -79,9 +77,8 @@ def expunge(card, abilities):
     @spell(description=abilities[0])
     def expunge():
         target, = card.owner.frontend.select.card(
-            match=lambda c : types.creature in c.types and
-                             types.artifact not in c.types and
-                             "B" not in c.colors
+            match=lambda c : is_creature(c) and not is_artifact(c) and not
+                             is_black(c)
         )
         common.destroy(target)
 

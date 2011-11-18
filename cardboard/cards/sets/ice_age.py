@@ -1,6 +1,6 @@
 from cardboard import types
 from cardboard.card import Ability
-from cardboard.cards import card, common
+from cardboard.cards import card, common, match
 
 
 spell = Ability.spell

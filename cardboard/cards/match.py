@@ -1,43 +1,80 @@
 from cardboard import types
 
 
-def _type_check_factory(type):
-    def has_types(*types):
-        types = set(types)
+class Match(object):
+    def __init__(self, fn=None, **predicates):
+        super(Match, self).__init__()
 
-        def _has_types(obj):
-            return types <= getattr(obj, type)
+        if fn:
+            if predicates:
+                attr_match = _attr_match(**predicates)
 
-        return _has_types
+                def _fn(obj, *args, **kwargs):
+                    return fn(obj, *args, **kwargs) and attr_match(obj)
 
-    def lacks_types(*types):
-        types = set(types)
+                self._fn = _fn
+            else:
+                self._fn = fn
+        elif predicates:
+            self._fn = _attr_match(**predicates)
+        else:
+            raise ValueError("Either a function or predicates are required.")
 
-        def _lacks_types(obj):
-            return not types & getattr(obj, type)
+    def __call__(self, *args, **kwargs):
+        return self._fn(*args, **kwargs)
 
-        return _lacks_types
+    def __and__(self, other):
+        return Match(
+            lambda *args, **kw : self._fn(*args, **kw) and other(*args, **kw)
+        )
 
-    return has_types, lacks_types
+    def __invert__(self):
+        return Match(lambda *args, **kw : not self._fn(*args, **kw))
+
+    def __or__(self, other):
+        return Match(
+            lambda *args, **kw : self._fn(*args, **kw) or other(*args, **kw)
+        )
 
 
-def _type_check(*types): return has_types(*types), lacks_types(*types)
+def _attr_match(**predicates):
+    def attr_match(obj):
+        return all(getattr(obj, k) == v for k, v in predicates.iteritems())
+    return attr_match
 
 
-has_types, lacks_types = _type_check_factory("types")
-has_subtypes, lacks_subtypes = _type_check_factory("subtypes")
-has_supertypes, lacks_supertypes = _type_check_factory("supertypes")
+def _check_factory(characteristic):
+    def has_characteristics(*characteristics):
+        characteristics = set(characteristics)
 
-is_artifact, is_not_artifact = _type_check(types.artifact)
-is_creature, is_not_creature = _type_check(types.creature)
-is_enchantment, is_not_enchantment = _type_check(types.enchantment)
-is_instant, is_not_instant = _type_check(types.instant)
-is_land, is_not_land = _type_check(types.land)
-is_planeswalker, is_not_planeswalker = _type_check(types.planeswalker)
-is_sorcery, is_not_sorcery = _type_check(types.sorcery)
+        def _has(obj):
+            return characteristics <= getattr(obj, characteristic)
 
-def is_basic_land(obj): return is_land(obj) and has_supertypes(u"Basic")(obj)
-def is_nonbasic_land(ob): return is_land(ob) and lacks_supertypes(u"Basic")(ob)
+        return Match(_has)
+    return has_characteristics
 
-def is_permanent(obj): return obj.types & types.permanents
-def is_nonpermanent(obj): return obj.types & types.nonpermanents
+
+has_colors = Match(_check_factory("colors"))
+has_types = Match(_check_factory("types"))
+has_subtypes = Match(_check_factory("subtypes"))
+has_supertypes = Match(_check_factory("supertypes"))
+
+is_white = Match(has_colors("W"))
+is_blue = Match(has_colors("U"))
+is_black = Match(has_colors("B"))
+is_red = Match(has_colors("R"))
+is_green = Match(has_colors("G"))
+is_colorless = Match(lambda o : not o.colors)
+
+is_artifact = Match(has_types(types.artifact))
+is_creature = Match(has_types(types.creature))
+is_enchantment = Match(has_types(types.enchantment))
+is_instant = Match(has_types(types.instant))
+is_land = Match(has_types(types.land))
+is_planeswalker = Match(has_types(types.planeswalker))
+is_sorcery = Match(has_types(types.sorcery))
+
+is_basic_land = is_land & has_supertypes(u"Basic")
+is_nonbasic_land = is_land & ~has_supertypes(u"Basic")
+
+is_permanent = Match(lambda obj : obj.types & types.permanents)
