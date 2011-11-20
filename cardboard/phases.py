@@ -22,6 +22,10 @@ def untap(game):
 
     game.events.trigger(event=phase_events["beginning"]["untap"]["started"])
 
+    # 1. XXX: Phase in all permanents that are phased out, and vice versa.
+    # 2. Untap all permanents XXX: that aren't being prevented from untapping.
+    # 3. No players get priority. XXX: defer triggered abils till next priority
+
     for permanent in game.turn.active_player.battlefield:
         if permanent.is_tapped:
             permanent.untap()
@@ -35,6 +39,9 @@ def upkeep(game):
 
     """
 
+    # 1. XXX: Abilities trigger.
+    # 2. The active player gets priority.
+
     game.events.trigger(event=phase_events["beginning"]["upkeep"]["started"])
     game.grant_priority()
     game.events.trigger(event=phase_events["beginning"]["upkeep"]["ended"])
@@ -45,6 +52,10 @@ def draw(game):
     Perform the :ref:`draw-step`.
 
     """
+
+    # 1. The active player draws a card.
+    # 2. XXX: Abilities trigger.
+    # 3. The active player gets priority.
 
     game.turn.active_player.draw()
     game.events.trigger(event=phase_events["beginning"]["draw"]["started"])

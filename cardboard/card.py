@@ -58,6 +58,7 @@ class Card(object):
     is_flipped, flip, unflip = _flip
     is_face_up, turn_face_up, turn_face_down = _turn
     is_phased_in, phase_in, phase_out = _phase
+    # XXX : only allow phasing / flipping / turning for stuff with those abils
 
     require = requirements(
         {"zone" : {"default" : "{self} was expected to be in a {expected.name}"
