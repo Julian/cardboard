@@ -176,7 +176,11 @@ def end(game):
 
     """
 
+    # 1. XXX: End of turn triggered abilities trigger.
+    # 2. The active player gets priority.
+
     game.events.trigger(event=phase_events["ending"]["end"]["started"])
+    game.grant_priority()
     game.events.trigger(event=phase_events["ending"]["end"]["ended"])
 
 
@@ -186,7 +190,23 @@ def cleanup(game):
 
     """
 
+    # 1. Hand size is trimmed to 7
+    # 2. XXX: All damage is removed and end of turn effects end.
+    # 3. XXX: No players get priority except for exception in rule 514.3a
+
     game.events.trigger(event=phase_events["ending"]["cleanup"]["started"])
+
+    player = game.turn.active_player
+    discard = len(player.hand) - player.hand_size
+
+    if discard > 0:
+        selection = player.frontend.select.cards(
+            zone=player.hand, how_many=discard,
+        )
+
+        for card in selection:
+            card.owner.graveyard.move(card)
+
     game.events.trigger(event=phase_events["ending"]["cleanup"]["ended"])
 
 

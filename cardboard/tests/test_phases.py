@@ -155,3 +155,47 @@ class TestPhaseMechanics(GameTestCase):
             events["game"]["turn"]["phase"]["second_main"]["started"],
             events["game"]["turn"]["phase"]["second_main"]["ended"],
         ])
+
+    def test_end(self):
+        """
+        The end step should perform the actions in :ref:`end-step`.
+
+        """
+
+        self.game.start()
+        self.game.grant_priority = mock.Mock()
+
+        p.end(self.game)
+        self.assertTrue(self.game.grant_priority.called)
+
+        self.assertTriggered([
+            events["game"]["turn"]["phase"]["ending"]["end"]["started"],
+            events["game"]["turn"]["phase"]["ending"]["end"]["ended"],
+        ])
+
+    def test_cleanup(self):
+        """
+        The cleanup step should perform the actions in :ref:`cleanup-step`.
+
+        """
+
+        self.game.start()
+
+        player = self.game.turn.active_player
+        player.frontend = TestingFrontend(player)
+        player.draw(3)
+
+        discard = list(player.hand)[:-7]
+
+        with player.frontend.select.cards.will_return(*discard):
+            p.cleanup(self.game)
+
+        for card in discard:
+            self.assertIn(card, player.graveyard)
+
+        # XXX: remove all damage
+
+        self.assertTriggered([
+            events["game"]["turn"]["phase"]["ending"]["cleanup"]["started"],
+            events["game"]["turn"]["phase"]["ending"]["cleanup"]["ended"],
+        ])

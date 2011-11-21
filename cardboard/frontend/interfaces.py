@@ -167,5 +167,3 @@ class IRunnable(Interface):
         Expected to raise an exception if the frontend is already running.
 
         """
-
-
