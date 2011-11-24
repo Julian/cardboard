@@ -7,11 +7,15 @@ import platform
 OS = platform.system()
 
 if OS == "Darwin":
-    APP_DATA = os.path.expanduser("~/Library/Application Data/Cardboard/")
+    APP_DATA = os.path.expanduser("~/Library/Application Support/Cardboard/")
+    USER_DATA = os.path.expanduser("~/Library/Cardboard")
 elif OS == "Windows":
+    # XXX
     APP_DATA = "{[APPDATA]}/Cardboard/".format(os.environ)
+    USER_DATA = "{[APPDATA]}/Cardboard/".format(os.environ)
 else:
     APP_DATA = os.path.expanduser("~/.cardboard/")
+    USER_DATA = os.path.expanduser("~/.cardboard/")
 
 DEFAULTS = {
     "general" : {
