@@ -13,78 +13,106 @@ from cardboard.db import decks as d
 class TestDeck(unittest.TestCase):
 
     deck = {
-        "name" : "Foo Deck",
-        "cards" : {"Foo" : 3, "Bar" : 2, "Baz" : 4, "Quux" : 1},
-        "sideboard" : {"Spam" : 1, "Eggs" : 1},
+        u"cards" : {u"Foo" : 3, u"Bar" : 2, u"Baz" : 4, u"Quux" : 1},
+        u"sideboard" : {u"Spam" : 1, u"Eggs" : 1},
     }
 
-    def test_parse(self):
-        s = textwrap.dedent(
-        """
-        2 Foo
-        4 Baz
-        2 Quux
-        2 Foo Bar
-        16 Spam Eggs
-        Sideboard
-        1 Hey
-        2 Bla
-        2 Foo
-        """
-        )
+    apprentice = textwrap.dedent(
+    u"""
+    // A comment
+    4 Baz
+    2 Foo
+    2 Foo Bar
+    16 Spam Eggs
 
-        self.assertEqual(d.parse(s), {
-            "name" : None,
-            "cards" : {
-                "Foo" : 2, "Baz" : 4, "Quux" : 2,
-                "Foo Bar" : 2, "Spam Eggs" : 16,
-            },
-            "sideboard" : {
-                "Hey" : 1, "Bla" : 2, "Foo" : 2,
-            },
-        })
+    SB: 2 Bla
+    SB: 2 Foo
+    SB: 1 Hey
+    """
+    ).strip()
 
-    def test_load(self):
-        c = StringIO.StringIO(json.dumps(self.deck))
-        self.assertEqual(d.load(from_file=c), self.deck)
+    mtgo = textwrap.dedent(
+    u"""
+    4 Baz
+    2 Foo
+    2 Foo Bar
+    16 Spam Eggs
 
-        # loading from default directory
-        with mock.patch("cardboard.db.decks.open", create=True) as mock_open:
-            mock_open.return_value = StringIO.StringIO(c.getvalue())
+    Sideboard
+    2 Bla
+    2 Foo
+    1 Hey
+    """
+    ).strip("\n")
 
-            with mock.patch("cardboard.db.decks.USER_DATA", "bar"):
-                self.assertEqual(d.load("foo"), self.deck)
+    export_deck = {
+        u"cards" : {
+            u"Foo" : 2, u"Baz" : 4, u"Foo Bar" : 2, u"Spam Eggs" : 16,
+        },
+        u"sideboard" : {
+            u"Hey" : 1, u"Bla" : 2, u"Foo" : 2,
+        },
+    }
 
-        path = os.path.join("bar", "Decks", "foo.deck")
-        mock_open.assert_called_once_with(path)
-
-        self.assertRaises(TypeError, d.load)
-
-    def test_save(self):
-        to = StringIO.StringIO()
+    def test_from_cards(self):
         cards = [mock.Mock(spec=Card) for _ in range(10)]
-        names = ["Foo"] * 3 + ["Bar"] * 2 + ["Baz"] * 4 + ["Quux"]
+        names = [u"Foo"] * 3 + [u"Bar"] * 2 + [u"Baz"] * 4 + [u"Quux"]
 
         sideboard = mock.Mock(), mock.Mock()
-        sideboard[0].name, sideboard[1].name = "Spam", "Eggs"
+        sideboard[0].name, sideboard[1].name = u"Spam", u"Eggs"
 
         for card, name in zip(cards, names):
             card.name = name
 
-        d.save("Foo Deck", cards, sideboard, to)
-        from_file = StringIO.StringIO(to.getvalue())
-        self.assertEqual(d.load(from_file=from_file), self.deck)
+        deck = d.from_cards(cards=cards, sideboard=sideboard)
+        self.assertEqual(deck, self.deck)
+
+    def test_export(self):
+        mtgo = self.mtgo.splitlines()
+        apprentice = self.apprentice.splitlines()[1:]  # without the comment
+
+        self.assertEqual(list(d.export(self.export_deck, format="mtgo")), mtgo)
+        self.assertEqual(
+            list(d.export(self.export_deck, format="apprentice")), apprentice
+        )
+
+    def test_load(self):
+        c = StringIO.StringIO(json.dumps(self.deck))
+        c.name = "Foo Deck.deck"
+        self.assertEqual(d.load(file=c), self.deck)
+
+        # mtgo
+        c = StringIO.StringIO(self.mtgo)
+        c.name = "Foo Deck.txt"
+        self.assertEqual(d.load(file=c), self.export_deck)
+
+        # apprentice
+        c = StringIO.StringIO(self.mtgo)
+        c.name = "Foo Deck.dec"
+        self.assertEqual(d.load(file=c), self.export_deck)
+
+        with self.assertRaises(ValueError):
+            d.load(file=c, format="invalid_thing")
+
+    def test_save(self):
+        to = StringIO.StringIO()
+
+        d.save("Foo Deck", self.deck, to)
+        in_file = StringIO.StringIO(to.getvalue())
+        in_file.name = "Foo Deck.deck"
+        self.assertEqual(d.load(file=in_file), self.deck)
 
         # saving to default directory
         with mock.patch("cardboard.db.decks.open", create=True) as mock_open:
             mock_open.return_value = mock.MagicMock(spec=file)
             mock_open.return_value.__enter__.return_value = StringIO.StringIO()
 
-            with mock.patch("cardboard.db.decks.USER_DATA", "bar"):
-                d.save("Foo Deck", cards, sideboard)
+            with mock.patch("cardboard.db.decks.DECKS_DIR", "bar"):
+                d.save("Foo Deck", self.deck)
                 to = mock_open.return_value.__enter__.return_value
-                from_file = StringIO.StringIO(to.getvalue())
+                in_file = StringIO.StringIO(to.getvalue())
+                in_file.name = "Foo Deck.deck"
 
-        self.assertEqual(d.load(from_file=from_file), self.deck)
-        path = os.path.join("bar", "Decks", "Foo Deck.deck")
+        self.assertEqual(d.load(file=in_file), self.deck)
+        path = os.path.join("bar", "Foo Deck.deck")
         mock_open.assert_called_once_with(path, "w")
