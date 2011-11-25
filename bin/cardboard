@@ -1,48 +1,21 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import argparse
-import collections
-import sys
-import textwrap
-
-import jinja2
-
-from cardboard.cards import cards
-from cardboard.db import Session
-from cardboard.db.models import Card, Set
 
 
-TEMPLATE_DIR = "."
-
-def write_coverage(cards):
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATE_DIR))
-    template = env.get_template("index.html")
-
-    with open("card_coverage.html", "w") as cc_file:
-        cc_file.write(template.render(cards=[
-            {"name" : "Island"},
-            {"name" : "Swamp"},
-            {"name" : "Multani, Maro-Sorcerer"},
-        ]))
-
-
-def check_coverage(*sets):
-    if not sets:
-        s = Session()
-        sets = s.query(Set)
-
-    for set in sets:
-        cover = u"".join(u"."  if c.name in cards else u"F" for c in set.cards)
-        yield u"\n".join([set.name, u"=" * len(set.name), u"", cover, u"\n"])
-
-
-parser = argparse.ArgumentParser(description="Cardboard's card coverage tool")
+parser = argparse.ArgumentParser(description="A Magic: The Gathering™ Client")
 subparsers = parser.add_subparsers()
 
-check = subparsers.add_parser("check", help="Check card coverage.")
-write = subparsers.add_parser("write", help="Create a card coverage report.")
+db = subparsers.add_parser(
+    "db", help="Interact with a Cardboard card database.",
+)
+db.add_argument("populate", help="Populate a new database.")
+
+coverage = subparsers.add_parser(
+    "coverage", help="Create and display card coverage reports.",
+)
+coverage.add_argument("run", help="Run the coverage tool.")
+coverage.add_argument("report", help="Output a card coverage report.")
 
 args = parser.parse_args()
-
-for coverage in check_coverage():
-    sys.stdout.write(coverage.encode("utf-8"))
