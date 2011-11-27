@@ -7,14 +7,14 @@ import unittest
 import mock
 
 from cardboard.card import Card
-from cardboard.db import decks as d
+from cardboard.db import deck as d
 
 
 class TestDeck(unittest.TestCase):
 
     deck = {
-        u"cards" : {u"Foo" : 3, u"Bar" : 2, u"Baz" : 4, u"Quux" : 1},
-        u"sideboard" : {u"Spam" : 1, u"Eggs" : 1},
+        u"cards" : {u"FOO" : 3, u"BAR" : 2, u"BAZ" : 4, u"QUUX" : 1},
+        u"sideboard" : {u"SPAM" : 1, u"EGGS" : 1},
     }
 
     apprentice = textwrap.dedent(
@@ -54,12 +54,31 @@ class TestDeck(unittest.TestCase):
         },
     }
 
+    export_deck_loaded = {
+        u"cards" : {
+            k.upper() : v for k, v in export_deck[u"cards"].iteritems()
+        },
+        u"sideboard" : {
+            k.upper() : v for k, v in export_deck[u"sideboard"].iteritems()
+        },
+    }
+
+    def setUp(self):
+        super(TestDeck, self).setUp()
+        # mock out the database queries
+        self.query_patch = mock.patch.object(d.DBCard, "query")
+        self.query = self.query_patch.start()
+        self.query.get.side_effect = lambda name : name.upper()
+
+    def tearDown(self):
+        self.query_patch.stop()
+
     def test_from_cards(self):
         cards = [mock.Mock(spec=Card) for _ in range(10)]
-        names = [u"Foo"] * 3 + [u"Bar"] * 2 + [u"Baz"] * 4 + [u"Quux"]
+        names = [u"FOO"] * 3 + [u"BAR"] * 2 + [u"BAZ"] * 4 + [u"QUUX"]
 
         sideboard = mock.Mock(), mock.Mock()
-        sideboard[0].name, sideboard[1].name = u"Spam", u"Eggs"
+        sideboard[0].name, sideboard[1].name = u"SPAM", u"EGGS"
 
         for card, name in zip(cards, names):
             card.name = name
@@ -84,17 +103,18 @@ class TestDeck(unittest.TestCase):
         # mtgo
         c = StringIO.StringIO(self.mtgo)
         c.name = "Foo Deck.txt"
-        self.assertEqual(d.load(file=c), self.export_deck)
+        self.assertEqual(d.load(file=c), self.export_deck_loaded)
 
         # apprentice
         c = StringIO.StringIO(self.mtgo)
         c.name = "Foo Deck.dec"
-        self.assertEqual(d.load(file=c), self.export_deck)
+        self.assertEqual(d.load(file=c), self.export_deck_loaded)
 
         with self.assertRaises(ValueError):
             d.load(file=c, format="invalid_thing")
 
     def test_save(self):
+        m = mock.Mock(side_effect=lambda name : name)
         to = StringIO.StringIO()
 
         d.save("Foo Deck", self.deck, to)
@@ -103,16 +123,17 @@ class TestDeck(unittest.TestCase):
         self.assertEqual(d.load(file=in_file), self.deck)
 
         # saving to default directory
-        with mock.patch("cardboard.db.decks.open", create=True) as mock_open:
+        with mock.patch("cardboard.db.deck.open", create=True) as mock_open:
             mock_open.return_value = mock.MagicMock(spec=file)
             mock_open.return_value.__enter__.return_value = StringIO.StringIO()
 
-            with mock.patch("cardboard.db.decks.DECKS_DIR", "bar"):
+            with mock.patch("cardboard.db.deck.DECKS_DIR", "bar"):
                 d.save("Foo Deck", self.deck)
                 to = mock_open.return_value.__enter__.return_value
-                in_file = StringIO.StringIO(to.getvalue())
-                in_file.name = "Foo Deck.deck"
 
+        in_file = StringIO.StringIO(to.getvalue())
+        in_file.name = "Foo Deck.deck"
         self.assertEqual(d.load(file=in_file), self.deck)
+
         path = os.path.join("bar", "Foo Deck.deck")
         mock_open.assert_called_once_with(path, "w")

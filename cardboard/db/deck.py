@@ -4,6 +4,8 @@ import json
 import os.path
 
 from cardboard.config import USER_DATA
+from cardboard.db.models import Card as DBCard
+from cardboard.card import Card
 
 
 DECKS_DIR = os.path.join(USER_DATA, "Decks")
@@ -45,7 +47,14 @@ def load(file, format=None):
         raise ValueError("Unknown format for {}".format(file.name))
 
     if format == "deck":
-        return json.load(file)
+        deck = json.load(file)
+        deck["cards"] = {
+            DBCard.query.get(n) : q for n, q in deck["cards"].iteritems()
+        }
+        deck["sideboard"] = {
+            DBCard.query.get(n) : q for n, q in deck["sideboard"].iteritems()
+        }
+        return deck
     else:
         deck = {u"cards" : {}, u"sideboard" : {}}
         put_into = deck[u"cards"]
@@ -59,8 +68,8 @@ def load(file, format=None):
             elif line == "Sideboard":
                 put_into = deck[u"sideboard"]
             else:
-                quantity, card = line.lstrip("SB: ").split(None, 1)
-                put_into[card] = int(quantity)
+                quantity, name = line.lstrip("SB: ").split(None, 1)
+                put_into[DBCard.query.get(name)] = int(quantity)
 
         return deck
 
@@ -108,3 +117,18 @@ def save(name, deck, to=None):
             json.dump(deck, f)
     else:
         json.dump(deck, to)
+
+
+def load_cards(deck):
+    """
+    Load the cards in a deck from the database.
+
+    """
+
+    loaded_deck = {u"cards" : [], u"sideboard" : []}
+
+    for k in [u"cards", u"sideboard"]:
+        for name, quantity in deck[k].iteritems():
+            card = DBCard.query.get(name)
+            loaded_deck[k].extend(Card(card) for _ in range(quantity))
+    return loaded_deck
