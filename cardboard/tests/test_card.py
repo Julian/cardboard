@@ -159,8 +159,7 @@ class TestMTGObjectFunctions(unittest.TestCase):
             "power" : o.power,
             "toughness" : o.toughness,
             "loyalty" : o.loyalty,
-            "expansion" : o.expansion,
-            "rules_text" : o.rules_text
+            # TODO: "expansion" : o.expansion,
         })
 
     def test_converted_mana_cost(self):

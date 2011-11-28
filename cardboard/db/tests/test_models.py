@@ -53,8 +53,8 @@ class TestSet(unittest.TestCase):
     def test_cards(self):
         s = m.Set()
         c = m.Card()
-        s.cards.add(c)
-        self.assertEqual(s.cards, {c})
+        s.cards.append(c)
+        self.assertEqual(s.cards, [c])
 
 
 class TestSetAppearance(unittest.TestCase):
@@ -72,9 +72,6 @@ class TestSetAppearance(unittest.TestCase):
         self.assertEqual(a.card, c)
         self.assertEqual(a.set, s)
         self.assertEqual(a.rarity, "R")
-
-    def test_invalid_rarity(self):
-        pass
 
 
 class TestType(unittest.TestCase):

@@ -69,9 +69,9 @@ class Card(object):
         super(Card, self).__init__()
 
         self.game = None
+        self.owner = None
 
         self.controller = None
-        self.owner = None
         self._zone = None
 
         for attr in {"name", "loyalty", "mana_cost",
@@ -86,6 +86,7 @@ class Card(object):
         self.power = self.base_power = db_card.power
         self.toughness = self.base_toughness = db_card.toughness
 
+        self.can_attack = True
         self.damage = 0
         self._changed_colors = set()
 
@@ -260,7 +261,7 @@ class Token(object):
             abilities = {}
 
         self.name = name
-        self.mana_cost = str(mana_cost)
+        self.mana_cost = mana_cost
         self.colors = set(colors)
         self.abilities = list(abilities)
         self.types = set(types)
@@ -271,34 +272,25 @@ class Token(object):
     @classmethod
     def from_card(cls, card, **new_characteristics):
         card_chars = characteristics(card)
-
-        # tokens don't have expansions or rules text
-        card_chars.pop("expansion")
-        card_chars.pop("rules_text")
-
         card_chars.update(**new_characteristics)
         return cls(**card_chars)
 
 
 def characteristics(object_):
     """
-    Get the :ref:`characteristics` of a M:TG :term:`object`.
+    Get the :ref:`characteristics` of an M:TG :term:`object`.
 
     """
 
     CHARS = ["name", "mana_cost", "colors", "types", "subtypes", "supertypes",
              "abilities", "power", "toughness", "loyalty"]
 
-    chars = {c : getattr(object_, c) for c in CHARS}
-    chars["expansion"] = getattr(object_, "expansion", "")
-    chars["rules_text"] = getattr(object_, "rules_text", "")
-
-    return chars
+    return {c : getattr(object_, c, None) for c in CHARS}
 
 
 def converted_mana_cost(object_):
     """
-    Calculate the :term:`converted mana cost` of a M:TG :term:`object`.
+    Calculate the :term:`converted mana cost` of an M:TG :term:`object`.
 
     """
 

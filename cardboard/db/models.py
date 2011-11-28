@@ -53,17 +53,13 @@ class Card(Base):
     )
 
     subtype_objects = relationship(
-        "Subtype", secondary=card_subtype,
-        collection_class=set, backref=backref(
-            "cards", lazy="dynamic", collection_class=set,
-        ),
+        "Subtype", secondary=card_subtype, collection_class=set,
+        backref=backref("cards", lazy="dynamic", collection_class=set),
     )
 
     supertype_objects = relationship(
-        "Supertype", secondary=card_supertype,
-        collection_class=set, backref=backref(
-            "cards", lazy="dynamic", collection_class=set,
-        ),
+        "Supertype", secondary=card_supertype, collection_class=set,
+        backref=backref("cards", lazy="dynamic", collection_class=set),
     )
 
     ability_objects = relationship("Ability",
@@ -116,19 +112,20 @@ class SetAppearance(Base):
 
     rarity = Column(Unicode(1))
 
-    card = relationship(
-        Card, backref=backref(
+    card = relationship(Card,
+        backref=backref(
             "set_appearances",
             collection_class=set,
             cascade="all, delete-orphan"
         )
     )
 
-    set = relationship(
-        Set, backref=backref(
+    set = relationship(Set,
+        backref=backref(
             "card_appearances",
-            collection_class=set,
-            cascade="all, delete-orphan"
+            collection_class=set,  # XXX: this is overwritten by lazy=dynamic
+            cascade="all, delete-orphan",
+            lazy="dynamic",
         )
     )
 

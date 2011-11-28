@@ -14,6 +14,20 @@ __all__ = ["ANY", "do_subscriptions", "log_events", "requirements"]
 ANY = lambda _ : True
 
 
+def populate(d):
+    """
+    Create a decorator that populates a given dict-like object by name.
+
+    """
+
+    def populator(name):
+        def populated(fn):
+            d[name] = fn
+            return fn
+        return populated
+    return populator
+
+
 def do_subscriptions(self, game=None):
     """
     Subscribe any of the class' instance methods to events.
