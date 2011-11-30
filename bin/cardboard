@@ -3,6 +3,8 @@
 
 import argparse
 
+from cardboard.db import populate
+
 
 parser = argparse.ArgumentParser(description="A Magic: The Gathering™ Client")
 subparsers = parser.add_subparsers()

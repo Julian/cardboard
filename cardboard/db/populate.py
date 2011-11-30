@@ -236,7 +236,7 @@ def load_cards(in_file=None, _parse=parse):
         in_file.close()
 
 
-def populate(cards_info):
+def populate(cards_info, session=Session):
     """
     Populate the database using a collection of cards.
 
@@ -245,7 +245,7 @@ def populate(cards_info):
 
     """
 
-    s = Session()
+    s = session()
 
     sts = itertools.chain.from_iterable(types.subtypes.itervalues())
 

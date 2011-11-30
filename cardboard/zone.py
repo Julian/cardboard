@@ -8,7 +8,6 @@ __all__ = ["UnorderedZone", "OrderedZone", "zone"]
 
 
 # TODO: Clarify / make zone operations atomic
-#       Write a Mixin
 
 
 def _zone(name):
