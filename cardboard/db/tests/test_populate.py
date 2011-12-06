@@ -156,7 +156,7 @@ class TestParser(unittest.TestCase):
             m.return_value = mock.MagicMock(spec=file)
             cards = list(p.load_cards(_parse=mock.Mock()))
 
-        m.assert_called_once_with(u"cards.txt", encoding=u"utf-8")
+        m.assert_called_once_with(p.DEFAULT_CARDS_FILE, encoding="utf-8")
         self.assertTrue(m.return_value.close.called)
 
 

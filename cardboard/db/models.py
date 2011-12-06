@@ -1,6 +1,6 @@
 import os.path
 
-from sqlalchemy import Column, ForeignKey, Integer, Table, Unicode
+from sqlalchemy import Column, Date, ForeignKey, Integer, Table, Unicode
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import backref, reconstructor, relationship
 from sqlalchemy.orm.collections import attribute_mapped_collection
@@ -96,6 +96,7 @@ class Set(Base):
 
     code = Column(Unicode(5), primary_key=True)
     name = Column(Unicode, nullable=False, unique=True)
+    released = Column(Date, nullable=False)
 
     cards = association_proxy(
         "card_appearances", "card", creator=lambda c : SetAppearance(card=c),
@@ -104,13 +105,34 @@ class Set(Base):
     def __repr__(self):
         return "<Set Model: {.name}>".format(self)
 
+    @property
+    def new_cards(self):
+        """
+        The cards that first appear in this set, and not in any earlier one.
+
+        """
+
+        # XXX: this is assuredly not the best way to do these two things
+        return set(self.cards) - set(self.reprints)
+
+    @property
+    def reprints(self):
+        """
+        The cards that were reprinted from earlier sets.
+
+        """
+
+        return Card.query.filter(
+            Card.sets.contains(self) &
+            Card.sets.any(Set.released < self.released)
+        )
+
 
 class SetAppearance(Base):
 
     card_name = Column(Integer, ForeignKey("card.name"), primary_key=True)
     set_code = Column(Integer, ForeignKey("set.code"), primary_key=True)
-
-    rarity = Column(Unicode(1))
+    rarity = Column(Unicode(1), primary_key=True)
 
     card = relationship(Card,
         backref=backref(
@@ -130,7 +152,9 @@ class SetAppearance(Base):
     )
 
     def __repr__(self):
-        return "<{0.card.name} ({0.set.code}-{0.rarity})>".format(self)
+        name = getattr(self.card, "name", None)
+        code = getattr(self.set, "code", None)
+        return "<{} ({}-{.rarity})>".format(name, code, self)
 
 
 class Type(Base):
