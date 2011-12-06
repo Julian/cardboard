@@ -60,7 +60,7 @@ class TestAbility(GameTestCase):
         self.assertEqual(a.type, "static")
 
     def test_not_implemented(self):
-        n = c.Ability.NotImplemented
+        n = c.AbilityNotImplemented
         self.assertEqual(repr(n), "<Ability Not Implemented>")
         with self.assertRaises(exceptions.NotImplemented):
             n()

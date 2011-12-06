@@ -3,10 +3,8 @@ This module implements the Magic: The Gathering game :term:`objects`.
 
 """
 
-import functools
-
 from cardboard import exceptions, types
-from cardboard.ability import Ability
+from cardboard.ability import AbilityNotImplemented
 from cardboard.cards import cards
 from cardboard.db import models, Session
 from cardboard.events import events
@@ -82,7 +80,7 @@ class Card(object):
         if self.name in _cards:
             self.abilities = _cards[self.name](self, db_card.abilities)
         else:
-            self.abilities = [Ability.NotImplemented] * len(db_card.abilities)
+            self.abilities = [AbilityNotImplemented] * len(db_card.abilities)
 
         self.power = self.base_power = db_card.power
         self.toughness = self.base_toughness = db_card.toughness

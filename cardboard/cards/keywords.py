@@ -1,4 +1,4 @@
-from cardboard.card import Ability
+from cardboard.ability import AbilityNotImplemented
 from cardboard.util import populate
 
 abilities = {}
@@ -7,7 +7,7 @@ ability = populate(abilities)
 
 @ability(name="Deathtouch")
 def deathtouch(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Defender")
@@ -17,434 +17,434 @@ def defender(card):
 
 @ability(name="Double Strike")
 def double_strike(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Enchant")
 def enchant(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Equip")
 def equip(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="First Strike")
 def first_strike(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Flash")
 def flash(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Flying")
 def flying(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Haste")
 def haste(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Hexproof")
 def hexproof(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Intimidate")
 def intimidate(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Landwalk")
 def landwalk(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Lifelink")
 def lifelink(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Protection")
 def protection(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Reach")
 def reach(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Shroud")
 def shroud(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Trample")
 def trample(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Vigilance")
 def vigilance(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Banding")
 def banding(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Rampage")
 def rampage(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Cumulative Upkeep")
 def cumulative_upkeep(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Flanking")
 def flanking(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Phasing")
 def phasing(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Buyback")
 def buyback(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Shadow")
 def shadow(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Cycling")
 def cycling(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Echo")
 def echo(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Horsemanship")
 def horsemanship(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Fading")
 def fading(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Kicker")
 def kicker(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Flashback")
 def flashback(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Madness")
 def madness(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Fear")
 def fear(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Morph")
 def morph(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Amplify")
 def amplify(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Provoke")
 def provoke(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Storm")
 def storm(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Affinity")
 def affinity(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Entwine")
 def entwine(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Modular")
 def modular(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Sunburst")
 def sunburst(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Bushido")
 def bushido(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Soulshift")
 def soulshift(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Splice")
 def splice(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Offering")
 def offering(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Ninjutsu")
 def ninjutsu(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Epic")
 def epic(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Convoke")
 def convoke(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Dredge")
 def dredge(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Transmute")
 def transmute(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Bloodthirst")
 def bloodthirst(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Haunt")
 def haunt(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Replicate")
 def replicate(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Forecast")
 def forecast(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Graft")
 def graft(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Recover")
 def recover(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Ripple")
 def ripple(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Split Second")
 def split_second(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Suspend")
 def suspend(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Vanishing")
 def vanishing(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Absorb")
 def absorb(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Aura Swap")
 def aura_swap(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Delve")
 def delve(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Fortify")
 def fortify(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Frenzy")
 def frenzy(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Gravestorm")
 def gravestorm(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Poisonous")
 def poisonous(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Transfigure")
 def transfigure(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Champion")
 def champion(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Changeling")
 def changeling(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Evoke")
 def evoke(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Hideaway")
 def hideaway(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Prowl")
 def prowl(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Reinforce")
 def reinforce(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Conspire")
 def conspire(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Persist")
 def persist(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Wither")
 def wither(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Retrace")
 def retrace(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Devour")
 def devour(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Exalted")
 def exalted(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Unearth")
 def unearth(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Cascade")
 def cascade(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Annihilator")
 def annihilator(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Level Up")
 def level_up(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Rebound")
 def rebound(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Totem Armor")
 def totem_armor(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Infect")
 def infect(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Battle Cry")
 def battle_cry(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented
 
 
 @ability(name="Living Weapon")
 def living_weapon(card):
-    return Ability.NotImplemented
+    return AbilityNotImplemented

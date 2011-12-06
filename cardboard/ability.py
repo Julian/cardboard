@@ -3,7 +3,10 @@ import functools
 from cardboard import exceptions
 
 
-__all__ = ["Ability", "spell", "activated", "triggered", "static"]
+__all__ = [
+    "Ability", "AbilityNotImplemented",
+    "spell", "activated", "triggered", "static"
+]
 
 
 class _AbilityNotImplemented(object):
@@ -14,10 +17,12 @@ class _AbilityNotImplemented(object):
         return "<Ability Not Implemented>"
 
 
+AbilityNotImplemented = _AbilityNotImplemented()
+
+
 class Ability(object):
 
     TYPES = frozenset({"spell", "activated", "triggered", "static"})
-    NotImplemented = _AbilityNotImplemented()
 
     def __init__(self, action, description, type):
         super(Ability, self).__init__()
