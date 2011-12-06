@@ -53,10 +53,11 @@ subtypes = {
         u"Surrakar", u"Survivor", u"Tetravite", u"Thalakos", u"Thopter",
         u"Thrull", u"Treefolk", u"Triskelavite", u"Troll", u"Turtle",
         u"Unicorn", u"Vampire", u"Vedalken", u"Viashino", u"Volver", u"Wall",
-        u"Warrior", u"Weird", u"Whale", u"Wizard", u"Wolf", u"Wolverine",
-        u"Wombat", u"Worm", u"Wraith", u"Wurm", u"Yeti", u"Zombie", u"Zubera"
+        u"Warrior", u"Weird", u"Werewolf", u"Whale", u"Wizard", u"Wolf",
+        u"Wolverine", u"Wombat", u"Worm", u"Wraith", u"Wurm", u"Yeti",
+        u"Zombie", u"Zubera"
     }),
-    enchantment : frozenset({u"Aura", u"Shrine"}),
+    enchantment : frozenset({u"Aura", u"Curse", u"Shrine"}),
     instant : frozenset({u"Arcane", u"Trap"}),
 
     u"Basic Land" : frozenset({
