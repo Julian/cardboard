@@ -9,10 +9,17 @@ from cardboard.db import populate
 parser = argparse.ArgumentParser(description="A Magic: The Gathering™ Client")
 subparsers = parser.add_subparsers()
 
+
+def do_db(args):
+    if args.populate:
+        populate.populate(populate.load_cards())
+
+
 db = subparsers.add_parser(
     "db", help="Interact with a Cardboard card database.",
 )
 db.add_argument("populate", help="Populate a new database.")
+db.set_defaults(func=do_db)
 
 coverage = subparsers.add_parser(
     "coverage", help="Create and display card coverage reports.",
@@ -21,3 +28,4 @@ coverage.add_argument("run", help="Run the coverage tool.")
 coverage.add_argument("report", help="Output a card coverage report.")
 
 args = parser.parse_args()
+args.func(args)
