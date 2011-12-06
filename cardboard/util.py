@@ -3,29 +3,21 @@ Utilities of use for the creation of game objects.
 
 """
 
+from csv import DictReader, reader
+from string import punctuation
+
 from twisted.python import log
 
 from cardboard import exceptions
 
 
-__all__ = ["ANY", "do_subscriptions", "log_events", "requirements"]
+__all__ = [
+    "ANY",
+    "do_subscriptions", "log_events", "populate", "requirements", "sanitize"
+]
 
 
 ANY = lambda _ : True
-
-
-def populate(d):
-    """
-    Create a decorator that populates a given dict-like object by name.
-
-    """
-
-    def populator(name):
-        def populated(fn):
-            d[name] = fn
-            return fn
-        return populated
-    return populator
 
 
 def do_subscriptions(self, game=None):
@@ -45,6 +37,20 @@ def do_subscriptions(self, game=None):
 
 def log_events(game):
     pass
+
+
+def populate(d):
+    """
+    Create a decorator that populates a given dict-like object by name.
+
+    """
+
+    def populator(name):
+        def populated(fn):
+            d[name] = fn
+            return fn
+        return populated
+    return populator
 
 
 def requirements(messages=None):
@@ -114,3 +120,41 @@ def requirements(messages=None):
                                                    msg=msg)
 
     return require
+
+
+def sanitize(s, ignore_case=True):
+    """
+    Sanitize a str so that it's suitable for use as a file name or identifier.
+
+    Typically used on Card and Set names.
+
+    """
+
+    if ignore_case:
+        s = s.lower()
+
+    return "".join(c for c in s if c not in punctuation).replace(" ", "_")
+
+
+def unicode_csv_reader(f, reader=reader, **kwargs):
+    """
+    Take a `codecs.open` wrapped file-like object and make csv not suck.
+
+    """
+
+    encoding = f.encoding
+    csv_reader = reader((line.encode(encoding) for line in f), **kwargs)
+
+    # hey cool I am lazy
+    if reader is DictReader:
+        def decode(row):
+            return {
+                k.decode(encoding) : v.decode(encoding)
+                for k, v in row.iteritems()
+            }
+    else:
+        def decode(row):
+            return tuple(field.decode(encoding) for field in row)
+
+    for row in csv_reader:
+        yield decode(row)
