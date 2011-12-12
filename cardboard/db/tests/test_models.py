@@ -36,8 +36,8 @@ class TestCard(unittest.TestCase):
     def test_sets(self):
         c = m.Card()
         s = m.Set()
-        c.sets.add(s)
-        self.assertEqual(c.sets, {s})
+        c.sets[s] = u"R"
+        self.assertEqual(c.sets, {s : u"R"})
 
 
 class TestSet(unittest.TestCase):
@@ -53,8 +53,8 @@ class TestSet(unittest.TestCase):
     def test_cards(self):
         s = m.Set()
         c = m.Card()
-        s.cards.append(c)
-        self.assertEqual(s.cards, [c])
+        s.cards[c] = u"R"
+        self.assertEqual(s.cards, {c : u"R"})
 
 
 class TestSetAppearance(unittest.TestCase):

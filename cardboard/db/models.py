@@ -1,9 +1,10 @@
-import os.path
+from operator import attrgetter
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, Table, Unicode
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import backref, reconstructor, relationship
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.orm.collections import MappedCollection
+from sqlalchemy.util import OrderedDict
 
 from cardboard.db import Base, Session
 
@@ -29,6 +30,12 @@ card_supertype = Table("card_supertype", Base.metadata,
         "supertype", Unicode, ForeignKey("supertype.name"), primary_key=True
     ),
 )
+
+
+class OrderedMappedCollection(OrderedDict, MappedCollection):
+    def __init__(self, keyfunc, *args, **kwargs):
+        MappedCollection.__init__(self, keyfunc=keyfunc)
+        OrderedDict.__init__(self, *args, **kwargs)
 
 
 class Ability(Base):
@@ -85,11 +92,24 @@ class Card(Base):
     loyalty = Column(Integer)
 
     sets = association_proxy(
-        "set_appearances", "set", creator=lambda s : SetAppearance(set=s)
+        "set_appearances", "rarity",
+        creator=lambda s, r : SetAppearance(set=s, rarity=r)
     )
 
     def __repr__(self):
         return "<Card Model: {.name}>".format(self)
+
+    @property
+    def first_appeared_in(self):
+        # XXX: I don't know how to properly do the order_by using SQLAlchemy
+        #      yet. See here for an example:
+        #      https://groups.google.com/forum/#!topic/sqlalchemy/cQ_Y2gJWj28 
+        return min(self.sets, key=attrgetter("released"))
+
+    @property
+    def last_appeared_in(self):
+        # XXX
+        return max(self.sets, key=attrgetter("released"))
 
 
 class Set(Base):
@@ -99,7 +119,8 @@ class Set(Base):
     released = Column(Date, nullable=False)
 
     cards = association_proxy(
-        "card_appearances", "card", creator=lambda c : SetAppearance(card=c),
+        "card_appearances", "rarity",
+        creator=lambda c, r : SetAppearance(card=c, rarity=r),
     )
 
     def __repr__(self):
@@ -112,8 +133,9 @@ class Set(Base):
 
         """
 
-        # XXX: this is assuredly not the best way to do these two things
-        return set(self.cards) - set(self.reprints)
+        # XXX: Once this is worked out on the Card model there will probably be
+        #      a better way to do it here too.
+        return {card for card in self.cards if card.first_appeared_in == self}
 
     @property
     def reprints(self):
@@ -122,10 +144,7 @@ class Set(Base):
 
         """
 
-        return Card.query.filter(
-            Card.sets.contains(self) &
-            Card.sets.any(Set.released < self.released)
-        )
+        return {card for card in self.cards if card.first_appeared_in != self}
 
 
 class SetAppearance(Base):
@@ -137,17 +156,21 @@ class SetAppearance(Base):
     card = relationship(Card,
         backref=backref(
             "set_appearances",
-            collection_class=set,
-            cascade="all, delete-orphan"
+            cascade="all, delete-orphan",
+            collection_class=(
+                lambda : OrderedMappedCollection(attrgetter("set"))
+            ),
         )
     )
 
     set = relationship(Set,
         backref=backref(
             "card_appearances",
-            collection_class=set,  # XXX: this is overwritten by lazy=dynamic
             cascade="all, delete-orphan",
-            lazy="dynamic",
+            order_by=set_code,
+            collection_class=(
+                lambda : OrderedMappedCollection(attrgetter("card"))
+            ),
         )
     )
 
