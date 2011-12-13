@@ -137,3 +137,21 @@ class TestDeck(unittest.TestCase):
 
         path = os.path.join("bar", "Foo Deck.deck")
         mock_open.assert_called_once_with(path, "w")
+
+    def test_load_cards(self):
+        c = mock.Mock(), mock.Mock()
+        s = {mock.Mock() : 4}
+        c[0].abilities = c[1].abilities = next(iter(s)).abilities = []
+
+        m = {"cards" : dict(zip(c, range(2, 4))), "sideboard" : s}
+        loaded = d.load_cards(m)
+
+        self.assertEqual(
+            sorted(card.name for card in loaded["cards"]),
+            sorted(card.name for card in [c[0], c[0], c[1], c[1], c[1]]),
+        )
+
+        self.assertEqual(
+            sorted(card.name for card in loaded["sideboard"]),
+            sorted(card.name for card in [next(iter(s))] * 4),
+        )

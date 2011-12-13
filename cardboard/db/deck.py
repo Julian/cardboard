@@ -123,12 +123,24 @@ def load_cards(deck):
     """
     Load the cards in a deck from the database.
 
+        >>> load_cards({
+        ...     "cards" : {
+        ...         <Card Model: Foo> : 2,
+        ...         <Card Model: Bar> : 1,
+        ...         <Card Model: Baz> : 4,
+        ...     },
+        ...     "sideboard" : {
+        ...         <Card Model: Foo> : 2,
+        ...     }
+        ... })
+        {
+            "cards" : [<Foo>, <Foo>, <Bar>, <Baz>, <Baz>, <Baz>, <Baz>],
+            "sideboard : [<Foo>, <Foo>]
+        }
+
     """
 
-    loaded_deck = {u"cards" : [], u"sideboard" : []}
-
-    for k in [u"cards", u"sideboard"]:
-        for name, quantity in deck[k].iteritems():
-            card = DBCard.query.get(name)
-            loaded_deck[k].extend(Card(card) for _ in range(quantity))
-    return loaded_deck
+    return {
+        k : {Card(c) for c, q in v.iteritems() for _ in range(q)}
+        for k, v in deck.iteritems()
+    }
