@@ -119,11 +119,11 @@ def save(name, deck, to=None):
         json.dump(deck, to)
 
 
-def load_cards(deck):
+def to_library(deck):
     """
-    Load the cards in a deck from the database.
+    Instantiate a deck suitably for using as a Player's library.
 
-        >>> load_cards({
+        >>> to_library({
         ...     "cards" : {
         ...         <Card Model: Foo> : 2,
         ...         <Card Model: Bar> : 1,

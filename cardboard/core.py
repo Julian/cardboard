@@ -4,7 +4,7 @@ Cardboard core
 """
 
 from collections import deque
-import random
+from random import shuffle
 
 from cardboard import exceptions, types
 from cardboard.events import events
@@ -443,7 +443,7 @@ class TurnManager(object):
 
     def _start(self):
         self.order = deque(self.game.players)
-        random.shuffle(self.order)
+        shuffle(self.order)
         self.step(self.game)
 
     def next(self):
