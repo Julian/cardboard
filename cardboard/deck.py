@@ -3,9 +3,9 @@ import glob
 import json
 import os.path
 
+from cardboard.card import Card
 from cardboard.config import USER_DATA
 from cardboard.db.models import Card as DBCard
-from cardboard.card import Card
 
 
 DECKS_DIR = os.path.join(USER_DATA, "Decks")
@@ -141,6 +141,6 @@ def load_cards(deck):
     """
 
     return {
-        k : {Card(c) for c, q in v.iteritems() for _ in range(q)}
+        k : [Card(c) for c, q in v.iteritems() for _ in range(q)]
         for k, v in deck.iteritems()
     }

@@ -7,7 +7,7 @@ import unittest
 import mock
 
 from cardboard.card import Card
-from cardboard.db import deck as d
+from cardboard import deck as d
 
 
 class TestDeck(unittest.TestCase):
@@ -123,11 +123,11 @@ class TestDeck(unittest.TestCase):
         self.assertEqual(d.load(file=in_file), self.deck)
 
         # saving to default directory
-        with mock.patch("cardboard.db.deck.open", create=True) as mock_open:
+        with mock.patch(d.__name__ + ".open", create=True) as mock_open:
             mock_open.return_value = mock.MagicMock(spec=file)
             mock_open.return_value.__enter__.return_value = StringIO.StringIO()
 
-            with mock.patch("cardboard.db.deck.DECKS_DIR", "bar"):
+            with mock.patch(d.__name__ + ".DECKS_DIR", "bar"):
                 d.save("Foo Deck", self.deck)
                 to = mock_open.return_value.__enter__.return_value
 
