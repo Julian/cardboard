@@ -10,6 +10,7 @@ dist
 MANIFEST
 
 .coverage
+.coveragerc
 coverage
 htmlcov
 
