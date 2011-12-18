@@ -163,16 +163,16 @@ class UrwidInfoDisplay(object):
 
     @property
     def turn(self):
-        if self.game.started:
-            info = (
-                urwid.Text(ps, align="center")
-                for ps in self._turn.info if ps is not None
-            )
-        else:
-            info = [
-                urwid.Text(u"Beginning", align="center"),
-                urwid.Text(u"Untap", align="center")
-            ]  # XXX
+        phase, step = (
+            self._turn.info if self.game.started else (u"Beginning", u"Untap")
+        )
+        info = [
+            urwid.Text(u"Current Turn", align="center"),
+            urwid.Text(u"Phase: " + phase)
+        ]
+
+        if step is not None:
+            info.append(urwid.Text(u"Step:  " + step))
 
         return urwid.Filler(urwid.Pile(info))
 

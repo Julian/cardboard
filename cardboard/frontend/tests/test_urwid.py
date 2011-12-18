@@ -87,17 +87,17 @@ class TestUrwidInfoDisplay(unittest.TestCase):
         # start on untap step even when the game hasn't started yet
         self.frontend.game.turn.info = None
         self.frontend.game.started = False
-        turn = [w.text for w in self.i.turn.base_widget.widget_list]
-        self.assertEqual(turn, ["Beginning", "Untap"])
+        turn = [w.text for w in self.i.turn.base_widget.widget_list[1:]]
+        self.assertEqual(turn, ["Phase: Beginning", "Step:  Untap"])
 
         self.frontend.game.started = True
         self.frontend.game.turn.info = "Foo", "Bar"
-        turn = [w.text for w in self.i.turn.base_widget.widget_list]
-        self.assertEqual(turn, ["Foo", "Bar"])
+        turn = [w.text for w in self.i.turn.base_widget.widget_list[1:]]
+        self.assertEqual(turn, ["Phase: Foo", "Step:  Bar"])
 
         self.frontend.game.turn.info = "Foo", None
-        turn = [w.text for w in self.i.turn.base_widget.widget_list]
-        self.assertEqual(turn, ["Foo"])
+        turn = [w.text for w in self.i.turn.base_widget.widget_list[1:]]
+        self.assertEqual(turn, ["Phase: Foo"])
 
 
 class TestUrwidSelector(unittest.TestCase):
