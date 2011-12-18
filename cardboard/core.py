@@ -292,9 +292,9 @@ class Player(object):
     require = requirements({"dead" : {True : "{self} is dead.",
                                       False : "{self} is alive."}})
 
-    def __init__(self, game, library, name=""):
+    def __init__(self, game, library, frontend=NoFrontend, name=""):
         self.game = game
-        self.frontend = NoFrontend(self)
+        self.frontend = frontend(self)
         self.name = name
 
         self.death_by = None
