@@ -39,14 +39,24 @@ def log_events(game):
     pass
 
 
-def populate(d):
+def populate(d, allow_overwrite=True):
     """
     Create a decorator that populates a given dict-like object by name.
+
+    Arguments
+    ---------
+
+    * d: a dict-like object to populate
+    * allow_overwrite: if False, raise a ValueError if d already has an
+                       existing such key (default=True)
 
     """
 
     def populator(name):
         def populated(fn):
+            if not allow_overwrite and name in d:
+                raise ValueError("'{}' is already present".format(name))
+
             d[name] = fn
             return fn
         return populated
