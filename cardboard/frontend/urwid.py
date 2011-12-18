@@ -1,26 +1,30 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
+from zope.interface import implements
 import urwid
 
-from cardboard.frontend import util
+from cardboard.frontend import interfaces
+from cardboard.frontend.mixin import FrontendMixin, validate_selection
+from cardboard.frontend.util import type_line
+from cardboard.util import ANY
 
 
-# TODO: Configure mana costs symbols via configparser
-#                 display name, abilities
-#       animated panes
-#       highlight currently selected player in sidebar
-#       don't show player changer if only one team member
+_ = urwid.AttrMap
 
+ROUND_CORNERS = {
+    "tlcorner" : u"╭", "trcorner" : u"╮", "blcorner" : u"╰", "brcorner" : u"╯"
+}
 
-ROUND_CORNERS = {"tlcorner" : urwid.Text(u"╭"), "trcorner" : urwid.Text(u"╮"),
-                 "blcorner" : urwid.Text(u"╰"), "brcorner" : urwid.Text(u"╯")}
-
+NAME_CORNERS = {
+    "tline" : u"_", "bline" : u"‾", "lline" : u"❲", "rline" : u"❳",
+    "tlcorner" : u"", "trcorner" : u"", "blcorner" : u"", "brcorner" : u"",
+}
 
 palette = [
     ("default", "default", "default"),
 
-    ("battlefield", "black", "dark gray"),
+    ("battlefield", "default", "default"),
     ("sidebar", "light gray", "black"),
 
     ("W", "white", "default"),
@@ -51,359 +55,193 @@ palette = [
 
     ("in focus", "black", "dark gray"),
 
-    ("dialog frame", "black", "light blue"),
-    ("dialog", "black", "dark gray"),
+    ("overlay frame", "black", "light blue"),
+    ("overlay", "black", "dark gray"),
 ]
-
-
-class UrwidFrontend(object):
-    def __init__(self, to):
-        super(UrwidFrontend, self).__init__()
-
-        # XXX: Remove, debug
-        to.game.start()
-        to.game.battlefield.move(list(to.hand)[0])
-        to.game.battlefield.move(list(to.hand)[0])
-        to.game.battlefield.move(list(list(to.opponents)[0].hand)[0])
-
-        self._debug = False
-
-        self.game = to.game
-        self.player = to
-
-        self.layout = Layout(self)
-        self.loop = None
-
-    def __repr__(self):
-        return "<UrwidFrontend to {.name}>".format(self.player)
-
-    def priority_granted(self):
-        pass
-
-    def prompt(self, *args, **kwargs):
-        return self.layout.prompt(*args, **kwargs)
-
-    def select_range(self, start, stop, how_many=1):
-        pass
-
-    def select_cards(*matchers, **kwargs):
-        pass
-
-    def select_players(*matchers, **kwargs):
-        pass
-
-    def run(self):
-        self.loop = urwid.MainLoop(self.layout.frame,
-                                   palette=palette,
-                                   unhandled_input=self.layout.unhandled_input)
-
-        self.loop.screen.set_terminal_properties(colors=256)
-        self.loop.run()
-
-    def card_info(self, card):
-        return self.layout.card_info(card)
 
 
 class Layout(object):
     def __init__(self, frontend):
-        super(Layout, self).__init__()
-
         self.frontend = frontend
 
-        self.active_card = Card(next(iter(self.frontend.player.hand)))
-        self.sidebar = sidebar(self)
+        self.active_card = None
+        self._show_sidebar = True
 
-        self.top = urwid.Columns([
-            PlayerPane(player, top=True) for player in self.top_players
+        self.sidebar = _(urwid.Pile([
+            ("weight", .4, self.active_card_widget),
+            ("weight", .6, self.frontend.info.turn),
+        ]), "sidebar")
+
+        self.battlefield = _(urwid.Pile([]), "battlefield")
+
+        self._columns = urwid.Columns([
+            ("weight", .25, self.sidebar), ("weight", .75, self.battlefield),
         ])
 
-        notifications = urwid.Text("Notifications", align="center")
-        self.notification_area = urwid.Filler(notifications)
+        self.frame = urwid.Frame(self._columns)
 
-        self.bottom = urwid.Columns([
-            PlayerPane(player, top=False) for player in self.bottom_players
-        ])
+        self.loop = urwid.MainLoop(
+            self.frame,
+            palette=palette,
+            unhandled_input=self.unhandled_input,
+            event_loop=urwid.TwistedEventLoop(),
+        )
 
-        field = urwid.Pile([self.top, self.notification_area, self.bottom])
-        self.battlefield = pad(field, 2)
+        self.loop.screen.set_terminal_properties(colors=256)
 
-        self.columns = urwid.Columns([("weight", .25, self.sidebar),
-                                      ("weight", 1, self.battlefield)])
+    def run(self):
+        """
+        Enter the main loop.
 
-        self.frame = urwid.Frame(self.columns)
+        """
+
+        self.loop.run()
 
     @property
-    def top_players(self):
-        opponents = self.frontend.player.opponents
-        return [p for p in self.frontend.game.turn.order if p in opponents]
+    def active_card_widget(self):
+        if self.active_card is None:
+            return urwid.Filler(urwid.Divider())
+        return self.active_card
 
     @property
-    def bottom_players(self):
-        team = self.frontend.player.team
-        return [p for p in self.frontend.game.turn.order if p in team]
+    def show_sidebar(self):
+        return self._show_sidebar
 
-    def unhandled_input(self, key):
-        if key in {"q", "Q"}:
-            raise urwid.ExitMainLoop()
-        elif key in {"o", "O"}:
-            class VoltaicKey(object):
-                name = u"Voltaic Key"
-                mana_cost = u"2WUUBRRRG"
-                type = u"Artifact"
-                subtypes = set()
-                power = toughness = 1
-                abilities = [u"1, T: Untap target artifact."]
-                colors = set()
+    @show_sidebar.setter
+    def show_sidebar(self, yesno):
+        if yesno:
+            # widget_list is a MonitoredList :/ be careful here not to ruin it
+            self._columns.widget_list[:] = [self.sidebar, self.battlefield]
+        else:
+            self._columns.widget_list[:] = [self.battlefield]
 
-            self.card_info(VoltaicKey)
+        self._show_sidebar = yesno
 
-    def prompt(self, msg, title=None, *args, **kwargs):
-        text = urwid.Text(msg, align="center")
-        body = urwid.AttrMap(urwid.Filler(text), "dialog")
-        self.show_dialog(body, title=title, *args, **kwargs)
+    def _exit_overlay(self, button):
+        self.loop.widget = self.loop.widget.bottom_w
 
-    def show_dialog(self, content, title=None, width=50, height=50,
-                    focus_buttons=True):
+    def show_overlay(
+            self, w, title=None, width=50, height=50, focus_buttons=True
+        ):
+        """
+        Show an overlay on top of the current top level widget.
+
+        """
 
         if title is not None:
-            title = urwid.Text(title, align="center")
-            title = urwid.AttrMap(title, "dialog frame")
+            title = _(urwid.Text(title, align="center"), "overlay frame")
 
-        ok = urwid.Button("OK", on_press=self._exit_dialog)
-        buttons = urwid.GridFlow([ok], cell_width=10, h_sep=3, v_sep=1,
-                                 align="center")
-        footer = urwid.AttrMap(buttons, "dialog frame")
+        ok = urwid.Button("OK", on_press=self._exit_overlay)
+        buttons = urwid.GridFlow(
+            [ok], cell_width=10, h_sep=3, v_sep=1, align="center"
+        )
+        footer = _(buttons, "overlay frame")
 
-        dialog = urwid.Frame(header=title, body=content, footer=footer)
+        top = urwid.Frame(header=title, body=w, footer=footer)
 
         if focus_buttons:
-            dialog.set_focus("footer")
+            top.set_focus("footer")
 
-        overlay = urwid.Overlay(dialog, self.frame, align="center",
-                                valign="middle", width=("relative", width),
-                                height=("relative", height))
+        self.loop.widget = urwid.Overlay(
+            top, self.loop.widget, align="center", valign="middle",
+            width=("relative", width), height=("relative", height),
+        )
 
-        self.frontend.loop.widget = overlay
-
-    def _exit_dialog(self, button):
-        self.frontend.loop.widget = self.frame
-
-    def card_info(self, card):
-        title = "Card: {.name}".format(card)
-        self.show_dialog(Card(card), title=title, width=40, height=60)
+    def unhandled_input(self, key):
+        if key == "meta s":
+            self.show_sidebar = not self.show_sidebar
 
 
-class Slider(urwid.WidgetWrap):
-    """
-    Slide across a series of widgets showing one column at a time.
+class UrwidInfoDisplay(object):
 
-    Arguments
-    ---------
+    implements(interfaces.IInfoDisplay)
 
-    * slides: An iterable of 2-tuples containing a slide name (or None) and a
-              widget to display in the slide
-
-    * show_header: whether to render the header (default: True)
-
-    * tabbed: If True, show all slide names as tabs in the header.  Otherwise,
-              only the current slide's name is shown (default: False)
-
-    """
-
-    slider_left = urwid.Text("◀")
-    slider_right = urwid.Text("▶")
-
-    def __init__(self, slides, show_header=True, tabbed=False):
-        frames = urwid.Columns([
-            urwid.Frame(
-                pad(slide),
-                header=urwid.Columns([("fixed", 1, self.slider_left),
-                                      urwid.Text(name, align="center"),
-                                      ("fixed", 1, self.slider_right)],
-                                     dividechars=1)
-            )
-            for name, slide in slides
-        ])
-
-        super(Slider, self).__init__(frames)
-
-        self.show_header = show_header
-        self.tabbed_header = tabbed
-
-    def render(self, size, focus=False):
-        current_column = self._w.get_focus()
-
-        if self.show_header:
-            return current_column.render(size, focus=focus)
-        else:
-            return current_column.body.render(size, focus=focus)
-
-    def sizing(self):
-        return {urwid.BOX}
-
-
-class PlayerPane(urwid.WidgetWrap):
-    def __init__(self, player, top):
-        self.player = player
-
-        battlefield = urwid.GridFlow([
-            Card(card) for card in self.player.battlefield
-        ], cell_width=10, h_sep=2, v_sep=6, align="center")
-
-        self.battlefield = urwid.Filler(battlefield)
-
-        self.vitals = urwid.Columns([
-            urwid.Text("Life: {.life}".format(self.player)),
-            urwid.Text("Hand: {}".format(len(self.player.hand))),
-            urwid.Text("Library: {}".format(len(self.player.library))),
-        ])
-
-        self.mana_pool = urwid.Columns([
-            urwid.Text((attr, "● {}".format(color)))
-            for attr, color in zip("WUBRGC", self.player.mana_pool)
-        ])
-
-
-        self.status_bar = urwid.Columns([
-            self.vitals,
-            ("weight", 2, urwid.Text(self.player.name, align="center")),
-            self.mana_pool
-        ])
-
-        pile = [("flow", self.status_bar), self.battlefield]
-        pile = urwid.Pile(pile if top else pile[::-1])
-
-        super(PlayerPane, self).__init__(pile)
-
-
-    def __repr__(self):
-        return "<PlayerPane: {.name}>".format(self.player)
-
-
-class Card(urwid.WidgetWrap):
-    def __init__(self, card):
-        self.card = card
-
-        name = urwid.Text(card.name)
-        mana_cost = color_cost(card.mana_cost, align="right")
-        name_line = rounded_box(name, mana_cost)
-        name_line = urwid.AttrMap(name_line, self._color + " light tint")
-
-        picture = pad(urwid.LineBox(urwid.Divider(top=3)))
-        picture = urwid.AttrMap(urwid.Filler(picture), "default")
-
-        type = rounded_box(urwid.Text(util.type_line(card)))
-        type = urwid.AttrMap(type, self._color + " light tint")
-
-        abilities = [focus(urwid.Text(abil)) for abil in card.abilities]
-        abilities = urwid.ListBox(urwid.SimpleListWalker(abilities))
-        abilities = urwid.AttrMap(abilities, self._color + " light tint")
-
-        if card.power or card.toughness:
-            pt = "{0.power}/{0.toughness}".format(card)
-            pt = urwid.Filler(urwid.Text(pt, align="right"))
-            pt = urwid.AttrMap(pt, self._color + " light tint")
-        else:
-            pt = urwid.Filler(urwid.Divider())
-
-        pile = pad(urwid.Pile([name_line, picture, type, abilities, pt]))
-        pile = urwid.AttrMap(pile, self._color + " background")
-
-        info = pad(urwid.LineBox(pile, **ROUND_CORNERS))
-        info = urwid.AttrMap(info, "card border")
-
-        box = urwid.LineBox(info, **ROUND_CORNERS)
-        box = urwid.Padding(box, align="center", width=("relative", 90))
-
-        super(Card, self).__init__(box)
+    def __init__(self, frontend):
+        self.frontend = frontend
+        self.game = frontend.game
+        self._turn = frontend.game.turn
 
     @property
-    def _color(self):
-        colors = self.card.colors
-
-        if len(colors) > 1:
-            return "multicolor"
-        elif not colors:
-            return "C"
+    def turn(self):
+        if self.game.started:
+            info = (
+                urwid.Text(ps, align="center")
+                for ps in self._turn.info if ps is not None
+            )
         else:
-            color, = colors
-            return color
+            info = [
+                urwid.Text(u"Beginning", align="center"),
+                urwid.Text(u"Untap", align="center")
+            ]  # XXX
+
+        return urwid.Filler(urwid.Pile(info))
+
+    @property
+    def player_overview(self):
+        pass
+
+    @property
+    def zone_overview(self):
+        pass
+
+    def card(self, card):
+        title = "Card: {.name}".format(card)
+        self.frontend.layout.show_overlay(Card(card), title=title)
+
+    def player(self, player):
+        title = "Player: {.name}".format(player)
+
+    def zone(self, zone):
+        title = zone.name.title()
 
 
-class ListCard(urwid.Text):
+class UrwidSelector(object):
 
-    _selectable = True
+    implements(interfaces.ISelector)
 
-    def __init__(self, card, hidden=False):
-        super(ListCard, self).__init__(card.name)
+    def __init__(self, frontend):
+        self.frontend = frontend
+        self.game = frontend.game
 
-        self.card = card
-        self.hidden = hidden
+    def choice(choices, how_many=1, duplicates=False):
+        pass
 
-    def get_text(self):
-        if self.hidden:
-            text = "- Hidden -"
-        else:
-            text = self._text
+    __call__ = choice
 
-        return text, self._attrib
+    def cards(
+        self, zone=None, match=ANY, how_many=1, duplicates=False, bad=True
+    ):
+        pass
 
-    def keypress(self, size, key):
-        return key
+    def players(self, match=ANY, how_many=1, duplicates=False, bad=True):
+        pass
 
+    def combined(self, zone=None, match_cards=ANY, how_many_cards=1,
+                 duplicate_cards=False, match_players=ANY, how_many_players=1,
+                 duplicate_players=False, bad=True):
+        pass
 
-def zone_slider(player, revealed=False):
-    zones = []
-
-    for zone in player.hand, player.graveyard, player.exile:
-        if not zone.ordered:
-            cards = [focus(ListCard(card)) for card in sorted(zone)]
-        else:
-            cards = [focus(ListCard(card)) for card in zone]
-
-        walker = urwid.SimpleListWalker(cards)
-        title = "{.name}'s {.name}".format(player, zone)
-        zones.append((title, urwid.ListBox(walker)))
-
-    library = [focus(ListCard(card, hidden=True)) for card in player.library]
-    title = "{.name}'s {.name}".format(player, player.library)
-    zones.append((title, urwid.ListBox(urwid.SimpleListWalker(library))))
-
-    return Slider(zones)
+    def range(start, stop, how_many=1, duplicates=False):
+        pass
 
 
-def focus(widget, unfocused=None):
-    return urwid.AttrMap(widget, unfocused, "focus")
+class UrwidFrontend(FrontendMixin):
 
+    implements(interfaces.IFrontend)
 
-def sidebar(layout):
-    zones = urwid.AttrMap(zone_slider(layout.frontend.player), "battlefield")
-    step = urwid.Filler(urwid.Text(layout.frontend.game.turn.step.__name__))
-    content = urwid.Pile([("weight", 2, layout.active_card),
-                          urwid.Filler(urwid.Divider()),
-                          ("weight", 1, zones),
-                          ("weight", 1, step)])
-    return urwid.AttrMap(content, "sidebar")
+    info = UrwidInfoDisplay
+    select = UrwidSelector
 
+    def __init__(self, player, debug=False):
+        super(UrwidFrontend, self).__init__(player=player, debug=debug)
+        self.layout = Layout(self)
 
-def pad(widget, n=1):
-    return urwid.Padding(widget, ("fixed left", n), ("fixed right", n))
+    def priority_granted(self):
+        pass
 
+    def prompt(self, msg, title=None, align="center", *args, **kwargs):
+        text = urwid.Filler(urwid.Text(msg, align=align))
+        self.layout.show_overlay(text, title=title, *args, **kwargs)
 
-def rounded_box(*widgets):
-    # TODO: urwid tip just replace with linebox
-
-    top = pad(urwid.Divider(u"_"))
-    left = ("fixed", 2, urwid.Text(u"("))
-    right = ("fixed", 2, urwid.Text(u")", align="right"))
-    bottom = pad(urwid.Divider(u"‾"))
-
-    sides = urwid.Columns((left,) + widgets + (right,))
-    border = urwid.Pile([top, sides, bottom])
-
-    return urwid.Filler(border)
-
-
-def color_cost(mana_cost, *args, **kwargs):
-    colored = [(c if c.isalpha() else "colorless", c) for c in mana_cost or ""]
-    return urwid.Text(colored or "", *args, **kwargs)
+    def started_running(self):
+        return self.layout.run()

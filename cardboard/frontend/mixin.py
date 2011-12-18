@@ -18,8 +18,6 @@ class FrontendMixin(object):
                                           False : "{self} is not running."}})
 
     def __init__(self, player, debug=False):
-        super(FrontendMixin, self).__init__()
-
         self._debug = debug
         self.running = False
 
