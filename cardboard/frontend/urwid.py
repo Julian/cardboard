@@ -100,6 +100,7 @@ class Layout(object):
     @property
     def active_card_widget(self):
         if self.active_card is None:
+            # XXX
             return urwid.Filler(urwid.Divider())
         return self.active_card
 
@@ -184,9 +185,12 @@ class UrwidInfoDisplay(object):
     def zone_overview(self):
         pass
 
+    def card_widget(self, card_widget):
+        title = "Card: {.name}".format(card_widget)
+        self.frontend.layout.show_overlay(card_widget, title=title)
+
     def card(self, card):
-        title = "Card: {.name}".format(card)
-        self.frontend.layout.show_overlay(Card(card), title=title)
+        return self.card_widget(Card(card))
 
     def player(self, player):
         title = "Player: {.name}".format(player)

@@ -30,10 +30,8 @@ def load(file, format=None):
     """
     Load a previously saved deck.
 
-    * name : the deck's name (required if loading without a provided file)
-    * from_file : a file-like object to load from, or None (default) to load
-                  from the default decks folder
-    * format : the format of the deck (default is to guess from the extension)
+    * file: a deck file
+    * format: the format of the deck (default is to guess from the extension)
 
     """
 

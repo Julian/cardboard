@@ -61,12 +61,11 @@ class TextualInfoDisplay(object):
 
     @property
     def turn(self):
-        phase = self.game.turn.phase
+        phase, step = self.game.turn.info
         info = [u"Phase: {}".format(phase)]
 
-        if len(phase) > 1:
-            step = self.game.turn.step.__name__
-            info.append(u"Step: {}".format(step.replace("_", " ").title()))
+        if step is not None:
+            info.append(u"Step: {}".format(step))
 
         return u"\n".join(info)
 
