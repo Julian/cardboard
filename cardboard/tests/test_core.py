@@ -479,21 +479,23 @@ class TestTurnManager(GameTestCase):
         for player in self.p1, self.p2, self.p3:
             player.frontend = TestingFrontend(player)
 
+        self.turn = self.game.turn
+
     def test_initialize_turn_and_phase(self):
         self.game.start()
-        self.assertIn(self.game.turn.active_player, {self.p1, self.p2})
-        self.assertEqual(self.game.turn.phase, phases.beginning)
-        self.assertEqual(self.game.turn.step, phases.beginning[0])
+        self.assertIn(self.turn.active_player, {self.p1, self.p2})
+        self.assertEqual(self.turn.phase, phases.beginning)
+        self.assertEqual(self.turn.step, phases.beginning[0])
 
     def do_tst_end(self):
         self.resetEvents()
 
-        active = self.game.turn.active_player
+        active = self.turn.active_player
         other = next(p for p in self.game.players if p != active)
 
-        self.game.turn.end()
+        self.turn.end()
 
-        self.assertIs(self.game.turn.active_player, other)
+        self.assertIs(self.turn.active_player, other)
         self.assertTriggered([{"event" : events["game"]["turn"]["ended"]},
                               {"event" : events["game"]["turn"]["started"]}])
 
@@ -503,7 +505,7 @@ class TestTurnManager(GameTestCase):
 
         # move to the middle of a turn somewhere to check it works from there
         for i in range(4):
-            self.game.turn.next()
+            self.turn.next()
 
         self.do_tst_end()
 
@@ -515,40 +517,44 @@ class TestTurnManager(GameTestCase):
 
         for _ in range(2):
 
-            self.game.turn.end = mock.Mock()
+            self.turn.end = mock.Mock()
 
-            self.assertEqual(self.game.turn.phase, phases.beginning)
-            self.assertEqual(self.game.turn.step, phases.untap)
+            self.assertEqual(self.turn.phase, phases.beginning)
+            self.assertEqual(self.turn.step, phases.untap)
+            self.assertEqual(self.turn.info, ("Beginning", "Untap"))
 
             self.assertTriggered([
                 {"event" : pe["beginning"]["started"]},
                 {"event" : pe["beginning"]["untap"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.beginning)
-            self.assertEqual(self.game.turn.step, phases.upkeep)
+            self.assertEqual(self.turn.phase, phases.beginning)
+            self.assertEqual(self.turn.step, phases.upkeep)
+            self.assertEqual(self.turn.info, ("Beginning", "Upkeep"))
 
             self.assertTriggered([
                 {"event" : pe["beginning"]["untap"]["ended"]},
                 {"event" : pe["beginning"]["upkeep"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.beginning)
-            self.assertEqual(self.game.turn.step, phases.draw)
+            self.assertEqual(self.turn.phase, phases.beginning)
+            self.assertEqual(self.turn.step, phases.draw)
+            self.assertEqual(self.turn.info, ("Beginning", "Draw"))
 
             self.assertTriggered([
                 {"event" : pe["beginning"]["upkeep"]["ended"]},
                 {"event" : pe["beginning"]["draw"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.first_main)
-            # TODO: self.assertEqual(self.game.turn.step, None)
+            self.assertEqual(self.turn.phase, phases.first_main)
+            # TODO: self.assertEqual(self.turn.step, None)
+            self.assertEqual(self.turn.info, ("First Main", None))
 
             self.assertTriggered([
                 {"event" : pe["beginning"]["draw"]["ended"]},
@@ -556,10 +562,11 @@ class TestTurnManager(GameTestCase):
                 {"event" : pe["first_main"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.combat)
-            self.assertEqual(self.game.turn.step, phases.beginning_of_combat)
+            self.assertEqual(self.turn.phase, phases.combat)
+            self.assertEqual(self.turn.step, phases.beginning_of_combat)
+            self.assertEqual(self.turn.info, ("Combat", "Beginning of Combat"))
 
             self.assertTriggered([
                 {"event" : pe["first_main"]["ended"]},
@@ -567,50 +574,55 @@ class TestTurnManager(GameTestCase):
                 {"event" : pe["combat"]["beginning"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.combat)
-            self.assertEqual(self.game.turn.step, phases.declare_attackers)
+            self.assertEqual(self.turn.phase, phases.combat)
+            self.assertEqual(self.turn.step, phases.declare_attackers)
+            self.assertEqual(self.turn.info, ("Combat", "Declare Attackers"))
 
             self.assertTriggered([
                 {"event" : pe["combat"]["beginning"]["ended"]},
                 {"event" : pe["combat"]["declare_attackers"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.combat)
-            self.assertEqual(self.game.turn.step, phases.declare_blockers)
+            self.assertEqual(self.turn.phase, phases.combat)
+            self.assertEqual(self.turn.step, phases.declare_blockers)
+            self.assertEqual(self.turn.info, ("Combat", "Declare Blockers"))
 
             self.assertTriggered([
                 {"event" : pe["combat"]["declare_attackers"]["ended"]},
                 {"event" : pe["combat"]["declare_blockers"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.combat)
-            self.assertEqual(self.game.turn.step, phases.combat_damage)
+            self.assertEqual(self.turn.phase, phases.combat)
+            self.assertEqual(self.turn.step, phases.combat_damage)
+            self.assertEqual(self.turn.info, ("Combat", "Combat Damage"))
 
             self.assertTriggered([
                 {"event" : pe["combat"]["declare_blockers"]["ended"]},
                 {"event" : pe["combat"]["combat_damage"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.combat)
-            self.assertEqual(self.game.turn.step, phases.end_of_combat)
+            self.assertEqual(self.turn.phase, phases.combat)
+            self.assertEqual(self.turn.step, phases.end_of_combat)
+            self.assertEqual(self.turn.info, ("Combat", "End of Combat"))
 
             self.assertTriggered([
                 {"event" : pe["combat"]["combat_damage"]["ended"]},
                 {"event" : pe["combat"]["end"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.second_main)
-            # TODO: self.assertEqual(self.game.turn.step, None)
+            self.assertEqual(self.turn.phase, phases.second_main)
+            # TODO: self.assertEqual(self.turn.step, None)
+            self.assertEqual(self.turn.info, ("Second Main", None))
 
             self.assertTriggered([
                 {"event" : pe["combat"]["end"]["ended"]},
@@ -618,10 +630,11 @@ class TestTurnManager(GameTestCase):
                 {"event" : pe["second_main"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.ending)
-            self.assertEqual(self.game.turn.step, phases.end)
+            self.assertEqual(self.turn.phase, phases.ending)
+            self.assertEqual(self.turn.step, phases.end)
+            self.assertEqual(self.turn.info, ("Ending", "End"))
 
             self.assertTriggered([
                 {"event" : pe["second_main"]["ended"]},
@@ -629,19 +642,20 @@ class TestTurnManager(GameTestCase):
                 {"event" : pe["ending"]["end"]["started"]},
             ])
 
-            self.game.turn.next()
+            self.turn.next()
 
-            self.assertEqual(self.game.turn.phase, phases.ending)
-            self.assertEqual(self.game.turn.step, phases.cleanup)
+            self.assertEqual(self.turn.phase, phases.ending)
+            self.assertEqual(self.turn.step, phases.cleanup)
+            self.assertEqual(self.turn.info, ("Ending", "Cleanup"))
 
             self.assertTriggered([
                 {"event" : pe["ending"]["end"]["ended"]},
                 {"event" : pe["ending"]["cleanup"]["started"]},
             ])
 
-            self.assertFalse(self.game.turn.end.called)
-            self.game.turn.next()
-            self.assertTrue(self.game.turn.end.called)
+            self.assertFalse(self.turn.end.called)
+            self.turn.next()
+            self.assertTrue(self.turn.end.called)
 
             self.assertTriggered([
                 {"event" : pe["ending"]["cleanup"]["ended"]},
@@ -663,7 +677,7 @@ class TestTurnManager(GameTestCase):
             self.p1.mana_pool.add(1, 2, 3, 4, 5, 6)
             self.p2.mana_pool.add(2, 2, 2, 2, 2, 2)
 
-            self.game.turn.next()
+            self.turn.next()
 
             self.assertTrue(self.p1.mana_pool.is_empty)
             self.assertTrue(self.p2.mana_pool.is_empty)
@@ -671,12 +685,12 @@ class TestTurnManager(GameTestCase):
     def test_unstarted_game(self):
         self.assertIs(self.game.ended, None)
 
-        self.assertIs(self.game.turn.active_player, None)
-        self.assertIs(self.game.turn.phase, None)
-        self.assertIs(self.game.turn.step, None)
+        self.assertIs(self.turn.active_player, None)
+        self.assertIs(self.turn.phase, None)
+        self.assertIs(self.turn.step, None)
 
         self.assertFalse(self.game.started)
 
     def test_advance_unstarted_game(self):
-        self.assertRaises(exceptions.InvalidAction, self.game.turn.next)
-        self.assertRaises(exceptions.InvalidAction, self.game.turn.end)
+        self.assertRaises(exceptions.InvalidAction, self.turn.next)
+        self.assertRaises(exceptions.InvalidAction, self.turn.end)

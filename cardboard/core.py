@@ -36,8 +36,6 @@ class Game(object):
 
         """
 
-        super(Game, self).__init__()
-
         self.events = handler
 
         self.ended = None
@@ -247,7 +245,6 @@ class ManaPool(object):
     colorless, white, blue, black, red, green = (_make_color(p) for p in POOLS)
 
     def __init__(self, owner):
-        super(ManaPool, self).__init__()
         self.owner = owner
 
     def __iter__(self):
@@ -296,8 +293,6 @@ class Player(object):
                                       False : "{self} is alive."}})
 
     def __init__(self, game, library, name=""):
-        super(Player, self).__init__()
-
         self.game = game
         self.frontend = NoFrontend(self)
         self.name = name
@@ -416,8 +411,6 @@ class Player(object):
 
 class TurnManager(object):
     def __init__(self, game):
-        super(TurnManager, self).__init__()
-
         self.game = game
 
         self.order = None
@@ -430,6 +423,25 @@ class TurnManager(object):
     def active_player(self):
         if self.game.started:
             return self.order[0]
+
+    @property
+    def info(self):
+        """
+        Return displayable information about the current turn.
+
+        """
+
+        phase, step = self.phase, self.step
+
+        if len(phase) == 1:
+            step = None
+
+        if phase is not None:
+            phase = phase.name.title().replace("_", " ")
+        if step is not None:
+            step = step.__name__.title().replace("_", " ").replace("Of", "of")
+
+        return phase, step
 
     @property
     def phase(self):
