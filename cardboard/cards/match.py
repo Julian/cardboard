@@ -78,3 +78,7 @@ is_basic_land = is_land & has_supertypes(u"Basic")
 is_nonbasic_land = is_land & ~has_supertypes(u"Basic")
 
 is_permanent = Match(lambda obj : obj.types & types.permanents)
+
+phases = is_permanent & Match(
+    lambda obj : any(abil.startswith("Phasing") for abil in obj.abilities)
+)

@@ -9,6 +9,7 @@ Implements the turn structure mechanics (phases and steps).
 from collections import namedtuple
 
 from cardboard.events import events
+from cardboard.cards import match
 
 
 phase_events = events["game"]["turn"]["phase"]
@@ -20,13 +21,20 @@ def untap(game):
 
     """
 
-    game.events.trigger(event=phase_events["beginning"]["untap"]["started"])
-
-    # 1. XXX: Phase in all permanents that are phased out, and vice versa.
+    # XXX: When all of these lack XXXs, consider moving them to the docstrings.
+    # 1. Phase in all permanents that are phased out, and vice versa.
     # 2. Untap all permanents XXX: that aren't being prevented from untapping.
     # 3. No players get priority. XXX: defer triggered abils till next priority
 
+    game.events.trigger(event=phase_events["beginning"]["untap"]["started"])
+
     for permanent in game.turn.active_player.battlefield:
+        if match.phases(permanent):
+            if permanent.is_phased_in:
+                permanent.phase_out()
+            else:
+                permanent.phase_in()
+
         if permanent.is_tapped:
             permanent.untap()
 
@@ -37,10 +45,13 @@ def upkeep(game):
     """
     Perform the :ref:`upkeep-step`.
 
-    """
+    What Happens
+    ------------
 
-    # 1. XXX: Abilities trigger.
-    # 2. The active player gets priority.
+    1. Abilities trigger.
+    2. The active player gets priority.
+
+    """
 
     game.events.trigger(event=phase_events["beginning"]["upkeep"]["started"])
     game.grant_priority()
@@ -51,11 +62,14 @@ def draw(game):
     """
     Perform the :ref:`draw-step`.
 
-    """
+    What Happens
+    ------------
 
-    # 1. The active player draws a card.
-    # 2. XXX: Abilities trigger.
-    # 3. The active player gets priority.
+    1. The active player draws a card.
+    2. Abilities trigger.
+    3. The active player gets priority.
+
+    """
 
     game.turn.active_player.draw()
     game.events.trigger(event=phase_events["beginning"]["draw"]["started"])
@@ -174,10 +188,13 @@ def end(game):
     """
     Perform the :ref:`end-step`.
 
-    """
+    What Happens
+    ------------
 
-    # 1. XXX: End of turn triggered abilities trigger.
-    # 2. The active player gets priority.
+    1. Abilities that trigger at the end of turn will be executed
+    2. The active player gets priority.
+
+    """
 
     game.events.trigger(event=phase_events["ending"]["end"]["started"])
     game.grant_priority()
@@ -190,9 +207,9 @@ def cleanup(game):
 
     """
 
-    # 1. Hand size is trimmed to 7
+    # 1. Hand size is trimmed to the max hand size (usually 7)
     # 2. XXX: All damage is removed and end of turn effects end.
-    # 3. XXX: No players get priority except for exception in rule 514.3a
+    # 3. No players get priority # XXX: except for the exception in rule 514.3a
 
     game.events.trigger(event=phase_events["ending"]["cleanup"]["started"])
 

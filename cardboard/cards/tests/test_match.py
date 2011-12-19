@@ -168,3 +168,11 @@ class TestMatchers(unittest.TestCase):
             self.assertTrue(fn(c))
 
         self.assertFalse(m.is_colorless(c))
+
+    def test_phases(self):
+        c = mock.Mock()
+        c.abilities = []
+        c.types = {"Creature"}
+        self.assertFalse(m.phases(c))
+        c.abilities.append("Phasing (bla bla)")
+        self.assertTrue(m.phases(c))

@@ -48,15 +48,21 @@ class TestPhaseMechanics(GameTestCase):
         own = [mock.Mock() for _ in range(4)]
         not_own = [mock.Mock() for _ in range(4)]
 
-        # XXX
+        # TODO: Just double check that this is how the final implementation is
         phasing = mock.Mock()
         phasing.description = "Phasing"
 
+        own[0].abilities = own[1].abilities = []
+        not_own[0].abilities = not_own[1].abilities = []
+
         own[2].abilities = own[3].abilities = [phasing]
-        own[2].phase_out()
+        own[2].is_phased_in = False
 
         not_own[2].abilities = not_own[3].abilities = [phasing]
-        not_own[2].phase_out()
+        not_own[2].is_phased_in = False
+
+        for n, o in zip(own, not_own):
+            n.types = o.types = {"Enchantment"}
 
         for o in own:
             o.controller = self.game.turn.active_player
@@ -69,11 +75,11 @@ class TestPhaseMechanics(GameTestCase):
         # phase out, and all phased-out permanents controlled when they phased
         # out phase in
 
-        # self.assertTrue(own[2].phase_in.called)
-        # self.assertTrue(own[3].phase_out.called)
+        self.assertTrue(own[2].phase_in.called)
+        self.assertTrue(own[3].phase_out.called)
 
-        # self.assertFalse(not_own[2].phase_in.called)
-        # self.assertFalse(not_own[3].phase_out.called)
+        self.assertFalse(not_own[2].phase_in.called)
+        self.assertFalse(not_own[3].phase_out.called)
 
         # the active player determines which permanents he controls will untap
         # Then he untaps them all simultaneously. 
