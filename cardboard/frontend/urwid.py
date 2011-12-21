@@ -55,7 +55,7 @@ palette = [
 
     ("in focus", "black", "dark gray"),
 
-    ("overlay frame", "black", "light blue"),
+    ("header", "black", "light blue"),
     ("overlay", "black", "dark gray"),
 ]
 
@@ -67,6 +67,7 @@ class Layout(object):
         self.active_card = None
         self._show_sidebar = True
 
+        # XXX: Padding
         self.sidebar = _(urwid.Pile([
             ("weight", .4, self.active_card_widget),
             ("weight", .6, self.frontend.info.turn),
@@ -130,13 +131,13 @@ class Layout(object):
         """
 
         if title is not None:
-            title = _(urwid.Text(title, align="center"), "overlay frame")
+            title = _(urwid.Text(title, align="center"), "header")
 
         ok = urwid.Button("OK", on_press=self._exit_overlay)
         buttons = urwid.GridFlow(
             [ok], cell_width=10, h_sep=3, v_sep=1, align="center"
         )
-        footer = _(buttons, "overlay frame")
+        footer = _(buttons, "header")
 
         top = urwid.Frame(header=title, body=w, footer=footer)
 
@@ -168,12 +169,12 @@ class UrwidInfoDisplay(object):
             self._turn.info if self.game.started else (u"Beginning", u"Untap")
         )
         info = [
-            urwid.Text(u"Current Turn", align="center"),
-            urwid.Text(u"Phase: " + phase)
+            _(urwid.Text(u"Current Turn", align="center"), "header"),
+            urwid.Text(phase + u" Phase", align="center")
         ]
 
         if step is not None:
-            info.append(urwid.Text(u"Step:  " + step))
+            info.append(urwid.Text(step + u" Step", align="center"))
 
         return urwid.Filler(urwid.Pile(info))
 

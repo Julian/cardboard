@@ -19,12 +19,18 @@ def untap(game):
     """
     Perform the :ref:`untap-step`.
 
+    What Happens
+    ------------
+
+    1. The active player's phased-in permanents phase out, and vice versa.
+    2. The active player's permanents that can be untapped are untapped.
+    3. No players get priority.
+
     """
 
-    # XXX: When all of these lack XXXs, consider moving them to the docstrings.
-    # 1. Phase in all permanents that are phased out, and vice versa.
-    # 2. Untap all permanents XXX: that aren't being prevented from untapping.
-    # 3. No players get priority. XXX: defer triggered abils till next priority
+    # XXX: Technically the rules say all this is "simultaneous".
+    #      At some point that will probably matter, and we will need some tests
+    #      and an implementation of that.
 
     game.events.trigger(event=phase_events["beginning"]["untap"]["started"])
 
@@ -36,7 +42,11 @@ def untap(game):
                 permanent.phase_in()
 
         if permanent.is_tapped:
+            # XXX: Check if the permanent says it can be untapped.
             permanent.untap()
+
+    # XXX: Again, technically abilities can't activate / resolve here, they
+    #      should be deferred until the upkeep.
 
     game.events.trigger(event=phase_events["beginning"]["untap"]["ended"])
 

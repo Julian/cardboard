@@ -88,16 +88,16 @@ class TestUrwidInfoDisplay(unittest.TestCase):
         self.frontend.game.turn.info = None
         self.frontend.game.started = False
         turn = [w.text for w in self.i.turn.base_widget.widget_list[1:]]
-        self.assertEqual(turn, ["Phase: Beginning", "Step:  Untap"])
+        self.assertEqual(turn, ["Beginning Phase", "Untap Step"])
 
         self.frontend.game.started = True
         self.frontend.game.turn.info = "Foo", "Bar"
         turn = [w.text for w in self.i.turn.base_widget.widget_list[1:]]
-        self.assertEqual(turn, ["Phase: Foo", "Step:  Bar"])
+        self.assertEqual(turn, ["Foo Phase", "Bar Step"])
 
         self.frontend.game.turn.info = "Foo", None
         turn = [w.text for w in self.i.turn.base_widget.widget_list[1:]]
-        self.assertEqual(turn, ["Phase: Foo"])
+        self.assertEqual(turn, ["Foo Phase"])
 
 
 class TestUrwidSelector(unittest.TestCase):
