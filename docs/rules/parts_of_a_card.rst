@@ -253,7 +253,7 @@ The expansion symbol indicates which *Magic* set a card is from. It's a small ic
 205.2
 -----
 
-The color of the expansion symbol indicates the rarity of the card within its set. A red-orange symbol indicates the card is mythic rare. A gold symbol indicates the card is rare. A silver symbol indicates the card is uncommon. A black or white symbol indicates the card is common or is a basic land. A purple symbol signifies a special rarity; to date, only the *Time Spiral*\ ® "timeshifted" cards, which were rarer than that set's rare cards, have had purple expansion symbols. (Prior to the *Exodus*™ set, all expansion symbols were black, regardless of rarity. Also, prior to the *Sixth Edition* core set, with the exception of the Simplified Chinese *Fifth Edition* core set, *Magic* core sets didn't have expansion symbols at all.)
+The color of the expansion symbol indicates the rarity of the card within its set. A red-orange symbol indicates the card is mythic rare. A gold symbol indicates the card is rare. A silver symbol indicates the card is uncommon. A black or white symbol indicates the card is common or is a basic land. A purple symbol signifies a special rarity; to date, only the *Time Spiral*\ ® "timeshifted" cards, which were rarer than that set's rare cards, have had purple expansion symbols. (Prior to the *Exodus*\ ™ set, all expansion symbols were black, regardless of rarity. Also, prior to the *Sixth Edition* core set, with the exception of the Simplified Chinese *Fifth Edition* core set, *Magic* core sets didn't have expansion symbols at all.)
 
 205.3
 -----
@@ -294,7 +294,7 @@ The text box may also contain italicized text that has no game function.
 206.3
 -----
 
-A guild icon appears in the text box of many *Ravnica*® block cards.  These cards either have the specified guild's exclusive mechanic or somehow relate to the two colors associated with that guild. Guild icons have no effect on game play. Similarly, a faction icon appears in the text box of most *Scars of Mirrodin*\ ™ block cards. These faction icons have no effect on game play.
+A guild icon appears in the text box of many *Ravnica*\ ® block cards.  These cards either have the specified guild's exclusive mechanic or somehow relate to the two colors associated with that guild. Guild icons have no effect on game play. Similarly, a faction icon appears in the text box of most *Scars of Mirrodin*\ ™ block cards. These faction icons have no effect on game play.
 
 206.4
 -----

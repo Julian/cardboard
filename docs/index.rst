@@ -1,15 +1,31 @@
-Welcome to cardboard's documentation!
-=====================================
+=========
+Cardboard
+=========
 
-Contents:
+Cardboard is a Magic: The Gathering™ client.
+
+
+Installation
+------------
+
+To install, run
+
+    python setup.py install
+
+
+Contents
+--------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   rules/index
+    cardboard/development
+    rules/index
 
-Indices and tables
-==================
+
+
+Indexes
+-------
 
 * :ref:`genindex`
 * :ref:`modindex`

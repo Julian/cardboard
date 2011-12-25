@@ -1,16 +1,6 @@
-=========
-Cardboard
-=========
-
-Cardboard is a Magic: The Gathering™ client.
-
-
-Installation
-------------
-
-To install, run
-
-    python setup.py install
+=================
+Developer's Guide
+=================
 
 
 Running the Test Suite
