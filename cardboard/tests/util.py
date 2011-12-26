@@ -87,7 +87,9 @@ class _CheckRequirementsContext(object):
 
 class EventHandlerTestCase(unittest.TestCase):
 
-    MSG = "Events failed to match a subset of the triggered events (heard {})"
+    MSG = (
+        "Expected events weren't triggered (first missing event {}, heard {})."
+    )
 
     def setUp(self):
         super(EventHandlerTestCase, self).setUp()
@@ -146,9 +148,9 @@ class EventHandlerTestCase(unittest.TestCase):
 
                 heard = len(self.events.trigger.call_args_list)
                 found_msg = "\n" + "\n".join(found)
-                msg = self._truncateMessage(self.MSG.format(heard), found_msg)
+                msg = self.MSG.format(event, heard)
 
-                self.fail(msg)
+                self.fail(self._truncateMessage(msg, found_msg))
 
     def assertLastEventsWere(self, events):
         last_events = self.events.trigger.call_args_list[-len(events):]
