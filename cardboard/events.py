@@ -79,7 +79,7 @@ the game.
 
             * event: ``"life gained"`` / ``"life lost"``
             * player: ``<the player>``
-            * life: ``<the amount of life (always positive)>``
+            * amount: ``<the amount of life (always positive)>``
 
 Player events will also be triggered when a player adds or removes :term:`mana`
 from his :term:`mana pool`.  The mana event will be triggered with:
