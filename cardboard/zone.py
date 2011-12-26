@@ -1,13 +1,14 @@
 from collections import Set
 import random
 
-from cardboard.events import events
+from cardboard import events
 
 
 __all__ = ["UnorderedZone", "OrderedZone", "zone"]
 
 
 # TODO: Clarify / make zone operations atomic
+ENTER, LEAVE = events.ENTERED_ZONE, events.LEFT_ZONE
 
 
 def _zone(name):
@@ -16,23 +17,14 @@ def _zone(name):
 
     """
 
-    _events = events["card"]["zones"][name]
-
     @classmethod
     def zone(cls, game, contents=(), owner=None):
-        return cls(game, name, contents, owner=owner, _events=_events)
+        return cls(game, name=name, contents=contents, owner=owner)
     return zone
 
 
 class ZoneMixin(object):
-    def __init__(self, game, name, contents=(), owner=None, _events=None):
-        super(ZoneMixin, self).__init__()
-
-        if _events is None:
-            _events = events
-
-        self._events = _events
-
+    def __init__(self, game, name, contents=(), owner=None):
         self.game = game
         self.name = name
         self.owner = owner
@@ -103,7 +95,7 @@ class UnorderedZone(ZoneMixin):
         self._contents.add(e)
 
         if not silent:
-            self.game.events.trigger(event=self._events["entered"], card=e)
+            self.game.events.trigger(event=ENTER, card=e, zone=self)
 
     def pop(self, silent=False):
         try:
@@ -111,7 +103,7 @@ class UnorderedZone(ZoneMixin):
             return e
         finally:
             if not silent:
-                self.game.events.trigger(event=self._events["left"], card=e)
+                self.game.events.trigger(event=LEAVE, card=e, zone=self)
 
     def remove(self, e, silent=False):
         try:
@@ -120,7 +112,7 @@ class UnorderedZone(ZoneMixin):
             raise ValueError("'{}' is not in the {} zone.".format(e, self))
         else:
             if not silent:
-                self.game.events.trigger(event=self._events["left"], card=e)
+                self.game.events.trigger(event=LEAVE, card=e, zone=self)
 
 
 class OrderedZone(ZoneMixin):
@@ -131,12 +123,11 @@ class OrderedZone(ZoneMixin):
 
     ordered = True
 
-    def __init__(self, game, name, contents=(), owner=None, _events=None):
+    def __init__(self, game, name, contents=(), owner=None):
         self._order = list(contents)
 
         super(OrderedZone, self).__init__(
-            game=game, name=name, contents=self._order,
-            owner=owner, _events=_events
+            game=game, name=name, contents=self._order, owner=owner
         )
 
     def __getitem__(self, i):
@@ -171,7 +162,7 @@ class OrderedZone(ZoneMixin):
         self._order.append(e)
 
         if not silent:
-            self.game.events.trigger(event=self._events["entered"], card=e)
+            self.game.events.trigger(event=ENTER, card=e, zone=self)
 
     def count(self, e):
         return self._order.count(e)
@@ -188,7 +179,7 @@ class OrderedZone(ZoneMixin):
         self._contents.remove(e)
 
         if not silent:
-            self.game.events.trigger(event=self._events["left"], card=e)
+            self.game.events.trigger(event=LEAVE, card=e, zone=self)
 
         return e
 
@@ -200,7 +191,7 @@ class OrderedZone(ZoneMixin):
         self._order.remove(e)
 
         if not silent:
-            self.game.events.trigger(event=self._events["left"], card=e)
+            self.game.events.trigger(event=LEAVE, card=e, zone=self)
 
     def reverse(self):
         self._order.reverse()

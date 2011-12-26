@@ -4,13 +4,12 @@ import unittest
 
 import mock
 
-from cardboard import card as c, zone as z
-from cardboard.events import events
+from cardboard import card as c, events, zone as z
 from cardboard.tests.util import GameTestCase
 from cardboard.util import ANY
 
 
-ZONE_EVENTS = {"entered" : object(), "left" : object()}
+ENTER, LEAVE = events.ENTERED_ZONE, events.LEFT_ZONE
 
 
 class ZoneTest(GameTestCase):
@@ -19,15 +18,13 @@ class ZoneTest(GameTestCase):
 
     def setUp(self):
         super(ZoneTest, self).setUp()
-        self.u = z.UnorderedZone(name="Emerald Hill",
-                                 game=self.game,
-                                 contents=self.library,
-                                 _events=ZONE_EVENTS)
+        self.u = z.UnorderedZone(
+            name="Emerald Hill", game=self.game, contents=self.library,
+        )
 
-        self.o = z.OrderedZone(name="Casino Night",
-                               game=self.game,
-                               contents=self.library,
-                               _events=ZONE_EVENTS)
+        self.o = z.OrderedZone(
+            name="Casino Night", game=self.game, contents=self.library,
+        )
 
 
 class TestZones(ZoneTest):
@@ -63,10 +60,10 @@ class TestZones(ZoneTest):
         self.assertEqual(len(self.o), len(self.library))
 
     def test_add(self):
-        with self.assertTriggers(event=ZONE_EVENTS["entered"], card=30):
+        with self.assertTriggers(event=ENTER, card=30, zone=self.u):
             self.u.add(30)
 
-        with self.assertTriggers(event=ZONE_EVENTS["entered"], card=30):
+        with self.assertTriggers(event=ENTER, card=30, zone=self.o):
             self.o.add(30)
 
         self.assertEqual(set(self.u), set(self.library) | {30})
@@ -119,24 +116,17 @@ class TestZones(ZoneTest):
         card.owner.foo.add.assert_called_once_with(card)
         card.owner.bar.add.assert_called_once_with(card)
 
-    def test_events_default(self):
-        u = z.UnorderedZone("Emerald Hill", self.library)
-        o = z.OrderedZone("Casino Night", self.library)
-
-        self.assertIs(u._events, events)
-        self.assertIs(o._events, events)
-
     def test_move(self):
         self.o.add(self.card)
         self.card.zone = self.o  # on actual cards this is a property
 
-        with self.assertTriggers(event=ZONE_EVENTS["entered"], card=self.card):
+        with self.assertTriggers(event=ENTER, card=self.card, zone=self.u):
             self.u.move(self.card)
             self.card.zone = self.u
 
         self.assertIn(self.card, self.u)
 
-        with self.assertTriggers(event=ZONE_EVENTS["entered"], card=self.card):
+        with self.assertTriggers(event=ENTER, card=self.card, zone=self.o):
             self.o.move(self.card)
 
         self.assertIn(self.card, self.o)
@@ -160,11 +150,11 @@ class TestZones(ZoneTest):
     def test_pop(self):
         self.resetEvents()
         e = self.u.pop()
-        self.assertLastEventsWere([dict(event=ZONE_EVENTS["left"], card=e)])
+        self.assertLastEventsWere([dict(event=LEAVE, card=e, zone=self.u)])
 
         self.resetEvents()
         f = self.o.pop()
-        self.assertLastEventsWere([dict(event=ZONE_EVENTS["left"], card=f)])
+        self.assertLastEventsWere([dict(event=LEAVE, card=f, zone=self.o)])
 
         self.assertEqual(set(self.u), set(self.library) - {e})
         self.assertEqual(list(self.o), self.library[:-1])
@@ -173,10 +163,10 @@ class TestZones(ZoneTest):
         e = self.library[-7]
         self.library.remove(e)
 
-        with self.assertTriggers(event=ZONE_EVENTS["left"], card=e):
+        with self.assertTriggers(event=LEAVE, card=e, zone=self.u):
             self.u.remove(e)
 
-        with self.assertTriggers(event=ZONE_EVENTS["left"], card=e):
+        with self.assertTriggers(event=LEAVE, card=e, zone=self.o):
             self.o.remove(e)
 
         self.assertEqual(set(self.u), set(self.library))
@@ -193,7 +183,7 @@ class TestZones(ZoneTest):
 
         self.assertEqual(len(self.u), len(self.library) + 4)
 
-        evs = [dict(event=ZONE_EVENTS["entered"], card=i) for i in range(4)]
+        evs = [dict(event=ENTER, card=i, zone=self.u) for i in range(4)]
         self.assertLastEventsWere(evs)
 
         self.resetEvents()
@@ -203,6 +193,7 @@ class TestZones(ZoneTest):
 
         self.assertEqual(len(self.o), len(self.library) + 4)
 
+        evs = [dict(event=ENTER, card=i, zone=self.o) for i in range(4)]
         self.assertLastEventsWere(evs)
 
     def test_silent(self):
@@ -275,8 +266,8 @@ class TestOrderedZone(ZoneTest):
 
         self.assertEqual(list(self.o), self.library)
         self.assertLastEventsWere([
-            {"event" : ZONE_EVENTS["left"], "card" : e1},
-            {"event" : ZONE_EVENTS["left"], "card" : e2},
+            {"event" : LEAVE, "card" : e1, "zone" : self.o},
+            {"event" : LEAVE, "card" : e2, "zone" : self.o},
         ])
 
     def test_reverse(self):
