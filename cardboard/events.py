@@ -30,7 +30,7 @@ Turn events are events that trigger when a game, turn, :term:`phase` or
 
         * event: ``"turn began"`` / ``"turn ended"``
         * player: ``<player whose turn is beginning or ending>``
-        * turn: ``<the turn number>``
+        * number: ``<the turn number>``
 
     * phase began / phase ended
 
@@ -85,7 +85,7 @@ Player events will also be triggered when a player adds or removes :term:`mana`
 from his :term:`mana pool`.  The mana event will be triggered with:
 
     * event: ``"mana added"`` / ``"mana removed"``
-    * mana: ``"white"`` / ``"blue"`` / ``"black"`` / ``"red"`` / ``"green"`` /
+    * color: ``"white"`` / ``"blue"`` / ``"black"`` / ``"red"`` / ``"green"`` /
       ``"colorless"``
     * player: ``<the player>``
     * amount: ``<the amount of mana (always positive)>``
