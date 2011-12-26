@@ -19,7 +19,7 @@ Contents
 .. toctree::
     :maxdepth: 2
 
-    cardboard/development
+    development/index
     rules/index
 
 
