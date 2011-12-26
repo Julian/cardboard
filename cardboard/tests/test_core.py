@@ -1,7 +1,6 @@
 import mock
 
-from cardboard import core as c, exceptions, phases
-from cardboard.events import events
+from cardboard import core as c, events, exceptions, phases
 from cardboard.tests.util import GameTestCase
 from cardboard.frontend.testing import TestingFrontend
 
@@ -84,18 +83,24 @@ class TestManaPool(GameTestCase):
     def test_mana_changed(self):
         self.game.start()
 
-        mana_events = events["player"]["mana"]
-
         for color in c.ManaPool.POOLS:
+            self.resetEvents()
+
             current = getattr(self.p1.mana_pool, color)
             setattr(self.p1.mana_pool, color, current)
-            self.assertLastEventsWereNot([mana_events[color]["added"]])
+            self.assertFalse(self.events.trigger.called)
 
-            setattr(self.p1.mana_pool, color, 100)
-            self.assertLastEventsWere([mana_events[color]["added"]])
+            with self.assertTriggers(
+                event=events.MANA_ADDED, color=color,
+                player=self.p1, amount=100,
+            ):
+                setattr(self.p1.mana_pool, color, 100)
 
-            setattr(self.p1.mana_pool, color, 10)
-            self.assertLastEventsWere([mana_events[color]["removed"]])
+            with self.assertTriggers(
+                event=events.MANA_REMOVED, color=color,
+                player=self.p1, amount=10,
+                ):
+                setattr(self.p1.mana_pool, color, 10)
 
     def test_is_empty(self):
         self.game.start()
@@ -138,47 +143,48 @@ class TestPlayer(GameTestCase):
 
     def test_life(self):
         self.game.start()
+        GAIN, LOSS = events.LIFE_GAINED, events.LIFE_LOST
 
-        self.p1.life += 2
-        self.assertLastEventsWere([events["player"]["life"]["gained"]])
+        with self.assertTriggers(event=GAIN, player=self.p1, amount=2):
+            self.p1.life += 2
         self.assertEqual(self.p1.life, 22)
 
-        self.p1.life -= 2
-        self.assertLastEventsWere([events["player"]["life"]["lost"]])
+        with self.assertTriggers(event=LOSS, player=self.p1, amount=2):
+            self.p1.life -= 2
         self.assertEqual(self.p1.life, 20)
 
     def test_life_not_changed(self):
         self.game.start()
+        self.resetEvents()
         self.p1.life += 0
-        self.assertLastEventsWereNot([events["player"]["life"]["gained"]])
-        self.assertLastEventsWereNot([events["player"]["life"]["lost"]])
+        self.assertFalse(self.events.trigger.called)
 
     def test_concede(self):
         self.game.start()
-
         self.assertFalse(self.p1.dead)
+
+        event = {"event" : events.PLAYER_CONCEDED, "player" : self.p1}
         self.p1.concede()
+        self.assertTriggered([event])
 
         self.assertEqual(self.p1.death_by, "concede")
         self.assertTrue(self.p1.dead)
 
-        self.assertTriggered([events["player"]["conceded"],
-                              events["player"]["died"]])
-
     def test_die(self):
         self.game.start()
         self.assertFalse(self.p1.dead)
+
+        event = {"event" : events.PLAYER_DIED, "player" : self.p1}
         self.p1.die("test")
+        self.assertTriggered([event])
 
         self.assertTrue(self.p1.dead)
         self.assertEqual(self.p1.death_by, "test")
 
-        self.assertTriggered([events["player"]["died"]])
-
         # can't die twice
         self.resetEvents()
         self.assertRaises(exceptions.InvalidAction, self.p1.die, "test2")
-        self.assertLastEventsWereNot([events["player"]["died"]])
+        self.assertFalse(self.events.trigger.called)
 
     def test_draw(self):
         self.game.start()
@@ -187,12 +193,11 @@ class TestPlayer(GameTestCase):
         self.assertIn(top, self.p1.library)
         self.assertNotIn(top, self.p1.hand)
 
-        self.p1.draw()
+        with self.assertTriggers(event=events.DRAW, player=self.p1):
+            self.p1.draw()
 
         self.assertIn(top, self.p1.hand)
         self.assertNotIn(top, self.p1.library)
-
-        self.assertLastEventsWere([events["player"]["draw"]])
 
         self.resetEvents()
 
@@ -202,7 +207,7 @@ class TestPlayer(GameTestCase):
         for card in top:
             self.assertIn(card, self.p2.hand)
 
-        self.assertTriggered([{"event" : events["player"]["draw"]}] * 3)
+        self.assertTriggered([{"event" : events.DRAW, "player" : self.p2}] * 3)
 
     def test_draw_zero(self):
         self.game.start()
@@ -261,9 +266,9 @@ class TestGame(GameTestCase):
         self.assertRaises(exceptions.InvalidAction, game.start)
 
     def test_start(self):
+        event = {"event" : events.GAME_BEGAN, "game" : self.game}
         self.game.start()
-        event = {"event" : events["game"]["started"]}
-        self.assertEqual(self.events.trigger.call_args_list[0], [event])
+        self.assertTriggered([event])
 
         # can't start a started game
         self.resetEvents()
@@ -323,8 +328,9 @@ class TestGame(GameTestCase):
         self.game.start()
         self.assertFalse(self.game.ended)
 
-        self.game.end()
-        self.assertLastEventsWere([events["game"]["ended"]])
+        with self.assertTriggers(event=events.GAME_ENDED, game=self.game):
+            self.game.end()
+
         self.assertTrue(self.game.ended)
 
     def test_check_for_win(self):
@@ -490,30 +496,44 @@ class TestTurnManager(GameTestCase):
     def do_tst_end(self):
         self.resetEvents()
 
-        active = self.turn.active_player
-        other = next(p for p in self.game.players if p != active)
-
+        active, other = self.turn.order
         self.turn.end()
 
         self.assertIs(self.turn.active_player, other)
-        self.assertTriggered([{"event" : events["game"]["turn"]["ended"]},
-                              {"event" : events["game"]["turn"]["started"]}])
+        self.assertTriggered([
+            {"event" : events.TURN_ENDED, "player" : active,
+             "number" : self.turn.number},
+            {"event" : events.TURN_BEGAN, "player" : other,
+             "number" : self.turn.number},
+        ])
 
     def test_end(self):
         self.game.start()
         self.do_tst_end()
 
+        self.turn.end()
         # move to the middle of a turn somewhere to check it works from there
         for i in range(4):
             self.turn.next()
 
         self.do_tst_end()
 
-    def test_next(self):
-
-        pe = events["game"]["turn"]["phase"]
+    def test_number(self):
+        self.assertIsNone(self.turn.number)
 
         self.game.start()
+
+        self.assertEqual(self.turn.number, 1)
+        self.turn.end()
+        self.assertEqual(self.turn.number, 1)
+        self.turn.end()
+        self.assertEqual(self.turn.number, 2)
+        self.turn.end()
+        self.assertEqual(self.turn.number, 2)
+
+    def test_next(self):
+        self.game.start()
+        p = self.game.turn.active_player
 
         for _ in range(2):
 
@@ -524,8 +544,10 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Beginning", "Untap"))
 
             self.assertTriggered([
-                {"event" : pe["beginning"]["started"]},
-                {"event" : pe["beginning"]["untap"]["started"]},
+                {"event" : events.PHASE_BEGAN, "phase" : "beginning",
+                 "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "beginning",
+                 "step" : "untap", "player" : p},
             ])
 
             self.turn.next()
@@ -535,8 +557,10 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Beginning", "Upkeep"))
 
             self.assertTriggered([
-                {"event" : pe["beginning"]["untap"]["ended"]},
-                {"event" : pe["beginning"]["upkeep"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "beginning",
+                 "step" : "untap", "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "beginning",
+                 "step" : "upkeep", "player" : p},
             ])
 
             self.turn.next()
@@ -546,8 +570,10 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Beginning", "Draw"))
 
             self.assertTriggered([
-                {"event" : pe["beginning"]["upkeep"]["ended"]},
-                {"event" : pe["beginning"]["draw"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "beginning",
+                 "step" : "upkeep", "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "beginning",
+                 "step" : "draw", "player" : p},
             ])
 
             self.turn.next()
@@ -557,9 +583,12 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("First Main", None))
 
             self.assertTriggered([
-                {"event" : pe["beginning"]["draw"]["ended"]},
-                {"event" : pe["beginning"]["ended"]},
-                {"event" : pe["first_main"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "beginning",
+                 "step" : "draw", "player" : p},
+                {"event" : events.PHASE_ENDED, "phase" : "beginning",
+                 "player" : p},
+                {"event" : events.PHASE_BEGAN, "phase" : "first main",
+                 "player" : p},
             ])
 
             self.turn.next()
@@ -569,9 +598,12 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Combat", "Beginning of Combat"))
 
             self.assertTriggered([
-                {"event" : pe["first_main"]["ended"]},
-                {"event" : pe["combat"]["started"]},
-                {"event" : pe["combat"]["beginning"]["started"]},
+                {"event" : events.PHASE_ENDED, "phase" : "first main",
+                 "player" : p},
+                {"event" : events.PHASE_BEGAN, "phase" : "combat",
+                 "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "combat",
+                 "step" : "beginning", "player" : p},
             ])
 
             self.turn.next()
@@ -581,8 +613,10 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Combat", "Declare Attackers"))
 
             self.assertTriggered([
-                {"event" : pe["combat"]["beginning"]["ended"]},
-                {"event" : pe["combat"]["declare_attackers"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "combat",
+                 "step" : "beginning", "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "combat",
+                 "step" : "declare attackers", "player" : p},
             ])
 
             self.turn.next()
@@ -592,8 +626,10 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Combat", "Declare Blockers"))
 
             self.assertTriggered([
-                {"event" : pe["combat"]["declare_attackers"]["ended"]},
-                {"event" : pe["combat"]["declare_blockers"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "combat",
+                 "step" : "declare attackers", "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "combat",
+                 "step" : "declare blockers", "player" : p},
             ])
 
             self.turn.next()
@@ -603,8 +639,10 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Combat", "Combat Damage"))
 
             self.assertTriggered([
-                {"event" : pe["combat"]["declare_blockers"]["ended"]},
-                {"event" : pe["combat"]["combat_damage"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "combat",
+                 "step" : "declare blockers", "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "combat",
+                 "step" : "combat damage", "player" : p},
             ])
 
             self.turn.next()
@@ -614,8 +652,10 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Combat", "End of Combat"))
 
             self.assertTriggered([
-                {"event" : pe["combat"]["combat_damage"]["ended"]},
-                {"event" : pe["combat"]["end"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "combat",
+                 "step" : "combat damage", "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "combat",
+                 "step" : "end", "player" : p},
             ])
 
             self.turn.next()
@@ -625,9 +665,12 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Second Main", None))
 
             self.assertTriggered([
-                {"event" : pe["combat"]["end"]["ended"]},
-                {"event" : pe["combat"]["ended"]},
-                {"event" : pe["second_main"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "combat",
+                 "step" : "end", "player" : p},
+                {"event" : events.PHASE_ENDED, "phase" : "combat",
+                 "player" : p},
+                {"event" : events.PHASE_BEGAN, "phase" : "second main",
+                 "player" : p},
             ])
 
             self.turn.next()
@@ -637,9 +680,12 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Ending", "End"))
 
             self.assertTriggered([
-                {"event" : pe["second_main"]["ended"]},
-                {"event" : pe["ending"]["started"]},
-                {"event" : pe["ending"]["end"]["started"]},
+                {"event" : events.PHASE_ENDED, "phase" : "second main",
+                 "player" : p},
+                {"event" : events.PHASE_BEGAN, "phase" : "ending",
+                 "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "ending",
+                 "step" : "end", "player" : p},
             ])
 
             self.turn.next()
@@ -649,8 +695,10 @@ class TestTurnManager(GameTestCase):
             self.assertEqual(self.turn.info, ("Ending", "Cleanup"))
 
             self.assertTriggered([
-                {"event" : pe["ending"]["end"]["ended"]},
-                {"event" : pe["ending"]["cleanup"]["started"]},
+                {"event" : events.STEP_ENDED, "phase" : "ending",
+                 "step" : "end", "player" : p},
+                {"event" : events.STEP_BEGAN, "phase" : "ending",
+                 "step" : "cleanup", "player" : p},
             ])
 
             self.assertFalse(self.turn.end.called)
@@ -658,8 +706,10 @@ class TestTurnManager(GameTestCase):
             self.assertTrue(self.turn.end.called)
 
             self.assertTriggered([
-                {"event" : pe["ending"]["cleanup"]["ended"]},
-                {"event" : pe["ending"]["ended"]},
+                {"event" : events.STEP_ENDED, "phase" : "ending",
+                 "step" : "cleanup", "player" : p},
+                {"event" : events.PHASE_ENDED, "phase" : "ending",
+                 "player" : p},
             ])
 
     def test_empties_mana_pool_on_each_step(self):

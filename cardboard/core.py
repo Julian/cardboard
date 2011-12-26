@@ -6,8 +6,7 @@ Cardboard core
 from collections import deque
 from random import shuffle
 
-from cardboard import exceptions, types
-from cardboard.events import events
+from cardboard import events, exceptions, types
 from cardboard.frontend._none import NoFrontend
 from cardboard.phases import phases
 from cardboard.util import requirements
@@ -114,7 +113,7 @@ class Game(object):
         """
 
         self.require(started=False)
-        self.events.trigger(event=events["game"]["started"])
+        self.events.trigger(event=events.GAME_BEGAN, game=self)
         self._start()
 
         for player in self.players:
@@ -139,7 +138,7 @@ class Game(object):
 
         self.ended = True
         # TODO: Stop all other events
-        self.events.trigger(event=events["game"]["ended"])
+        self.events.trigger(event=events.GAME_ENDED, game=self)
 
     def grant_priority(self, to=None):
         """
@@ -205,7 +204,6 @@ class Game(object):
 def _make_color(name):
 
     _color = "_" + name
-    color_events = events["player"]["mana"][name]
 
     @property
     def color(self):
@@ -215,7 +213,6 @@ def _make_color(name):
     def color(self, amount):
 
         self.owner.game.require(started=True)
-
         current = getattr(self, name)
 
         if amount < 0:
@@ -224,9 +221,13 @@ def _make_color(name):
         elif amount == current:
             return
         elif amount > current:
-            self.owner.game.events.trigger(event=color_events["added"])
+            event = events.MANA_ADDED
         elif amount < current:
-            self.owner.game.events.trigger(event=color_events["removed"])
+            event = events.MANA_REMOVED
+
+        self.owner.game.events.trigger(
+            event=event, color=name, player=self.owner, amount=abs(amount)
+        )
 
         setattr(self, _color, amount)
 
@@ -345,10 +346,13 @@ class Player(object):
         if amount == self.life:
             return
         elif amount > self.life:
-            self.game.events.trigger(event=events["player"]["life"]["gained"])
+            event = events.LIFE_GAINED
         else:
-            self.game.events.trigger(event=events["player"]["life"]["lost"])
+            event = events.LIFE_LOST
 
+        self.game.events.trigger(
+            event=event, player=self, amount=abs(amount - self.life)
+        )
         self._life = amount
 
     @property
@@ -361,7 +365,7 @@ class Player(object):
         return team
 
     def concede(self):
-        self.game.events.trigger(event=events["player"]["conceded"])
+        self.game.events.trigger(event=events.PLAYER_CONCEDED, player=self)
         self.die(reason="concede")
 
     def die(self, reason):
@@ -385,7 +389,7 @@ class Player(object):
         self.require(dead=False)
 
         self.death_by = reason
-        self.game.events.trigger(event=events["player"]["died"])
+        self.game.events.trigger(event=events.PLAYER_DIED, player=self)
         self.game._check_for_win()
 
     def draw(self, cards=1):
@@ -406,13 +410,15 @@ class Player(object):
         else:
             for i in range(cards):
                 self.hand.add(self.library.pop())
-                self.game.events.trigger(event=events["player"]["draw"])
+                self.game.events.trigger(event=events.DRAW, player=self)
 
 
 class TurnManager(object):
     def __init__(self, game):
         self.game = game
 
+        self._first = None
+        self.number = None
         self.order = None
 
         self._phases = deque(phases)
@@ -456,6 +462,14 @@ class TurnManager(object):
     def _start(self):
         self.order = deque(self.game.players)
         shuffle(self.order)
+        self._first = self.active_player
+        self.number = 1
+
+        self.game.events.trigger(
+            event=events.PHASE_BEGAN, phase=self.phase.name.lower(),
+            player=self.active_player,
+        )
+
         self.step(self.game)
 
     def next(self):
@@ -470,12 +484,19 @@ class TurnManager(object):
             next_step = next(self._steps)
         except StopIteration:
 
-            event = events["game"]["turn"]["phase"][self.phase.name]["ended"]
-            self.game.events.trigger(event=event)
+            self.game.events.trigger(
+                event=events.PHASE_ENDED, phase=self.phase.name.lower(),
+                player=self.active_player,
+            )
 
             self._phases.rotate(-1)
             self._steps = iter(self.phase)
             self._step = next(self._steps)
+
+            self.game.events.trigger(
+                event=events.PHASE_BEGAN, phase=self.phase.name.lower(),
+                player=self.active_player,
+            )
 
         else:
             self._step = next_step
@@ -497,8 +518,18 @@ class TurnManager(object):
 
         self.game.require(started=True)
 
-        self.game.events.trigger(event=events["game"]["turn"]["ended"])
+        self.game.events.trigger(
+            event=events.TURN_ENDED, player=self.active_player,
+            number=self.number
+        )
         self.order.rotate(-1)
-        self.game.events.trigger(event=events["game"]["turn"]["started"])
+
+        if self.active_player == self._first:
+            self.number += 1
+
+        self.game.events.trigger(
+            event=events.TURN_BEGAN, player=self.active_player,
+            number=self.number
+        )
 
         # XXX: end from middle of a turn
