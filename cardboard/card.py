@@ -3,11 +3,10 @@ This module implements the Magic: The Gathering game :term:`objects`.
 
 """
 
-from cardboard import exceptions, types
+from cardboard import events, exceptions, types
 from cardboard.ability import AbilityNotImplemented
 from cardboard.cards import cards
 from cardboard.db import models, Session
-from cardboard.events import events
 from cardboard.util import requirements
 
 
@@ -38,7 +37,9 @@ def status(name, on_event, off_event, default=True):
 
             stupid_nonlocal[0] = turn_on
 
-            self.game.events.trigger(event=events["card"]["status"][event])
+            self.game.events.trigger(
+                event=events.STATUS_CHANGED, card=self, status=event
+            )
 
         return setter
 
@@ -47,8 +48,8 @@ def status(name, on_event, off_event, default=True):
 
 _tap = status("is_tapped", "tapped", "untapped", default=False)
 _flip = status("is_flipped", "flipped", "unflipped", default=False)
-_turn = status("is_face_up", "turned_face_up", "turned_face_down", True)
-_phase = status("is_phased_in", "phased_in", "phased_out", default=True)
+_turn = status("is_face_up", "face up", "face down", True)
+_phase = status("is_phased_in", "phased in", "phased out", default=True)
 
 
 class Card(object):
@@ -159,7 +160,9 @@ class Card(object):
                 raise exceptions.InvalidAction(err.format(self.owner))
 
         self.game.stack.add(Spell(self))
-        self.game.events.trigger(event=events["card"]["cast"])
+        self.game.events.trigger(  # XXX: isn't necessarily the right player
+            event=events.CARD_CAST, card=self, player=self.owner,
+        )
 
 
 class Spell(object):

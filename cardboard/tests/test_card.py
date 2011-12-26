@@ -2,9 +2,8 @@ import unittest
 
 import mock
 
-from cardboard import card as c, ability, exceptions, types
+from cardboard import card as c, ability, events, exceptions, types
 from cardboard.db import models as m
-from cardboard.events import events
 from cardboard.tests.util import GameTestCase
 
 
@@ -128,8 +127,11 @@ class TestCard(GameTestCase):
 
         # TODO: Test all types
 
-        self.creature.play()
-        self.instant.play()
+        for card in (self.creature, self.instant):
+            with self.assertTriggers(
+                event=events.CARD_CAST, card=card, player=card.owner
+            ):
+                card.play()
 
         # instant spell on top
         creature_spell, instant_spell = self.game.stack
@@ -140,8 +142,6 @@ class TestCard(GameTestCase):
         # controller is set to owner
         self.assertIs(creature_spell.card.controller, self.p4)
         self.assertIs(instant_spell.card.controller, self.p4)
-
-        self.assertLastEventsWere([events["card"]["cast"]])
 
 
 class TestMTGObjectFunctions(unittest.TestCase):
@@ -201,10 +201,8 @@ class TestStatus(GameTestCase):
         self.library[-1] = self.creature
         self.p3 = self.game.add_player(library=self.library)
 
-        self.evs = [("tapped", "untapped"),
-                    ("flipped", "unflipped"),
-                    ("turned_face_down", "turned_face_up"),
-                    ("phased_out", "phased_in")]
+        self.statuses = [("tapped", "untapped"), ("flipped", "unflipped"),
+                         ("face down", "face up"), ("phased out", "phased in")]
 
         self.fns = [(self.creature.tap, self.creature.untap),
                     (self.creature.flip, self.creature.unflip),
@@ -236,9 +234,11 @@ class TestStatus(GameTestCase):
     def test_toggle(self):
         self.game.battlefield.move(self.creature)
 
-        for (nondefault, _), (event, _) in zip(self.fns, self.evs):
-            nondefault()
-            self.assertLastEventsWere([events["card"]["status"][event]])
+        for (nondefault, _), (status, _) in zip(self.fns, self.statuses):
+            with self.assertTriggers(
+                event=events.STATUS_CHANGED, card=self.creature, status=status
+            ):
+                nondefault()
 
         self.assertTrue(self.creature.is_tapped)
         self.assertTrue(self.creature.is_flipped)
@@ -255,9 +255,11 @@ class TestStatus(GameTestCase):
         # didn't fire any events
         self.assertFalse(self.events.trigger.called)
 
-        for (_, default), (_, event) in zip(self.fns, self.evs):
-            default()
-            self.assertLastEventsWere([events["card"]["status"][event]])
+        for (_, default), (_, status) in zip(self.fns, self.statuses):
+            with self.assertTriggers(
+                event=events.STATUS_CHANGED, card=self.creature, status=status
+            ):
+                default()
 
         self.assertFalse(self.creature.is_tapped)
         self.assertFalse(self.creature.is_flipped)
