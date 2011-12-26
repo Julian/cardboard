@@ -8,11 +8,8 @@ Implements the turn structure mechanics (phases and steps).
 
 from collections import namedtuple
 
-from cardboard.events import events
+from cardboard import events
 from cardboard.cards import match
-
-
-phase_events = events["game"]["turn"]["phase"]
 
 
 def untap(game):
@@ -28,13 +25,18 @@ def untap(game):
 
     """
 
+    player = game.turn.active_player
+
     # XXX: Technically the rules say all this is "simultaneous".
     #      At some point that will probably matter, and we will need some tests
     #      and an implementation of that.
 
-    game.events.trigger(event=phase_events["beginning"]["untap"]["started"])
+    game.events.trigger(
+        event=events.STEP_BEGAN, phase="beginning",
+        step="untap", player=player,
+    )
 
-    for permanent in game.turn.active_player.battlefield:
+    for permanent in player.battlefield:
         if match.phases(permanent):
             if permanent.is_phased_in:
                 permanent.phase_out()
@@ -48,7 +50,10 @@ def untap(game):
     # XXX: Again, technically abilities can't activate / resolve here, they
     #      should be deferred until the upkeep.
 
-    game.events.trigger(event=phase_events["beginning"]["untap"]["ended"])
+    game.events.trigger(
+        event=events.STEP_ENDED, phase="beginning",
+        step="untap", player=player,
+    )
 
 
 def upkeep(game):
@@ -63,9 +68,17 @@ def upkeep(game):
 
     """
 
-    game.events.trigger(event=phase_events["beginning"]["upkeep"]["started"])
+    game.events.trigger(
+        event=events.STEP_BEGAN, phase="beginning",
+        step="upkeep", player=game.turn.active_player,
+    )
+
     game.grant_priority()
-    game.events.trigger(event=phase_events["beginning"]["upkeep"]["ended"])
+
+    game.events.trigger(
+        event=events.STEP_ENDED, phase="beginning",
+        step="upkeep", player=game.turn.active_player,
+    )
 
 
 def draw(game):
@@ -82,9 +95,18 @@ def draw(game):
     """
 
     game.turn.active_player.draw()
-    game.events.trigger(event=phase_events["beginning"]["draw"]["started"])
+
+    game.events.trigger(
+        event=events.STEP_BEGAN, phase="beginning",
+        step="draw", player=game.turn.active_player
+    )
+
     game.grant_priority()
-    game.events.trigger(event=phase_events["beginning"]["draw"]["ended"])
+
+    game.events.trigger(
+        event=events.STEP_ENDED, phase="beginning",
+        step="draw", player=game.turn.active_player,
+    )
 
 
 def _main(game):
@@ -97,9 +119,17 @@ def _main(game):
 
 
 def first_main(game):
-    game.events.trigger(event=phase_events["first_main"]["started"])
+    player = game.turn.active_player
+
+    game.events.trigger(
+        event=events.PHASE_BEGAN, phase="first main", player=player,
+    )
+
     _main(game)
-    game.events.trigger(event=phase_events["first_main"]["ended"])
+
+    game.events.trigger(
+        event=events.PHASE_ENDED, phase="first main", player=player,
+    )
 
 
 def beginning_of_combat(game):
@@ -108,9 +138,17 @@ def beginning_of_combat(game):
 
     """
 
-    game.events.trigger(event=phase_events["combat"]["beginning"]["started"])
+    game.events.trigger(
+        event=events.STEP_BEGAN, phase="combat",
+        step="beginning", player=game.turn.active_player
+    )
+
     game.grant_priority()
-    game.events.trigger(event=phase_events["combat"]["beginning"]["ended"])
+
+    game.events.trigger(
+        event=events.STEP_ENDED, phase="combat",
+        step="beginning", player=game.turn.active_player
+    )
 
 
 def declare_attackers(game):
@@ -120,7 +158,8 @@ def declare_attackers(game):
     """
 
     game.events.trigger(
-        event=phase_events["combat"]["declare_attackers"]["started"]
+        event=events.STEP_BEGAN, phase="combat",
+        step="declare attackers", player=game.turn.active_player
     )
 
     possible_attackers = {c for c in game.battlefield if c.can_attack}
@@ -143,8 +182,10 @@ def declare_attackers(game):
     #     card.tap()
 
     game.grant_priority()
+
     game.events.trigger(
-        event=phase_events["combat"]["declare_attackers"]["ended"]
+        event=events.STEP_ENDED, phase="combat",
+        step="declare attackers", player=game.turn.active_player
     )
 
 
@@ -155,11 +196,13 @@ def declare_blockers(game):
     """
 
     game.events.trigger(
-        event=phase_events["combat"]["declare_blockers"]["started"]
+        event=events.STEP_BEGAN, phase="combat",
+        step="declare blockers", player=game.turn.active_player
     )
 
     game.events.trigger(
-        event=phase_events["combat"]["declare_blockers"]["ended"]
+        event=events.STEP_ENDED, phase="combat",
+        step="declare blockers", player=game.turn.active_player
     )
 
 
@@ -170,11 +213,13 @@ def combat_damage(game):
     """
 
     game.events.trigger(
-        event=phase_events["combat"]["combat_damage"]["started"]
+        event=events.STEP_BEGAN, phase="combat",
+        step="combat damage", player=game.turn.active_player
     )
 
     game.events.trigger(
-        event=phase_events["combat"]["combat_damage"]["ended"]
+        event=events.STEP_ENDED, phase="combat",
+        step="combat damage", player=game.turn.active_player
     )
 
 
@@ -184,14 +229,28 @@ def end_of_combat(game):
 
     """
 
-    game.events.trigger(event=phase_events["combat"]["end"]["started"])
-    game.events.trigger(event=phase_events["combat"]["end"]["ended"])
+    game.events.trigger(
+        event=events.STEP_BEGAN, phase="combat",
+        step="end", player=game.turn.active_player
+    )
+    game.events.trigger(
+        event=events.STEP_ENDED, phase="combat",
+        step="end", player=game.turn.active_player
+    )
 
 
 def second_main(game):
-    game.events.trigger(event=phase_events["second_main"]["started"])
+    player = game.turn.active_player
+
+    game.events.trigger(
+        event=events.PHASE_BEGAN, phase="second main", player=player,
+    )
+
     _main(game)
-    game.events.trigger(event=phase_events["second_main"]["ended"])
+
+    game.events.trigger(
+        event=events.PHASE_ENDED, phase="second main", player=player,
+    )
 
 
 def end(game):
@@ -206,9 +265,17 @@ def end(game):
 
     """
 
-    game.events.trigger(event=phase_events["ending"]["end"]["started"])
+    game.events.trigger(
+        event=events.STEP_BEGAN, phase="ending",
+        step="end", player=game.turn.active_player
+    )
+
     game.grant_priority()
-    game.events.trigger(event=phase_events["ending"]["end"]["ended"])
+
+    game.events.trigger(
+        event=events.STEP_ENDED, phase="ending",
+        step="end", player=game.turn.active_player
+    )
 
 
 def cleanup(game):
@@ -221,7 +288,10 @@ def cleanup(game):
     # 2. XXX: All damage is removed and end of turn effects end.
     # 3. No players get priority # XXX: except for the exception in rule 514.3a
 
-    game.events.trigger(event=phase_events["ending"]["cleanup"]["started"])
+    game.events.trigger(
+        event=events.STEP_BEGAN, phase="ending",
+        step="cleanup", player=game.turn.active_player
+    )
 
     player = game.turn.active_player
     discard = len(player.hand) - player.hand_size
@@ -234,7 +304,10 @@ def cleanup(game):
         for card in selection:
             card.owner.graveyard.move(card)
 
-    game.events.trigger(event=phase_events["ending"]["cleanup"]["ended"])
+    game.events.trigger(
+        event=events.STEP_ENDED, phase="ending",
+        step="cleanup", player=game.turn.active_player
+    )
 
 
 class Phase(object):

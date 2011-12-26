@@ -2,8 +2,7 @@ import unittest
 
 import mock
 
-from cardboard import phases as p
-from cardboard.events import events
+from cardboard import events, phases as p
 from cardboard.frontend.testing import TestingFrontend
 from cardboard.tests.util import GameTestCase
 
@@ -91,8 +90,10 @@ class TestPhaseMechanics(GameTestCase):
             self.assertFalse(o.untap.called)
 
         self.assertTriggered([
-            events["game"]["turn"]["phase"]["beginning"]["untap"]["started"],
-            events["game"]["turn"]["phase"]["beginning"]["untap"]["ended"],
+            {"event" : events.STEP_BEGAN, "phase" : "beginning",
+             "step" : "untap", "player" : self.game.turn.active_player},
+            {"event" : events.STEP_ENDED, "phase" : "beginning",
+             "step" : "untap", "player" : self.game.turn.active_player},
         ])
 
         # XXX: Normally all untap. but effects can keep some from untapping.
@@ -110,8 +111,10 @@ class TestPhaseMechanics(GameTestCase):
         self.assertTrue(self.game.grant_priority.called)
 
         self.assertTriggered([
-            events["game"]["turn"]["phase"]["beginning"]["upkeep"]["started"],
-            events["game"]["turn"]["phase"]["beginning"]["upkeep"]["ended"],
+            {"event" : events.STEP_BEGAN, "phase" : "beginning",
+             "step" : "upkeep", "player" : self.game.turn.active_player},
+            {"event" : events.STEP_ENDED, "phase" : "beginning",
+             "step" : "upkeep", "player" : self.game.turn.active_player},
         ])
 
     def test_draw(self):
@@ -130,8 +133,10 @@ class TestPhaseMechanics(GameTestCase):
         self.assertTrue(self.game.grant_priority.called)
 
         self.assertTriggered([
-            events["game"]["turn"]["phase"]["beginning"]["draw"]["started"],
-            events["game"]["turn"]["phase"]["beginning"]["draw"]["ended"],
+            {"event" : events.STEP_BEGAN, "phase" : "beginning",
+             "step" : "draw", "player" : self.game.turn.active_player},
+            {"event" : events.STEP_ENDED, "phase" : "beginning",
+             "step" : "draw", "player" : self.game.turn.active_player},
         ])
 
     def test_main(self):
@@ -147,8 +152,10 @@ class TestPhaseMechanics(GameTestCase):
         self.assertTrue(self.game.grant_priority.called)
 
         self.assertTriggered([
-            events["game"]["turn"]["phase"]["first_main"]["started"],
-            events["game"]["turn"]["phase"]["first_main"]["ended"],
+            {"event" : events.PHASE_BEGAN, "phase" : "first main",
+             "player" : self.game.turn.active_player},
+            {"event" : events.PHASE_ENDED, "phase" : "first main",
+             "player" : self.game.turn.active_player},
         ])
 
         self.resetEvents()
@@ -158,8 +165,10 @@ class TestPhaseMechanics(GameTestCase):
         self.assertTrue(self.game.grant_priority.called)
 
         self.assertTriggered([
-            events["game"]["turn"]["phase"]["second_main"]["started"],
-            events["game"]["turn"]["phase"]["second_main"]["ended"],
+            {"event" : events.PHASE_BEGAN, "phase" : "second main",
+             "player" : self.game.turn.active_player},
+            {"event" : events.PHASE_ENDED, "phase" : "second main",
+             "player" : self.game.turn.active_player},
         ])
 
     def test_end(self):
@@ -175,8 +184,10 @@ class TestPhaseMechanics(GameTestCase):
         self.assertTrue(self.game.grant_priority.called)
 
         self.assertTriggered([
-            events["game"]["turn"]["phase"]["ending"]["end"]["started"],
-            events["game"]["turn"]["phase"]["ending"]["end"]["ended"],
+            {"event" : events.STEP_BEGAN, "phase" : "ending",
+             "step" : "end", "player" : self.game.turn.active_player},
+            {"event" : events.STEP_ENDED, "phase" : "ending",
+             "step" : "end", "player" : self.game.turn.active_player},
         ])
 
     def test_cleanup(self):
@@ -202,6 +213,8 @@ class TestPhaseMechanics(GameTestCase):
         # XXX: remove all damage
 
         self.assertTriggered([
-            events["game"]["turn"]["phase"]["ending"]["cleanup"]["started"],
-            events["game"]["turn"]["phase"]["ending"]["cleanup"]["ended"],
+            {"event" : events.STEP_BEGAN, "phase" : "ending",
+             "step" : "cleanup", "player" : self.game.turn.active_player},
+            {"event" : events.STEP_ENDED, "phase" : "ending",
+             "step" : "cleanup", "player" : self.game.turn.active_player},
         ])
