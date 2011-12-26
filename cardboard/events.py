@@ -1,4 +1,7 @@
 """
+.. module:: events
+    :synopsis: Defines the various game events.
+
 ======
 Events
 ======
@@ -23,24 +26,24 @@ Turn events are events that trigger when a game, turn, :term:`phase` or
 
     * game began / game ended
 
-        * event: ``"game began"`` / ``"game ended"``
+        * event: :py:const:`GAME_BEGAN` / :py:const:`GAME_ENDED`
         * game: ``<the game object>``
 
     * turn began / turn ended
 
-        * event: ``"turn began"`` / ``"turn ended"``
+        * event: :py:const:`TURN_BEGAN` / :py:const:`TURN_ENDED`
         * player: ``<player whose turn is beginning or ending>``
         * number: ``<the turn number>``
 
     * phase began / phase ended
 
-        * event: ``"phase began"`` / ``"phase ended"``
+        * event: :py:const:`PHASE_BEGAN` / :py:const:`PHASE_ENDED`
         * phase: ``<the beginning or ending phase>``
         * player: ``<the active player>``
 
     * step began / step ended
 
-        * event: ``"step began"`` / ``"step ended"``
+        * event: :py:const:`STEP_BEGAN` / :py:const:`STEP_ENDED`
         * phase: ``<the current phase>``
         * step: ``<the beginning or ending step>``
         * player: ``<the active player>``
@@ -56,35 +59,35 @@ the game.
 
         The player :term:`conceded <concede>` the game.
 
-            * event: ``"player conceded"``
+            * event: :py:const:`PLAYER_CONCEDED`
             * player: ``<the conceding player>``
 
     * died
 
         A player has died.
 
-            * event: ``"player died"``
+            * event: :py:const:`PLAYER_DIED`
             * player: ``<the dead parrot>``
 
     * draw
 
         A player :term:`drew <draw>` a card.
 
-            * event: ``"draw"``
+            * event: :py:const:`DRAW`
             * player: ``<the drawing player>``
 
     * life gained / life lost
 
         A player gained or lost :term:`life <life, life total>`.
 
-            * event: ``"life gained"`` / ``"life lost"``
+            * event: :py:const:`LIFE_GAINED` / :py:const:`LIFE_LOST`
             * player: ``<the player>``
             * amount: ``<the amount of life (always positive)>``
 
 Player events will also be triggered when a player adds or removes :term:`mana`
 from his :term:`mana pool`.  The mana event will be triggered with:
 
-    * event: ``"mana added"`` / ``"mana removed"``
+    * event: :py:const:`MANA_ADDED` / :py:const:`MANA_REMOVED`
     * color: ``"white"`` / ``"blue"`` / ``"black"`` / ``"red"`` / ``"green"`` /
       ``"colorless"``
     * player: ``<the player>``
@@ -109,7 +112,7 @@ The card and spell events are as follows:
 
         A card was :term:`cast`.
 
-            * event: ``"card cast"``
+            * event: :py:const:`CARD_CAST`
             * card: ``<the casted card>``
             * player: ``<the casting player>``
 
@@ -117,21 +120,21 @@ The card and spell events are as follows:
 
         A spell was :term:`countered <counter>`.
 
-            * event: ``"spell countered"``
+            * event: :py:const:`SPELL_COUNTERED`
             * spell: ``<the countered spell>``
 
     * resolved
 
         A spell :term:`resolved <resolve>`.
 
-            * event: ``"spell resolved"``
+            * event: :py:const:`SPELL_RESOLVED`
             * spell: ``<the resolving spell>``
 
 
 Additionally, cards have a number of :term:`status` change events that fire
 when a card's status changes. The triggered event will look like:
 
-    * event: ``"status changed"``
+    * event: :py:const:`STATUS_CHANGED`
     * card: ``<the card>``
     * status: one of:
         * ``"tapped"`` / ``"untapped"``
@@ -144,12 +147,12 @@ Finally, cards will trigger zone change events when their location is changed.
 The card will trigger an event with the zone it is leaving, followed by another
 when it enters its destination:
 
-    * event: ``"entered zone"`` / ``"left zone"``
+    * event: :py:const:`ENTERED_ZONE` / :py:const:`LEFT_ZONE`
     * card: ``<the card>``
     * zone: ``<the relevant zone>``
 
-
 """
+
 
 GAME_BEGAN, GAME_ENDED = "game began", "game ended"
 TURN_BEGAN, TURN_ENDED = "turn began", "turn ended"
