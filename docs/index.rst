@@ -10,7 +10,7 @@ Installation
 
 To install, run
 
-    python setup.py install
+    ``python setup.py install``
 
 
 Contents
