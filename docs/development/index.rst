@@ -7,6 +7,7 @@ Developer's Guide
     :maxdepth: 2
 
     events
+    frontend
     implementation_notes
 
 
