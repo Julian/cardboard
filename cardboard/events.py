@@ -61,10 +61,10 @@ the game.
 
 +--------------------------+--------------------+-----------------------------+
 | Event                    | Description        | Parameters                  |
-+======================+======================================================+
++==========================+====================+=============================+
 | :const:`PLAYER_CONCEDED` | A player conceded. | * ``player``:               |
 |                          |                    |   ``<the conceding player>``|
-+--------------------------+------------+-------------------------------------+
++--------------------------+--------------------+-----------------------------+
 | :const:`PLAYER_DIED`     | A player died.     | * ``player``:               |
 |                          |                    |   ``<the dying player>``    |
 |                          |                    | * ``reason``:               |
@@ -75,49 +75,40 @@ the game.
 |                          | a card.            |                             |
 |                          |                    |                             |
 +--------------------------+--------------------+-----------------------------+
-| :const:`TURN_ENDED`      | A turn ended.      | * ``player``:               |
-|                          |                    |   ``<the formere player>``  |
-|                          |                    | * ``number``: `rn number>`` |
+| :const:`LIFE_GAINED`     | A player gained    | * ``player``:               |
+|                          | life.              |   ``<the player>``          |
+|                          |                    | * ``amount``:               |
+|                          |                    |   ``<the amount of life>``  |
+|                          |                    |   (always positive)         |
 +--------------------------+--------------------+-----------------------------+
-| :const:`PHASE_BEGAN`     | A phase began.     | * ``phase``:                |
-|                          |                    |   ``<the beginne>``         |
-|                          |                    | * ``player``:               |
-|                          |                    |   ``<the active``           |
+| :const:`LIFE_LOST`       | A player lost life.| * ``player``:               |
+|                          |                    |   ``<the player>``          |
+|                          |                    | * ``amount``:               |
+|                          |                    |   ``<the amount of life>``  |
+|                          |                    |   (always positive)         |
 +--------------------------+--------------------+-----------------------------+
-| :const:`PHASE_ENDED`     | A phase ended.     | * ``phase``:                |
-|                          |                    |   ``<the beginne>``         |
+| :const:`MANA_ADDED`      | Mana was added to a| * ``color``:                |
+|                          | player's mana pool.|   ``"white"`` / ``"blue"`` /|
+|                          |                    |   ``"black"`` / ``"red"`` / |
+|                          |                    |   ``"green"`` /             |
+|                          |                    |   ``"colorless"``           |
 |                          |                    | * ``player``:               |
-|                          |                    |   ``<the active``           |
-+--------------------------+--------------------+-------------------------------------+
-
-draw
-^^^^
-
-A player :term:`drew <draw>` a card.
-
-* ``event``: :const:`DRAW`
-* ``player``: ``<the drawing player>``
-
-life gained / life lost
-^^^^^^^^^^^^^^^^^^^^^^^
-
-A player gained or lost :term:`life <life, life total>`.
-
-* ``event``: :const:`LIFE_GAINED` / :const:`LIFE_LOST`
-* ``player``: ``<the player>``
-* ``amount``: ``<the amount of life (always positive)>``
-
-mana changes
-^^^^^^^^^^^^
-
-Player events will also be triggered when a player adds or removes :term:`mana`
-from his :term:`mana pool`.  The mana event will be triggered with:
-
-* ``event``: :const:`MANA_ADDED` / :const:`MANA_REMOVED`
-* ``color``: ``"white"`` / ``"blue"`` / ``"black"`` / ``"red"`` /
-    ``"green"`` / ``"colorless"``
-* ``player``: ``<the player>``
-* ``amount``: ``<the amount of mana (always positive)>``
+|                          |                    |   ``<the player>``          |
+|                          |                    | * ``amount``:               |
+|                          |                    |   ``<the amount of mana>``  |
+|                          |                    |   (always positive)         |
++--------------------------+--------------------+-----------------------------+
+| :const:`MANA_REMOVED`    | Mana was removed   | * ``color``:                |
+|                          | from a player's    |   ``"white"`` / ``"blue"`` /|
+|                          | mana pool.         |   ``"black"`` / ``"red"`` / |
+|                          |                    |   ``"green"`` /             |
+|                          |                    |   ``"colorless"``           |
+|                          |                    | * ``player``:               |
+|                          |                    |   ``<the player>``          |
+|                          |                    | * ``amount``:               |
+|                          |                    |   ``<the amount of mana>``  |
+|                          |                    |   (always positive)         |
++--------------------------+--------------------+-----------------------------+
 
 
 Card & Spell Events
@@ -134,57 +125,46 @@ Card and spell events are triggered for events that are relevant to cards,
 
 The card and spell events are as follows:
 
-cast
-^^^^
 
-A card was :term:`cast`.
-
-* ``event``: :const:`CARD_CAST`
-* ``card``: ``<the casted card>``
-* ``player``: ``<the casting player>``
-
-countered
-^^^^^^^^^
-
-A spell was :term:`countered <counter>`.
-
-* ``event``: :const:`SPELL_COUNTERED`
-* ``spell``: ``<the countered spell>``
-
-resolved
-^^^^^^^^
-
-A spell :term:`resolved <resolve>`.
-
-* ``event``: :const:`SPELL_RESOLVED`
-* ``spell``: ``<the resolving spell>``
-
-
-status changes
-^^^^^^^^^^^^^^
-
-Additionally, cards have a number of :term:`status` change events that fire
-when a card's status changes. The triggered event will look like:
-
-* ``event``: :const:`STATUS_CHANGED`
-* ``card``: ``<the card>``
-* ``status``: one of:
-    * ``"tapped"`` / ``"untapped"``
-    * ``"flipped"`` / ``"unflipped"``
-    * ``"face up"`` / ``"face down"``
-    * ``"phased in"`` / ``"phased out"``
-
-
-zone changes
-^^^^^^^^^^^^
-
-Finally, cards will trigger zone change events when their location is changed.
-The card will trigger an event with the zone it is leaving, followed by another
-when it enters its destination:
-
-* ``event``: :const:`ENTERED_ZONE` / :const:`LEFT_ZONE`
-* ``card``: ``<the card>``
-* ``zone``: ``<the relevant zone>``
++--------------------------+--------------------+-----------------------------+
+| Event                    | Description        | Parameters                  |
++==========================+====================+=============================+
+| :const:`CARD_CAST`       | A card was         | * ``card``:                 |
+|                          | :term:`cast`.      |   ``<the casted card>``     |
+|                          |                    | * ``player``:               |
+|                          |                    |   ``<the casting player>``  |
++--------------------------+--------------------+-----------------------------+
+| :const:`SPELL_COUNTERED` | A spell was        | * ``spell``:                |
+|                          | :term:`countered   |   ``<the countered spell>`` |
+|                          | <counter>`.        |                             |
++--------------------------+--------------------+-----------------------------+
+| :const:`SPELL_RESOLVED`  | A spell            | * ``spell``:                |
+|                          | :term:`resolved    |   ``<the resolving spell>`` |
+|                          | <resolve>`.        |                             |
++--------------------------+--------------------+-----------------------------+
+| :const:`STATUS_CHANGED`  | A card's           | * ``card``:                 |
+|                          | :term:`status` was |   ``<the card>``            |
+|                          | changed.           | * ``status``:               |
+|                          |                    |                             |
+|                          |                    |   * ``"tapped"`` /          |
+|                          |                    |     ``"untapped"``          |
+|                          |                    |   * ``"flipped"`` /         |
+|                          |                    |     ``"unflipped"``         |
+|                          |                    |   * ``"face up"`` /         |
+|                          |                    |     ``"face down"``         |
+|                          |                    |   * ``"phased in"`` /       |
+|                          |                    |     ``"phased out"``        |
++--------------------------+--------------------+-----------------------------+
+| :const:`ENTERED_ZONE`    | A card entered a   | * ``card``:                 |
+|                          | new :term:`zone`.  |   ``<the moving card>``     |
+|                          |                    | * ``zone``:                 |
+|                          |                    |   ``<the entered zone>``    |
++--------------------------+--------------------+-----------------------------+
+| :const:`LEFT_ZONE`       | A card left a      | * ``card``:                 |
+|                          | :term:`zone`.      |   ``<the moving card>``     |
+|                          |                    | * ``zone``:                 |
+|                          |                    |   ``<the left zone>``       |
++--------------------------+--------------------+-----------------------------+
 
 """
 
