@@ -7,6 +7,8 @@ Developer's Guide
     :maxdepth: 2
 
     events
+    jsonrpc
+    implementing_a_card
     implementation_notes
 
 
@@ -18,8 +20,8 @@ Running the test suite can be accomplished by running
     ``trial cardboard``
 
 (or via your test runner of choice). In addition, all the integration tests are
-kept inside the :py:mod:`cardboard.integration_tests` package, so restricting
-to only the integration tests can be accomplished with
+kept inside the :mod:`cardboard.integration_tests` package, so restricting to
+only the integration tests can be accomplished with
 
     ``trial cardboard.integration_tests``
 
