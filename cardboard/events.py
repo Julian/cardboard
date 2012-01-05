@@ -25,27 +25,18 @@ Turn events are events that trigger when a game, turn, :term:`phase` or
 +----------------------+----------------+-------------------------------------+
 | Event                | Description    | Parameters                          |
 +======================+================+=====================================+
-| :const:`GAME_BEGAN`  | The game began.| * ``game``: ``<the game object>``   |
+| :const:`GAME_BEGAN`  | The game began | * ``game``: ``<the game object>``   |
++                      + (resp. ended). +                                     +
+| :const:`GAME_ENDED`  |                |                                     |
 +----------------------+----------------+-------------------------------------+
-| :const:`GAME_ENDED`  | The game ended.| * ``game``: ``<the game object>``   |
+| :const:`TURN_BEGAN`  | A turn began   | * ``player``:                       |
+|                      | (resp. ended). |   ``<the active player>``           |
+| :const:`TURN_ENDED`  |                | * ``number``: ``<the turn number>`` |
 +----------------------+----------------+-------------------------------------+
-| :const:`TURN_BEGAN`  | A turn began.  | * ``player``:                       |
-|                      |                |   ``<the active player>``           |
-|                      |                | * ``number``: ``<the turn number>`` |
-+----------------------+----------------+-------------------------------------+
-| :const:`TURN_ENDED`  | A turn ended.  | * ``player``:                       |
-|                      |                |   ``<the formerly active player>``  |
-|                      |                | * ``number``: ``<the turn number>`` |
-+----------------------+----------------+-------------------------------------+
-| :const:`PHASE_BEGAN` | A phase began. | * ``phase``:                        |
-|                      |                |   ``<the beginning phase>``         |
-|                      |                | * ``player``:                       |
-|                      |                |   ``<the active player>``           |
-+----------------------+----------------+-------------------------------------+
-| :const:`PHASE_ENDED` | A phase ended. | * ``phase``:                        |
-|                      |                |   ``<the beginning phase>``         |
-|                      |                | * ``player``:                       |
-|                      |                |   ``<the active player>``           |
+| :const:`PHASE_BEGAN` | A phase began  | * ``phase``:                        |
+|                      | (resp. ended). |   ``<the beginning phase>``         |
+| :const:`PHASE_ENDED` |                | * ``player``:                       |
+|                      |                |   ``<the relevant player>``         |
 +----------------------+----------------+-------------------------------------+
 
 
@@ -73,32 +64,15 @@ the game.
 |                          |                    |                             |
 +--------------------------+--------------------+-----------------------------+
 | :const:`LIFE_GAINED`     | A player gained    | * ``player``:               |
-|                          | life.              |   ``<the player>``          |
-|                          |                    | * ``amount``:               |
+|                          | or lost life.      |   ``<the player>``          |
+| :const:`LIFE_LOST`       |                    | * ``amount``:               |
 |                          |                    |   ``<the amount of life>``  |
 |                          |                    |   (always positive)         |
 +--------------------------+--------------------+-----------------------------+
-| :const:`LIFE_LOST`       | A player lost life.| * ``player``:               |
-|                          |                    |   ``<the player>``          |
-|                          |                    | * ``amount``:               |
-|                          |                    |   ``<the amount of life>``  |
-|                          |                    |   (always positive)         |
-+--------------------------+--------------------+-----------------------------+
-| :const:`MANA_ADDED`      | Mana was added to a| * ``color``:                |
-|                          | player's mana pool.|   ``"white"`` / ``"blue"`` /|
-|                          |                    |   ``"black"`` / ``"red"`` / |
-|                          |                    |   ``"green"`` /             |
-|                          |                    |   ``"colorless"``           |
-|                          |                    | * ``player``:               |
-|                          |                    |   ``<the player>``          |
-|                          |                    | * ``amount``:               |
-|                          |                    |   ``<the amount of mana>``  |
-|                          |                    |   (always positive)         |
-+--------------------------+--------------------+-----------------------------+
-| :const:`MANA_REMOVED`    | Mana was removed   | * ``color``:                |
-|                          | from a player's    |   ``"white"`` / ``"blue"`` /|
-|                          | mana pool.         |   ``"black"`` / ``"red"`` / |
-|                          |                    |   ``"green"`` /             |
+| :const:`MANA_ADDED`      | Mana was added to  | * ``color``:                |
+|                          | or removed from a  |   ``"white"`` / ``"blue"`` /|
+|                          | player's           |   ``"black"`` / ``"red"`` / |
+| :const:`MANA_REMOVED`    | :term:`mana pool`. |   ``"green"`` /             |
 |                          |                    |   ``"colorless"``           |
 |                          |                    | * ``player``:               |
 |                          |                    |   ``<the player>``          |
@@ -152,15 +126,10 @@ The card and spell events are as follows:
 |                          |                    |   * ``"phased in"`` /       |
 |                          |                    |     ``"phased out"``        |
 +--------------------------+--------------------+-----------------------------+
-| :const:`ENTERED_ZONE`    | A card entered a   | * ``card``:                 |
-|                          | new :term:`zone`.  |   ``<the moving card>``     |
-|                          |                    | * ``zone``:                 |
-|                          |                    |   ``<the entered zone>``    |
-+--------------------------+--------------------+-----------------------------+
-| :const:`LEFT_ZONE`       | A card left a      | * ``card``:                 |
-|                          | :term:`zone`.      |   ``<the moving card>``     |
-|                          |                    | * ``zone``:                 |
-|                          |                    |   ``<the left zone>``       |
+| :const:`ENTERED_ZONE`    | A card entered or  | * ``card``:                 |
+|                          | left a             |   ``<the moving card>``     |
+| :const:`LEFT_ZONE`       | :term:`zone`.      | * ``zone``:                 |
+|                          |                    |   ``<the relevant zone>``   |
 +--------------------------+--------------------+-----------------------------+
 
 """
