@@ -1,12 +1,13 @@
-=========
+#########
 Cardboard
-=========
+#########
 
-Cardboard is a Magic: The Gathering™ game engine.
+Cardboard is an unofficial
+`Magic: The Gathering™ <http://www.wizards.com/magic/>`_ game engine.
 
 
 Installation
-------------
+============
 
 To install, run
 
@@ -14,7 +15,7 @@ To install, run
 
 
 Contents
---------
+========
 
 .. toctree::
     :maxdepth: 2
@@ -25,7 +26,7 @@ Contents
 
 
 Indexes
--------
+=======
 
 * :ref:`genindex`
 * :ref:`modindex`

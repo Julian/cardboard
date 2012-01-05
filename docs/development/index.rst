@@ -1,6 +1,6 @@
-=================
+#################
 Developer's Guide
-=================
+#################
 
 
 .. toctree::
@@ -14,7 +14,7 @@ Developer's Guide
 
 
 Running the Test Suite
-----------------------
+======================
 
 Running the test suite can be accomplished by running
 

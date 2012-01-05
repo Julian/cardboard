@@ -2,9 +2,6 @@
 .. module:: events
     :synopsis: Defines the various game events.
 
-======
-Events
-======
 
 Whenever a game event occurs, the event handler will trigger an event. Game
 objects can subscribe and react to the events (see :doc:`implementing_a_card`
@@ -19,7 +16,7 @@ each event's respective parameters.
 
 
 Turn Events
------------
+===========
 
 Turn events are events that trigger when a game, turn, :term:`phase` or
 :term:`step` begins or ends.
@@ -53,7 +50,7 @@ Turn events are events that trigger when a game, turn, :term:`phase` or
 
 
 Player Events
--------------
+=============
 
 Player events are triggered for in-game events affecting a :term:`player` in
 the game.
@@ -112,7 +109,7 @@ the game.
 
 
 Card & Spell Events
--------------------
+===================
 
 Card and spell events are triggered for events that are relevant to cards,
 :term:`spells <spell>` and :term:`abilities <ability>`.

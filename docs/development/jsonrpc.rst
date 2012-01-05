@@ -1,6 +1,6 @@
-================
+****************
 The JSON RPC API
-================
+****************
 
 If you're looking to write a frontend for Cardboard, you'll need to be familiar
 with the JSON RPC call and response API it uses.
@@ -17,10 +17,9 @@ with the JSON RPC call and response API it uses.
     written for it.
     
     If you insist on knowing more, you can take a quick glance at the 
-    at the `official specification <http://jsonrpc.org/spec.html>`__ for JSON
-    RPC 2.0, or the `official specification
-    <http://tools.ietf.org/html/draft-zyp-json-schema-03>`__ for draft 3 of
-    JSON Schema.
+    official specification for `JSON RPC 2.0 <http://jsonrpc.org/spec.html>`__,
+    or the official specification for `JSON Schema Draft 3
+    <http://tools.ietf.org/html/draft-zyp-json-schema-03>`__.
 
 Communication with Cardboard involves listening for and responding to requests
 from the game engine. The types of requests and responses are divided into a
@@ -31,3 +30,8 @@ number of different namespaces.
     Each request and response object below is described by a JSON Schema
     object.
 
+Namespaces
+==========
+
+Game
+----
