@@ -174,9 +174,10 @@ class TestPlayer(GameTestCase):
         self.game.start()
         self.assertFalse(self.p1.dead)
 
-        event = {"event" : events.PLAYER_DIED, "player" : self.p1}
-        self.p1.die("test")
-        self.assertTriggered([event])
+        with self.assertTriggers(
+            event=events.PLAYER_DIED, player=self.p1, reason="test",
+        ):
+            self.p1.die("test")
 
         self.assertTrue(self.p1.dead)
         self.assertEqual(self.p1.death_by, "test")

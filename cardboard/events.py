@@ -24,29 +24,32 @@ Turn Events
 Turn events are events that trigger when a game, turn, :term:`phase` or
 :term:`step` begins or ends.
 
-    * game began / game ended
 
-        * ``event``: :const:`GAME_BEGAN` / :const:`GAME_ENDED`
-        * ``game``: ``<the game object>``
-
-    * turn began / turn ended
-
-        * ``event``: :const:`TURN_BEGAN` / :const:`TURN_ENDED`
-        * ``player``: ``<player whose turn is beginning or ending>``
-        * ``number``: ``<the turn number>``
-
-    * phase began / phase ended
-
-        * ``event``: :const:`PHASE_BEGAN` / :const:`PHASE_ENDED`
-        * ``phase``: ``<the beginning or ending phase>``
-        * ``player``: ``<the active player>``
-
-    * step began / step ended
-
-        * ``event``: :const:`STEP_BEGAN` / :const:`STEP_ENDED`
-        * ``phase``: ``<the current phase>``
-        * ``step``: ``<the beginning or ending step>``
-        * ``player``: ``<the active player>``
++----------------------+----------------+-------------------------------------+
+| Event                | Description    | Parameters                          |
++======================+================+=====================================+
+| :const:`GAME_BEGAN`  | The game began.| * ``game``: ``<the game object>``   |
++----------------------+----------------+-------------------------------------+
+| :const:`GAME_ENDED`  | The game ended.| * ``game``: ``<the game object>``   |
++----------------------+----------------+-------------------------------------+
+| :const:`TURN_BEGAN`  | A turn began.  | * ``player``:                       |
+|                      |                |   ``<the active player>``           |
+|                      |                | * ``number``: ``<the turn number>`` |
++----------------------+----------------+-------------------------------------+
+| :const:`TURN_ENDED`  | A turn ended.  | * ``player``:                       |
+|                      |                |   ``<the formerly active player>``  |
+|                      |                | * ``number``: ``<the turn number>`` |
++----------------------+----------------+-------------------------------------+
+| :const:`PHASE_BEGAN` | A phase began. | * ``phase``:                        |
+|                      |                |   ``<the beginning phase>``         |
+|                      |                | * ``player``:                       |
+|                      |                |   ``<the active player>``           |
++----------------------+----------------+-------------------------------------+
+| :const:`PHASE_ENDED` | A phase ended. | * ``phase``:                        |
+|                      |                |   ``<the beginning phase>``         |
+|                      |                | * ``player``:                       |
+|                      |                |   ``<the active player>``           |
++----------------------+----------------+-------------------------------------+
 
 
 Player Events
@@ -55,43 +58,66 @@ Player Events
 Player events are triggered for in-game events affecting a :term:`player` in
 the game.
 
-    * conceded
 
-        The player :term:`conceded <concede>` the game.
++--------------------------+--------------------+-----------------------------+
+| Event                    | Description        | Parameters                  |
++======================+======================================================+
+| :const:`PLAYER_CONCEDED` | A player conceded. | * ``player``:               |
+|                          |                    |   ``<the conceding player>``|
++--------------------------+------------+-------------------------------------+
+| :const:`PLAYER_DIED`     | A player died.     | * ``player``:               |
+|                          |                    |   ``<the dying player>``    |
+|                          |                    | * ``reason``:               |
+|                          |                    |   ``<a reason for death>``  |
++--------------------------+--------------------+-----------------------------+
+| :const:`DRAW`            | A player           | * ``player``:               |
+|                          | :term:`drew <draw>`|   ``<the drawing player>``  |
+|                          | a card.            |                             |
+|                          |                    |                             |
++--------------------------+--------------------+-----------------------------+
+| :const:`TURN_ENDED`      | A turn ended.      | * ``player``:               |
+|                          |                    |   ``<the formere player>``  |
+|                          |                    | * ``number``: `rn number>`` |
++--------------------------+--------------------+-----------------------------+
+| :const:`PHASE_BEGAN`     | A phase began.     | * ``phase``:                |
+|                          |                    |   ``<the beginne>``         |
+|                          |                    | * ``player``:               |
+|                          |                    |   ``<the active``           |
++--------------------------+--------------------+-----------------------------+
+| :const:`PHASE_ENDED`     | A phase ended.     | * ``phase``:                |
+|                          |                    |   ``<the beginne>``         |
+|                          |                    | * ``player``:               |
+|                          |                    |   ``<the active``           |
++--------------------------+--------------------+-------------------------------------+
 
-            * ``event``: :const:`PLAYER_CONCEDED`
-            * ``player``: ``<the conceding player>``
+draw
+^^^^
 
-    * died
+A player :term:`drew <draw>` a card.
 
-        A player has died.
+* ``event``: :const:`DRAW`
+* ``player``: ``<the drawing player>``
 
-            * ``event``: :const:`PLAYER_DIED`
-            * ``player``: ``<the dead parrot>``
+life gained / life lost
+^^^^^^^^^^^^^^^^^^^^^^^
 
-    * draw
+A player gained or lost :term:`life <life, life total>`.
 
-        A player :term:`drew <draw>` a card.
+* ``event``: :const:`LIFE_GAINED` / :const:`LIFE_LOST`
+* ``player``: ``<the player>``
+* ``amount``: ``<the amount of life (always positive)>``
 
-            * ``event``: :const:`DRAW`
-            * ``player``: ``<the drawing player>``
-
-    * life gained / life lost
-
-        A player gained or lost :term:`life <life, life total>`.
-
-            * ``event``: :const:`LIFE_GAINED` / :const:`LIFE_LOST`
-            * ``player``: ``<the player>``
-            * ``amount``: ``<the amount of life (always positive)>``
+mana changes
+^^^^^^^^^^^^
 
 Player events will also be triggered when a player adds or removes :term:`mana`
 from his :term:`mana pool`.  The mana event will be triggered with:
 
-    * ``event``: :const:`MANA_ADDED` / :const:`MANA_REMOVED`
-    * ``color``: ``"white"`` / ``"blue"`` / ``"black"`` / ``"red"`` /
-      ``"green"`` / ``"colorless"``
-    * ``player``: ``<the player>``
-    * ``amount``: ``<the amount of mana (always positive)>``
+* ``event``: :const:`MANA_ADDED` / :const:`MANA_REMOVED`
+* ``color``: ``"white"`` / ``"blue"`` / ``"black"`` / ``"red"`` /
+    ``"green"`` / ``"colorless"``
+* ``player``: ``<the player>``
+* ``amount``: ``<the amount of mana (always positive)>``
 
 
 Card & Spell Events
@@ -108,48 +134,57 @@ Card and spell events are triggered for events that are relevant to cards,
 
 The card and spell events are as follows:
 
-    * cast
+cast
+^^^^
 
-        A card was :term:`cast`.
+A card was :term:`cast`.
 
-            * ``event``: :const:`CARD_CAST`
-            * ``card``: ``<the casted card>``
-            * ``player``: ``<the casting player>``
+* ``event``: :const:`CARD_CAST`
+* ``card``: ``<the casted card>``
+* ``player``: ``<the casting player>``
 
-    * countered
+countered
+^^^^^^^^^
 
-        A spell was :term:`countered <counter>`.
+A spell was :term:`countered <counter>`.
 
-            * ``event``: :const:`SPELL_COUNTERED`
-            * ``spell``: ``<the countered spell>``
+* ``event``: :const:`SPELL_COUNTERED`
+* ``spell``: ``<the countered spell>``
 
-    * resolved
+resolved
+^^^^^^^^
 
-        A spell :term:`resolved <resolve>`.
+A spell :term:`resolved <resolve>`.
 
-            * ``event``: :const:`SPELL_RESOLVED`
-            * ``spell``: ``<the resolving spell>``
+* ``event``: :const:`SPELL_RESOLVED`
+* ``spell``: ``<the resolving spell>``
 
+
+status changes
+^^^^^^^^^^^^^^
 
 Additionally, cards have a number of :term:`status` change events that fire
 when a card's status changes. The triggered event will look like:
 
-    * ``event``: :const:`STATUS_CHANGED`
-    * ``card``: ``<the card>``
-    * ``status``: one of:
-        * ``"tapped"`` / ``"untapped"``
-        * ``"flipped"`` / ``"unflipped"``
-        * ``"face up"`` / ``"face down"``
-        * ``"phased in"`` / ``"phased out"``
+* ``event``: :const:`STATUS_CHANGED`
+* ``card``: ``<the card>``
+* ``status``: one of:
+    * ``"tapped"`` / ``"untapped"``
+    * ``"flipped"`` / ``"unflipped"``
+    * ``"face up"`` / ``"face down"``
+    * ``"phased in"`` / ``"phased out"``
 
+
+zone changes
+^^^^^^^^^^^^
 
 Finally, cards will trigger zone change events when their location is changed.
 The card will trigger an event with the zone it is leaving, followed by another
 when it enters its destination:
 
-    * ``event``: :const:`ENTERED_ZONE` / :const:`LEFT_ZONE`
-    * ``card``: ``<the card>``
-    * ``zone``: ``<the relevant zone>``
+* ``event``: :const:`ENTERED_ZONE` / :const:`LEFT_ZONE`
+* ``card``: ``<the card>``
+* ``zone``: ``<the relevant zone>``
 
 """
 

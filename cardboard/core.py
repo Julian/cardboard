@@ -389,7 +389,9 @@ class Player(object):
         self.require(dead=False)
 
         self.death_by = reason
-        self.game.events.trigger(event=events.PLAYER_DIED, player=self)
+        self.game.events.trigger(
+            event=events.PLAYER_DIED, player=self, reason=reason
+        )
         self.game._check_for_win()
 
     def draw(self, cards=1):

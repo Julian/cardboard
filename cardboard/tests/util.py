@@ -171,7 +171,7 @@ class EventHandlerTestCase(unittest.TestCase):
     def assertTriggers(self, **event):
         self.resetEvents()
         yield
-        self.assertLastEventsWere([event])
+        self.assertTriggered([event])
 
     def checkRequirements(self, method, *args, **kwargs):
         return _CheckRequirementsContext(self, method, *args, **kwargs)
