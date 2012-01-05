@@ -182,6 +182,7 @@ Card Types
     a. The card types are artifact, creature, enchantment, instant, land, plane, planeswalker, scheme, sorcery, tribal, and vanguard.
 
         .. _seealso::
+
             :ref:`card-types`
 
     b. Some objects have more than one card type (for example, an artifact creature). Such objects satisfy the criteria for any effect that applies to any of their card types.

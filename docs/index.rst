@@ -2,7 +2,7 @@
 Cardboard
 =========
 
-Cardboard is a Magic: The Gathering™ client.
+Cardboard is a Magic: The Gathering™ game engine.
 
 
 Installation

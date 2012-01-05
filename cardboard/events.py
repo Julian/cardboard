@@ -7,8 +7,8 @@ Events
 ======
 
 Whenever a game event occurs, the event handler will trigger an event. Game
-objects can subscribe and react to the events (see the :ref:`Implementing a
-Card` document for examples).
+objects can subscribe and react to the events (see :doc:`implementing_a_card`
+for examples).
 
 A triggered event may have one or more parameters that describe more specific
 information about the event. The names of these parameters are specific to the
@@ -26,27 +26,27 @@ Turn events are events that trigger when a game, turn, :term:`phase` or
 
     * game began / game ended
 
-        * event: :py:const:`GAME_BEGAN` / :py:const:`GAME_ENDED`
-        * game: ``<the game object>``
+        * ``event``: :const:`GAME_BEGAN` / :const:`GAME_ENDED`
+        * ``game``: ``<the game object>``
 
     * turn began / turn ended
 
-        * event: :py:const:`TURN_BEGAN` / :py:const:`TURN_ENDED`
-        * player: ``<player whose turn is beginning or ending>``
-        * number: ``<the turn number>``
+        * ``event``: :const:`TURN_BEGAN` / :const:`TURN_ENDED`
+        * ``player``: ``<player whose turn is beginning or ending>``
+        * ``number``: ``<the turn number>``
 
     * phase began / phase ended
 
-        * event: :py:const:`PHASE_BEGAN` / :py:const:`PHASE_ENDED`
-        * phase: ``<the beginning or ending phase>``
-        * player: ``<the active player>``
+        * ``event``: :const:`PHASE_BEGAN` / :const:`PHASE_ENDED`
+        * ``phase``: ``<the beginning or ending phase>``
+        * ``player``: ``<the active player>``
 
     * step began / step ended
 
-        * event: :py:const:`STEP_BEGAN` / :py:const:`STEP_ENDED`
-        * phase: ``<the current phase>``
-        * step: ``<the beginning or ending step>``
-        * player: ``<the active player>``
+        * ``event``: :const:`STEP_BEGAN` / :const:`STEP_ENDED`
+        * ``phase``: ``<the current phase>``
+        * ``step``: ``<the beginning or ending step>``
+        * ``player``: ``<the active player>``
 
 
 Player Events
@@ -59,46 +59,46 @@ the game.
 
         The player :term:`conceded <concede>` the game.
 
-            * event: :py:const:`PLAYER_CONCEDED`
-            * player: ``<the conceding player>``
+            * ``event``: :const:`PLAYER_CONCEDED`
+            * ``player``: ``<the conceding player>``
 
     * died
 
         A player has died.
 
-            * event: :py:const:`PLAYER_DIED`
-            * player: ``<the dead parrot>``
+            * ``event``: :const:`PLAYER_DIED`
+            * ``player``: ``<the dead parrot>``
 
     * draw
 
         A player :term:`drew <draw>` a card.
 
-            * event: :py:const:`DRAW`
-            * player: ``<the drawing player>``
+            * ``event``: :const:`DRAW`
+            * ``player``: ``<the drawing player>``
 
     * life gained / life lost
 
         A player gained or lost :term:`life <life, life total>`.
 
-            * event: :py:const:`LIFE_GAINED` / :py:const:`LIFE_LOST`
-            * player: ``<the player>``
-            * amount: ``<the amount of life (always positive)>``
+            * ``event``: :const:`LIFE_GAINED` / :const:`LIFE_LOST`
+            * ``player``: ``<the player>``
+            * ``amount``: ``<the amount of life (always positive)>``
 
 Player events will also be triggered when a player adds or removes :term:`mana`
 from his :term:`mana pool`.  The mana event will be triggered with:
 
-    * event: :py:const:`MANA_ADDED` / :py:const:`MANA_REMOVED`
-    * color: ``"white"`` / ``"blue"`` / ``"black"`` / ``"red"`` / ``"green"`` /
-      ``"colorless"``
-    * player: ``<the player>``
-    * amount: ``<the amount of mana (always positive)>``
+    * ``event``: :const:`MANA_ADDED` / :const:`MANA_REMOVED`
+    * ``color``: ``"white"`` / ``"blue"`` / ``"black"`` / ``"red"`` /
+      ``"green"`` / ``"colorless"``
+    * ``player``: ``<the player>``
+    * ``amount``: ``<the amount of mana (always positive)>``
 
 
 Card & Spell Events
 -------------------
 
 Card and spell events are triggered for events that are relevant to cards,
-:term:`spells <spell>` and :term`abilities <ability>`.
+:term:`spells <spell>` and :term:`abilities <ability>`.
 
     .. note::
 
@@ -112,31 +112,31 @@ The card and spell events are as follows:
 
         A card was :term:`cast`.
 
-            * event: :py:const:`CARD_CAST`
-            * card: ``<the casted card>``
-            * player: ``<the casting player>``
+            * ``event``: :const:`CARD_CAST`
+            * ``card``: ``<the casted card>``
+            * ``player``: ``<the casting player>``
 
     * countered
 
         A spell was :term:`countered <counter>`.
 
-            * event: :py:const:`SPELL_COUNTERED`
-            * spell: ``<the countered spell>``
+            * ``event``: :const:`SPELL_COUNTERED`
+            * ``spell``: ``<the countered spell>``
 
     * resolved
 
         A spell :term:`resolved <resolve>`.
 
-            * event: :py:const:`SPELL_RESOLVED`
-            * spell: ``<the resolving spell>``
+            * ``event``: :const:`SPELL_RESOLVED`
+            * ``spell``: ``<the resolving spell>``
 
 
 Additionally, cards have a number of :term:`status` change events that fire
 when a card's status changes. The triggered event will look like:
 
-    * event: :py:const:`STATUS_CHANGED`
-    * card: ``<the card>``
-    * status: one of:
+    * ``event``: :const:`STATUS_CHANGED`
+    * ``card``: ``<the card>``
+    * ``status``: one of:
         * ``"tapped"`` / ``"untapped"``
         * ``"flipped"`` / ``"unflipped"``
         * ``"face up"`` / ``"face down"``
@@ -147,9 +147,9 @@ Finally, cards will trigger zone change events when their location is changed.
 The card will trigger an event with the zone it is leaving, followed by another
 when it enters its destination:
 
-    * event: :py:const:`ENTERED_ZONE` / :py:const:`LEFT_ZONE`
-    * card: ``<the card>``
-    * zone: ``<the relevant zone>``
+    * ``event``: :const:`ENTERED_ZONE` / :const:`LEFT_ZONE`
+    * ``card``: ``<the card>``
+    * ``zone``: ``<the relevant zone>``
 
 """
 
