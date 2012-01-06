@@ -69,9 +69,9 @@ the game.
 |                          |                    |   ``<the amount of life>``  |
 |                          |                    |   (always positive)         |
 +--------------------------+--------------------+-----------------------------+
-| :const:`MANA_ADDED`      | Mana was added to  | * ``color``:                |
-|                          | or removed from a  |   ``"white"`` / ``"blue"`` /|
-|                          | player's           |   ``"black"`` / ``"red"`` / |
+| :const:`MANA_ADDED`      | :term:`Mana` was   | * ``color``:                |
+|                          | added to or removed|   ``"white"`` / ``"blue"`` /|
+|                          | from a player's    |   ``"black"`` / ``"red"`` / |
 | :const:`MANA_REMOVED`    | :term:`mana pool`. |   ``"green"`` /             |
 |                          |                    |   ``"colorless"``           |
 |                          |                    | * ``player``:               |
