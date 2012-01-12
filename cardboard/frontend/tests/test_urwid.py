@@ -43,7 +43,7 @@ class TestLayout(unittest.TestCase):
         self.assertIsNone(overlay.top_w.header)
 
         # focus is on the buttons by default
-        self.assertIs(overlay.top_w.focus_part, "footer")
+        self.assertEqual(overlay.top_w.focus_part, "footer")
 
         # clicking the button exits the overlay
         overlay.top_w.footer.base_widget.cells[0].keypress((15,), "enter")
@@ -53,7 +53,7 @@ class TestLayout(unittest.TestCase):
         self.u.show_overlay(edit, title=u"Hey", focus_buttons=False)
 
         overlay = self.u.loop.widget
-        self.assertIs(overlay.top_w.focus_part, "body")
+        self.assertEqual(overlay.top_w.focus_part, "body")
         self.assertEqual(overlay.top_w.header.base_widget.text, u"Hey")
 
     def test_active_card(self):
