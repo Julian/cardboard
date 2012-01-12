@@ -28,6 +28,7 @@ setup(
         "SQLAlchemy",
         "Twisted",
         # "jinja2",
+        "jsonschema",
         # "mock",
         "panglery",
         "urwid >= 1.0.2",
