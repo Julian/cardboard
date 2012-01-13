@@ -30,8 +30,13 @@ class MethodNotFound(JSONRPCError):
     message = "Message not found"
 
 
-class InternalError(JSONRPCError):
+class InvalidParams(JSONRPCError):
     code = -32602
+    message = "Invalid params"
+
+
+class InternalError(JSONRPCError):
+    code = -32603
     message = "Internal error"
 
 
@@ -100,4 +105,17 @@ def _received_result(recv):
 def _received_request(recv):
     if "method" not in recv:
         raise InvalidRequest("method")
+    params = recv.get("params", [])
+
+    try:
+        params.keys
+    except AttributeError:
+        try:
+            iter(params)
+        except TypeError:
+            raise InvalidParams(params)
+        else:
+            recv["args"], recv["kwargs"] = params, {}
+    else:
+        recv["args"], recv["kwargs"] = [], params
     return recv

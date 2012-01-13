@@ -35,13 +35,36 @@ class TestJSONRPCLib(unittest.TestCase):
              "method" : "bar", "params" : [1, 2, "foo"]}
         )
 
-    def assertInvalid(self, req):
-        with self.assertRaises(j.InvalidRequest):
-            j.received(req)
+    def test_received_request(self):
+        r = {"jsonrpc" : "2.0", "id" : "1", "method": "foo"}
+        self.assertEqual(
+            j.received(json.dumps(r)),
+            {"jsonrpc" : "2.0", "id" : "1", "method" : "foo",
+             "args" : [], "kwargs" : {}},
+        )
 
-    def test_received(self):
+        r = {"jsonrpc" : "2.0", "id" : "2", "method": "bar", "params" : [1, 2]}
+        self.assertEqual(
+            j.received(json.dumps(r)),
+            {"jsonrpc" : "2.0", "id" : "2", "method" : "bar",
+             "params" : [1, 2], "args" : [1, 2], "kwargs" : {}},
+        )
+
+        r = {"jsonrpc" : "2.0", "id" : "3",
+             "method": "quux", "params" : {"foo" : 2}}
+        self.assertEqual(
+            j.received(json.dumps(r)),
+            {"jsonrpc" : "2.0", "id" : "3", "method" : "quux",
+             "params" : {"foo" : 2}, "args" : [], "kwargs" : {"foo" : 2}},
+        )
+
+        with self.assertRaises(j.InvalidParams):
+            r = {"jsonrpc" : "2.0", "id" : "4", "method": "qu", "params" : 2}
+            j.received(json.dumps(r))
+
+    def test_received_response(self):
         r = {"jsonrpc" : "2.0", "id" : "1", "result": [1, 2, 3]}
-        self.assertEqual(r, j.received(json.dumps(r)))
+        self.assertEqual(j.received(json.dumps(r)), r)
 
         with self.assertRaises(j.ParseError):
             j.received("bigboom")
