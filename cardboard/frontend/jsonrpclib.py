@@ -81,7 +81,7 @@ def received(data):
         raise ParseError()
 
     if "jsonrpc" not in recv:
-        raise InvalidRequest("jsonrpc")
+        raise InvalidRequest({"reason" : "jsonrpc"})
 
     if "result" in recv or "error" in recv:
         return _received_result(recv)
@@ -91,10 +91,12 @@ def received(data):
 
 def _received_result(recv):
     if "id" not in recv:
-        raise InvalidRequest("id")
+        raise InvalidRequest({"reason" : "id"})
 
     if "result" in recv and "error" in recv:
-        raise InvalidRequest("Cannot contain both 'result' and 'error'")
+        raise InvalidRequest(
+            {"reason" : "Cannot contain both 'result' and 'error'"}
+        )
     elif "result" in recv:
         result = recv["result"]
     elif "error" in recv:
@@ -104,7 +106,7 @@ def _received_result(recv):
 
 def _received_request(recv):
     if "method" not in recv:
-        raise InvalidRequest("method")
+        raise InvalidRequest({"reason" : "method"})
     params = recv.get("params", [])
 
     try:
@@ -113,7 +115,9 @@ def _received_request(recv):
         try:
             iter(params)
         except TypeError:
-            raise InvalidParams(params)
+            raise InvalidParams(
+                {"reason" : "{!r} is not dict or list-like".format(params)}
+            )
         else:
             recv["args"], recv["kwargs"] = params, {}
     else:
