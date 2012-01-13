@@ -5,7 +5,7 @@ from twisted.test import proto_helpers
 from twisted.trial import unittest
 import mock
 
-from cardboard.frontend import jsonrpc
+from cardboard.frontend import jsonrpc, jsonrpclib
 
 
 class TestJSONRPC(unittest.TestCase):
@@ -51,6 +51,7 @@ class TestJSONRPC(unittest.TestCase):
     def test_unsolicited_result(self):
         receive = {"jsonrpc" : "2.0", "id" :  "1", "result" : [2, 3, "bar"]}
         self.proto.dataReceived(json.dumps(receive))
+        # XXX: test log.msg
 
     def test_received_notify(self):
         receive = {"jsonrpc" : "2.0", "method" : "foo"}
@@ -64,7 +65,7 @@ class TestJSONRPC(unittest.TestCase):
     def test_received_notify_no_method(self):
         receive = {"jsonrpc" : "2.0", "method" : "quux"}
         self.proto.dataReceived(json.dumps(receive))
-        errors = self.flushLoggedErrors(KeyError)
+        errors = self.flushLoggedErrors(jsonrpclib.MethodNotFound)
         self.assertEqual(len(errors), 1)
 
     def test_received_notify_wrong_param_type(self):
@@ -94,3 +95,29 @@ class TestJSONRPC(unittest.TestCase):
         self.proto.dataReceived(json.dumps(receive))
         self.deferred.callback(27)
         self.assertSent({"jsonrpc" : "2.0", "id" : "3", "result" : 27})
+
+    def test_received_request_no_method(self):
+        receive = {"jsonrpc" : "2.0", "id" : "3", "method" : "quux"}
+        self.proto.dataReceived(json.dumps(receive))
+        errors = self.flushLoggedErrors(jsonrpclib.MethodNotFound)
+        self.assertEqual(len(errors), 1)
+
+        sent = json.loads(self.tr.value())
+        self.assertIn("error", sent)
+        self.assertEqual(sent["error"]["code"], jsonrpclib.MethodNotFound.code)
+
+    def test_received_request_error(self):
+        receive = {
+            "jsonrpc" : "2.0", "id" : "1", "method" : "foo", "params" : [1, 2]
+        }
+        self.proto.dataReceived(json.dumps(receive))
+
+        response = json.loads(self.tr.value())
+
+        self.assertNotIn("result", response)
+        self.assertEqual(response["id"], "1")
+        self.assertEqual(response["error"]["data"]["exception"], "TypeError")
+        self.assertTrue(response["error"]["data"]["traceback"])
+
+        errors = self.flushLoggedErrors(TypeError)
+        self.assertEqual(len(errors), 1)

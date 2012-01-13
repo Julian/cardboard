@@ -45,31 +45,35 @@ class JSONRPC(protocol.Protocol):
         d.callback(response["result"])
 
     def _received_notify_request(self, nr):
-        try:
-            method = self.exposed[nr["method"]]
-        except KeyError:
-            log.err()
-            return
+        id, args, kwargs = nr.get("id"), nr["args"], nr["kwargs"]
+        method = self.exposed.get(nr["method"])
+        is_notification = id is None
 
-        params = nr.get("params", [])
-        if isinstance(params, list):
-            args, kwargs = params, {}
-        elif isinstance(params, dict):
-            args, kwargs = (), params
-        else:
-            log.err(TypeError("{!r} is not a list or dict".format(params)))
-            return
+        if method is None:
+            err = jsonrpclib.MethodNotFound(nr["method"])
+            log.err(err)
 
-        id = nr.get("id")
-        if id is None:
+            if is_notification:
+                return
+            else:
+                return self._send(jsonrpclib.error(id, err))
+
+        if is_notification:
             try:
                 method(*args, **kwargs)
             except:
                 log.err()
             return
 
-        defer.maybeDeferred(method, *args, **kwargs).addCallback(
-            lambda result : jsonrpclib.response(id, result)
+        def errback(failure):
+            log.err(failure)
+            return jsonrpclib.error(id, jsonrpclib.InternalError({
+                "exception" : failure.type.__name__,
+                "traceback" : failure.getTraceback()
+            }))
+
+        defer.maybeDeferred(method, *args, **kwargs).addCallbacks(
+            lambda result : jsonrpclib.response(id, result), errback
         ).addCallback(self._send)
 
     def _send(self, obj):
