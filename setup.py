@@ -20,9 +20,25 @@ setup(
     license="MIT/X",
     url="http://github.com/Julian/Cardboard",
     long_description = long_description,
-    packages=["cardboard", "cardboard.cards", "cardboard.db",
-                "cardboard.frontend", "cardboard.tests"],
     scripts=["bin/cardboard"],
+
+    packages=[
+        "cardboard",
+        "cardboard.integration_tests",
+        "cardboard.tests",
+
+        "cardboard.cards",
+        "cardboard.cards.tests",
+        "cardboard.cards.sets",
+        "cardboard.cards.sets.tests",
+
+        "cardboard.db",
+        "cardboard.db.tests",
+
+        "cardboard.frontend",
+        "cardboard.frontend.tests",
+    ],
+
     install_requires=[
         "Minerva",
         "SQLAlchemy",
