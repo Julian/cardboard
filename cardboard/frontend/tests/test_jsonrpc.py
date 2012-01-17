@@ -1,6 +1,7 @@
 import json
 
 from twisted.internet import defer
+from twisted.python import failure
 from twisted.test import proto_helpers
 from twisted.trial import unittest
 import mock
@@ -30,6 +31,11 @@ class TestJSONRPC(unittest.TestCase):
         self.assertEqual(json.loads(self.tr.value()), expected)
 
     def test_notify(self):
+        """
+        notify() sends a valid JSON RPC notification.
+
+        """
+
         self.proto.notify("foo")
         self.assertSent({"method" : "foo", "params" : []})
 
@@ -39,6 +45,11 @@ class TestJSONRPC(unittest.TestCase):
         self.assertSent({"method" : "bar", u"params" : [1, 2, "baz"]})
 
     def test_request(self):
+        """
+        request() sends a valid JSON RPC request and returns a deferred.
+
+        """
+
         d = self.proto.request("foo")
         self.assertSent({"id" : "1", "method" : "foo", "params" : []})
 
@@ -48,10 +59,85 @@ class TestJSONRPC(unittest.TestCase):
         self.proto.dataReceived(json.dumps(receive))
         return d
 
+    def test_unhandled_error(self):
+        """
+        An unhandled error gets logged and disconnects the transport.
+
+        """
+
+        v = failure.Failure(ValueError("Hey a value error"))
+        self.proto.unhandled_error(v)
+        self.assertTrue(self.tr.disconnecting)
+
+        errors = self.flushLoggedErrors(ValueError)
+        self.assertEqual(errors, [v])
+
+    def test_invalid_json(self):
+        """
+        Invalid JSON causes a JSON RPC ParseError and disconnects.
+
+        """
+
+        self.proto.dataReceived("[1,2,")
+        self.assertTrue(self.tr.disconnecting)
+
+        err = {"id" : None, "error" : jsonrpclib.ParseError().to_response()}
+        self.assertSent(err)
+
+        errors = self.flushLoggedErrors(jsonrpclib.ParseError)
+        self.assertEqual(len(errors), 1)
+
+    def test_invalid_request(self):
+        """
+        An invalid request causes a JSON RPC InvalidRequest and disconnects.
+
+        """
+
+        self.proto.dataReceived(json.dumps({"id" : 12}))
+        self.assertTrue(self.tr.disconnecting)
+
+        err = jsonrpclib.InvalidRequest({"reason" : "jsonrpc"})
+        self.assertSent({"id" : None, "error" : err.to_response()})
+
+        errors = self.flushLoggedErrors(jsonrpclib.InvalidRequest)
+        self.assertEqual(len(errors), 1)
+
     def test_unsolicited_result(self):
+        """
+        An incoming result for an id that does not exist raises an error.
+
+        """
+
         receive = {"jsonrpc" : "2.0", "id" :  "1", "result" : [2, 3, "bar"]}
         self.proto.dataReceived(json.dumps(receive))
-        # XXX: test log.msg
+
+        self.assertTrue(self.tr.disconnecting)
+
+        err = jsonrpclib.InternalError({
+            "exception" : "KeyError", "message" : "u'1'",
+        })
+        expect = {"jsonrpc" : "2.0", "id" : "1", "error" : err.to_response()}
+        sent = json.loads(self.tr.value())
+        tb = sent["error"]["data"].pop("traceback")
+
+        self.assertEqual(sent, expect)
+        self.assertTrue(tb)
+
+        # TODO: Raises original exception. Do we want InternalError instead?
+        errors = self.flushLoggedErrors(KeyError)
+        self.assertEqual(len(errors), 1)
+
+    def test_error_result(self):
+        for id, error in enumerate(jsonrpclib.PROTOCOL_ERRORS.itervalues(), 1):
+            d = self.proto.request("foo")
+            d.addErrback(lambda fail : self.assertEqual(fail.type, error))
+
+            receive = {"jsonrpc" : "2.0", "id" : str(id), "error" : {}}
+            receive["error"] = {"code" : error.code, "message" : error.message}
+            self.proto.dataReceived(json.dumps(receive))
+
+            errors = self.flushLoggedErrors(error)
+            self.assertEqual(len(errors), 1)
 
     def test_received_notify(self):
         receive = {"jsonrpc" : "2.0", "method" : "foo"}

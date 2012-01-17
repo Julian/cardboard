@@ -40,6 +40,14 @@ class InternalError(JSONRPCError):
     message = "Internal error"
 
 
+class ApplicationError(JSONRPCError):
+    def __init__(self, code, message, data=None, *args, **kwargs):
+        super(ApplicationError, self).__init__(data=data, *args, **kwargs)
+
+        self.code = code
+        self.message = message
+
+
 class ServerError(JSONRPCError):
     message = "Server error"
 
@@ -51,13 +59,23 @@ class ServerError(JSONRPCError):
         self.code = code
 
 
-_ERRORS = {ParseError, InvalidRequest, MethodNotFound, InternalError}
-PROTOCOL_ERRORS = {error.code : error for error in _ERRORS}
+class InvalidResponse(JSONRPCError):
+    pass
 
 
-def error(id, err):
-    err = {"jsonrpc" : "2.0", "id" : id, "error" : err.to_response()}
-    return json.dumps(err)
+_e = {ParseError, InvalidRequest, MethodNotFound, InvalidParams, InternalError}
+PROTOCOL_ERRORS = {error.code : error for error in _e}
+
+
+def error(id, failure):
+    tr = getattr(failure.value, "to_response", None)
+    if tr is None:
+        tr = InternalError({
+            "message" : failure.getErrorMessage(),
+            "exception" : failure.type.__name__,
+            "traceback" : failure.getTraceback(),
+        }).to_response
+    return json.dumps({"jsonrpc" : "2.0", "id" : id, "error" : tr()})
 
 
 def notify(method, params=()):
@@ -74,26 +92,19 @@ def response(id, result):
     return json.dumps({"jsonrpc" : "2.0", "id" : id, "result" : result})
 
 
-def received(data):
+def loads(data):
     try:
-        recv = json.loads(data)
+        return json.loads(data)
     except ValueError:
         raise ParseError()
 
+
+def received_result(recv):
     if "jsonrpc" not in recv:
         raise InvalidRequest({"reason" : "jsonrpc"})
-
-    if "result" in recv or "error" in recv:
-        return _received_result(recv)
-    else:
-        return _received_request(recv)
-
-
-def _received_result(recv):
-    if "id" not in recv:
+    elif "id" not in recv:
         raise InvalidRequest({"reason" : "id"})
-
-    if "result" in recv and "error" in recv:
+    elif "result" in recv and "error" in recv:
         raise InvalidRequest(
             {"reason" : "Cannot contain both 'result' and 'error'"}
         )
@@ -101,13 +112,37 @@ def _received_result(recv):
         result = recv["result"]
     elif "error" in recv:
         err = recv["error"]
+
+        try:
+            code, message = int(err["code"]), err["message"]
+        except (KeyError, TypeError, ValueError) as e:
+            raise InvalidResponse(e.args[0])
+        data = err.get("data")
+
+        if code in PROTOCOL_ERRORS:
+            raise PROTOCOL_ERRORS[code](data=data)
+        else:
+            try:
+                err = ServerError(code=code, data=data)
+            except ValueError:
+                err = ApplicationError(code=code, message=message, data=data)
+            raise err
+    else:
+        raise InvalidRequest({"reason" : "error"})
     return recv
 
 
-def _received_request(recv):
-    if "method" not in recv:
+def received_request(recv, methods):
+    if "jsonrpc" not in recv:
+        raise InvalidRequest({"reason" : "jsonrpc"})
+    elif "method" not in recv:
         raise InvalidRequest({"reason" : "method"})
+
+    method = recv["method"]
     params = recv.get("params", [])
+
+    if method not in methods:
+        raise MethodNotFound({"method" : method})
 
     try:
         params.keys

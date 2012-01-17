@@ -7,10 +7,10 @@ All of the implementations I found were either resource-based or really ugly.
 
 import itertools
 
-from twisted.internet import defer, error, protocol
-from twisted.python import log
+from jsonschema import validate
+from twisted.internet import defer, protocol
+from twisted.python import failure, log
 from zope.interface import implements
-import jsonschema
 
 from cardboard.frontend import jsonrpclib, network
 
@@ -26,58 +26,54 @@ class JSONRPC(protocol.Protocol):
         self._requests = {}
 
     def dataReceived(self, data):
-        received = jsonrpclib.received(data)
+        try:
+            received = jsonrpclib.loads(data)
+        except jsonrpclib.ParseError:
+            return self.unhandled_error(failure.Failure())
 
-        if "result" in data:
+        if "result" in received or "error" in received:
             return self._received_result(received)
-        elif "error" in data:
-            return self._received_error(received)
         else:
-            return self._received_notify_request(received)
+            return self._received_request(received)
 
-    def _received_result(self, response):
-        d = self._requests.get(response["id"])
+    def _received_result(self, result):
+        defer.execute(jsonrpclib.received_result, result).addCallback(
+            lambda res : self._requests[res["id"]].callback(res["result"])
+        ).addErrback(self.unhandled_error, id=result.get("id"))
 
-        if d is None:
-            log.msg("Received unsolicited response: {!r}".format(response))
-            return
+    def _received_request(self, request):
+        try:
+            req = jsonrpclib.received_request(request, self.exposed)
+        except:
+            return self.unhandled_error(failure.Failure())
 
-        d.callback(response["result"])
+        id = request.get("id")
+        d = defer.maybeDeferred(
+            self.exposed[req["method"]], *req["args"], **req["kwargs"]
+        )
 
-    def _received_notify_request(self, nr):
-        id, args, kwargs = nr.get("id"), nr["args"], nr["kwargs"]
-        method = self.exposed.get(nr["method"])
-        is_notification = id is None
+        if id is not None:
+            d.addCallback(lambda res : jsonrpclib.response(id, res))
 
-        if method is None:
-            err = jsonrpclib.MethodNotFound(nr["method"])
-            log.err(err)
+        d.addErrback(self.unhandled_error, id=id)
 
-            if is_notification:
-                return
-            else:
-                return self._send(jsonrpclib.error(id, err))
-
-        if is_notification:
-            try:
-                method(*args, **kwargs)
-            except:
-                log.err()
-            return
-
-        def errback(failure):
-            log.err(failure)
-            return jsonrpclib.error(id, jsonrpclib.InternalError({
-                "exception" : failure.type.__name__,
-                "traceback" : failure.getTraceback()
-            }))
-
-        defer.maybeDeferred(method, *args, **kwargs).addCallbacks(
-            lambda result : jsonrpclib.response(id, result), errback
-        ).addCallback(self._send)
+        if id is not None:
+            d.addCallback(self._send)
 
     def _send(self, obj):
         self.transport.write(obj)
+
+    def unhandled_error(self, failure, id=None):
+        log.err(
+            failure,
+            "An error went unhandled by the client application. "
+            "Dropping connection. To avoid this, add errbacks to all remote "
+            "requests and verify that valid JSON is being sent."
+        )
+
+        if self.transport is not None:
+            self._send(jsonrpclib.error(id, failure))
+            self.transport.loseConnection()
 
     def notify(self, method, parameters=()):
         self._send(jsonrpclib.notify(method, parameters))
