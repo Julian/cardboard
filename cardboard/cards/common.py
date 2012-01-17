@@ -23,7 +23,7 @@ def draw_discard(player, draw=1, discard=1, to=None):
         to = player.graveyard
 
     player.draw(draw)
-    discarded = player.frontend.select.cards(player.hand, how_many=discard)
+    discarded = player.frontend.select_cards(player.hand, how_many=discard)
 
     for card in discarded:
         to.move(card)

@@ -13,7 +13,7 @@ from cardboard.tests.util import GameTestCase
 class TestLayout(unittest.TestCase):
     def setUp(self):
         super(TestLayout, self).setUp()
-        self.frontend = mock.Mock(spec=u.UrwidFrontend)
+        self.frontend = mock.Mock()
         self.u = u.Layout(frontend=self.frontend)
 
     def test_run(self):
@@ -98,14 +98,6 @@ class TestUrwidInfoDisplay(unittest.TestCase):
         self.frontend.game.turn.info = "Foo", None
         turn = [w.text for w in self.i.turn.base_widget.widget_list[1:]]
         self.assertEqual(turn, ["Foo Phase"])
-
-
-class TestUrwidSelector(unittest.TestCase):
-    def setUp(self):
-        super(TestUrwidSelector, self).setUp()
-        self.layout = mock.Mock(spec=u.Layout)
-        self.layout.frontend = self.frontend = mock.Mock()
-        self.s = u.UrwidSelector(frontend=self.layout.frontend)
 
 
 class TestUrwidFrontend(GameTestCase):

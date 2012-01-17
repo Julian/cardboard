@@ -26,5 +26,6 @@ class NoFrontend(object):
     def _not_connected(self, *args, **kwargs):
         raise exceptions.NoFrontendConnected(self.player)
 
-    priority_granted = prompt = _not_connected
-    info = running = select = property(_not_connected)
+    priority_granted = prompt = select_range = _not_connected
+    select = select_cards = select_players = select_combined = select_range
+    running = property(_not_connected)

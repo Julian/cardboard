@@ -12,9 +12,6 @@ from cardboard.util import ANY
 
 
 class TextualInfoDisplay(object):
-
-    implements(interfaces.IInfoDisplay)
-
     def __init__(self, frontend):
         super(TextualInfoDisplay, self).__init__()
 
@@ -73,83 +70,16 @@ class TextualInfoDisplay(object):
         return u"\n".join(str(card) for card in zone)
 
 
-class TextualSelector(object):
-
-    implements(interfaces.ISelector)
-
-    def __init__(self, frontend):
-        super(TextualSelector, self).__init__()
-
-        self.frontend = frontend
-        self.game = frontend.game
-
-    @validate_selection
-    def choice(self, choices, how_many=1, duplicates=False):
-        num = u"your" if how_many is None else how_many
-        s = u"s" if how_many is not None and how_many != 1 else ""
-
-        self.frontend.formatted_prompt(
-            header=u"Select {} choice{}.".format(num, s),
-            body=(u"{}. {}".format(i, c) for i, c in enumerate(choices, 1)),
-            end=u"\n"
-        )
-
-        selections = [int(s) for s in self.frontend.input().split(u",")]
-        return [choices[i - 1] for i in selections]
-
-    __call__ = choice
-
-    @validate_selection
-    def cards(
-        self, zone=None, match=ANY, how_many=1, duplicates=False, bad=True,
-    ):
-        if zone is None:
-            zone = self.game.battlefield
-
-        return self.choice(
-            choices=[card for card in zone if match(card)],
-            how_many=how_many,
-            duplicates=duplicates,
-        )
-
-    @validate_selection
-    def players(self, match=ANY, how_many=1, duplicates=False, bad=True):
-        return self.choice(
-            choices=(player for player in self.game.players if match(player)),
-            how_many=how_many,
-            duplicates=duplicates,
-        )
-
-    @validate_selection
-    def range(self, start, stop, how_many=1, duplicates=False):
-
-        if stop <= start:
-            raise ValueError("Cannot select from an empty range.")
-
-        if how_many is None:
-            num = u"some"
-            s = u"s"
-        elif how_many == 1:
-            num = u"a"
-            s = u""
-        else:
-            num = how_many
-            s = u"s"
-
-        prompt = u"Select {} number{} between {} and {}."
-        self.frontend.prompt(prompt.format(num, s, start, stop - 1))
-        return [int(s) for s in self.frontend.input().split(",")]
-
-
 class TextualFrontend(FrontendMixin):
 
-    implements(interfaces.ISelector)
-
-    info = TextualInfoDisplay
-    select = TextualSelector
+    implements(interfaces.IFrontend)
 
     PS1 = u"▸▸▸ "
     in_file, out_file = sys.stdin, sys.stdout
+
+    def __init__(self, *args, **kwargs):
+        super(TextualFrontend, self).__init__(*args, **kwargs)
+        self.info = TextualInfoDisplay(self)
 
     def input(self):
         self.prompt(self.PS1, end="")
@@ -179,3 +109,60 @@ class TextualFrontend(FrontendMixin):
         return menu[self.select(sorted(menu))[0]]
 
     started_running = main_menu
+
+    @validate_selection
+    def select(self, choices, how_many=1, duplicates=False):
+        num = u"your" if how_many is None else how_many
+        s = u"s" if how_many is not None and how_many != 1 else ""
+
+        self.formatted_prompt(
+            header=u"Select {} choice{}.".format(num, s),
+            body=(u"{}. {}".format(i, c) for i, c in enumerate(choices, 1)),
+            end=u"\n"
+        )
+
+        selections = [int(s) for s in self.input().split(u",")]
+        return [choices[i - 1] for i in selections]
+
+    @validate_selection
+    def select_cards(
+        self, zone=None, match=ANY, how_many=1, duplicates=False, bad=True,
+    ):
+        if zone is None:
+            zone = self.game.battlefield
+
+        return self.select(
+            choices=[card for card in zone if match(card)],
+            how_many=how_many,
+            duplicates=duplicates,
+        )
+
+    @validate_selection
+    def select_players(
+        self, match=ANY, how_many=1, duplicates=False, bad=True
+    ):
+        return self.select(
+            choices=(player for player in self.game.players if match(player)),
+            how_many=how_many,
+            duplicates=duplicates,
+        )
+
+    @validate_selection
+    def select_range(self, start, stop, how_many=1, duplicates=False):
+
+        if stop <= start:
+            raise ValueError("Cannot select from an empty range.")
+
+        if how_many is None:
+            num = u"some"
+            s = u"s"
+        elif how_many == 1:
+            num = u"a"
+            s = u""
+        else:
+            num = how_many
+            s = u"s"
+
+        prompt = u"Select {} number{} between {} and {}."
+        self.prompt(prompt.format(num, s, start, stop - 1))
+        return [int(s) for s in self.input().split(",")]

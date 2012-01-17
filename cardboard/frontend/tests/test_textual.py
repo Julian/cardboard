@@ -55,6 +55,94 @@ class TestTextualFrontend(GameTestCase):
         self.assertEqual(self.f.getvalue(), formatted_msg)
 
 
+class TestSelection(unittest.TestCase):
+
+    tf = t.TextualFrontend(mock.Mock())
+    p1, p2 = tf.game.players = tf.game.turn.order = [mock.Mock(), mock.Mock()]
+    tf.player = p1
+
+    def setUp(self):
+        super(TestSelection, self).setUp()
+        self.f = self.tf.out_file = StringIO()
+
+    def test_select(self):
+        self.tf.in_file = StringIO(u"1\n1, 3\n")
+
+        class Thing(object):
+            def __init__(self, name):
+                self.name = name
+
+            def __str__(self):
+                return self.name
+
+        c = [Thing(u"bar"), Thing(u"foo"), Thing(u"baz")]
+
+        sel = self.tf.select(c)
+        p = u"Select 1 choice.\n\n    1. bar\n    2. foo\n    3. baz\n\n▸▸▸ "
+        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
+        self.assertEqual(sel, [c[0]])
+
+        self.assertEqual(self.tf.select(c, how_many=2), [c[0], c[2]])
+
+    def test_select_cards(self):
+        self.tf.select = mock.Mock(return_value=[2, 4])
+        self.tf.select_cards(range(8), match=lambda i : i % 2 == 0, how_many=2)
+        self.tf.select.assert_called_with(
+            choices=[0, 2, 4, 6], how_many=2, duplicates=False
+        )
+
+        # default is to select from game.battlefield
+        self.tf.game.battlefield = [1, 2, 3]
+        self.tf.select_cards(how_many=2)
+        self.tf.select.assert_called_with(
+            choices=self.tf.game.battlefield, how_many=2, duplicates=False,
+        )
+
+    def test_select_players(self):
+        self.tf.select = mock.Mock(return_value=[self.p1, self.p1, self.p1])
+        self.tf.select_players(
+            match=lambda p : p == self.p1, how_many=3, duplicates=True
+        )
+
+        args, kwargs = self.tf.select.call_args
+        kwargs["choices"] = list(kwargs["choices"])
+
+        self.assertFalse(args)
+        self.assertEqual(
+            kwargs, dict(choices=[self.p1], how_many=3, duplicates=True)
+        )
+
+    def test_select_range(self):
+        self.tf.in_file = StringIO(u"13\n2, 6, 4\n1, 2, 3, 4, 5\n")
+
+        sel = self.tf.select_range(1, 21)
+
+        p = u"Select a number between 1 and 20.\n▸▸▸ "
+        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
+        self.assertEqual(sel, [13])
+
+        self.f = self.tf.out_file = StringIO()
+        sel = self.tf.select_range(1, 10, how_many=3)
+
+        p = u"Select 3 numbers between 1 and 9.\n▸▸▸ "
+        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
+        self.assertEqual(sel, [2, 6, 4])
+
+        self.f = self.tf.out_file = StringIO()
+        sel = self.tf.select_range(1, 6, how_many=None)
+
+        p = u"Select some numbers between 1 and 5.\n▸▸▸ "
+        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
+        self.assertEqual(sel, [1, 2, 3, 4, 5])
+
+        # invalid ranges
+        with self.assertRaises(ValueError):
+            self.tf.select_range(5, 2)
+
+        with self.assertRaisesRegexp(ValueError, "empty"):
+            self.tf.select_range(2, 2)
+
+
 class TestTextualInfoDisplay(unittest.TestCase):
 
     tf = mock.Mock()
@@ -126,92 +214,3 @@ class TestTextualInfoDisplay(unittest.TestCase):
 
     def test_zone_info(self):
         self.assertEqual(self.info.zone([1, 2, 3]), "1\n2\n3")
-
-
-class TestSelector(unittest.TestCase):
-
-    tf = t.TextualFrontend(mock.Mock())
-    p1, p2 = tf.game.players = tf.game.turn.order = [mock.Mock(), mock.Mock()]
-    tf.player = p1
-    s = t.TextualSelector(tf)
-
-    def setUp(self):
-        super(TestSelector, self).setUp()
-        self.f = self.tf.out_file = StringIO()
-
-    def test_select(self):
-        self.tf.in_file = StringIO(u"1\n1, 3\n")
-
-        class Thing(object):
-            def __init__(self, name):
-                self.name = name
-
-            def __str__(self):
-                return self.name
-
-        c = [Thing(u"bar"), Thing(u"foo"), Thing(u"baz")]
-
-        sel = self.s(c)
-        p = u"Select 1 choice.\n\n    1. bar\n    2. foo\n    3. baz\n\n▸▸▸ "
-        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
-        self.assertEqual(sel, [c[0]])
-
-        self.assertEqual(self.s(c, how_many=2), [c[0], c[2]])
-
-    def test_select_cards(self):
-        self.s.choice = mock.Mock(return_value=[2, 4])
-        self.s.cards(range(8), match=lambda i : i % 2 == 0, how_many=2)
-        self.s.choice.assert_called_with(
-            choices=[0, 2, 4, 6], how_many=2, duplicates=False
-        )
-
-        # default is to select from game.battlefield
-        self.s.game.battlefield = [1, 2, 3]
-        self.s.cards(how_many=2)
-        self.s.choice.assert_called_with(
-            choices=self.s.game.battlefield, how_many=2, duplicates=False,
-        )
-
-    def test_select_players(self):
-        self.s.choice = mock.Mock(return_value=[self.p1, self.p1, self.p1])
-        self.s.players(
-            match=lambda p : p == self.p1, how_many=3, duplicates=True
-        )
-
-        args, kwargs = self.s.choice.call_args
-        kwargs["choices"] = list(kwargs["choices"])
-
-        self.assertFalse(args)
-        self.assertEqual(
-            kwargs, dict(choices=[self.p1], how_many=3, duplicates=True)
-        )
-
-    def test_select_range(self):
-        self.tf.in_file = StringIO(u"13\n2, 6, 4\n1, 2, 3, 4, 5\n")
-
-        sel = self.s.range(1, 21)
-
-        p = u"Select a number between 1 and 20.\n▸▸▸ "
-        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
-        self.assertEqual(sel, [13])
-
-        self.f = self.tf.out_file = StringIO()
-        sel = self.s.range(1, 10, how_many=3)
-
-        p = u"Select 3 numbers between 1 and 9.\n▸▸▸ "
-        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
-        self.assertEqual(sel, [2, 6, 4])
-
-        self.f = self.tf.out_file = StringIO()
-        sel = self.s.range(1, 6, how_many=None)
-
-        p = u"Select some numbers between 1 and 5.\n▸▸▸ "
-        self.assertEqual(self.f.getvalue(), p.encode("utf-8"))
-        self.assertEqual(sel, [1, 2, 3, 4, 5])
-
-        # invalid ranges
-        with self.assertRaises(ValueError):
-            self.s.range(5, 2)
-
-        with self.assertRaisesRegexp(ValueError, "empty"):
-            self.s.range(2, 2)

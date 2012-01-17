@@ -20,18 +20,10 @@ class IFrontend(Interface):
     """
 
     _debug = Attribute("Designates whether the frontend is in debug mode")
+
+    game = Attribute("The attached game object")
+    player = Attribute("The attached player")
     running = Attribute("Specifies if the frontend is currently running")
-
-    info = Attribute(
-        "A provider of {IInfoDisplay} to be instantiated for each instance."
-    )
-    select = Attribute(
-        "A provider of {ISelector} to be instantiated for each instance."
-    )
-
-    game = Attribute("The game object which the frontend is currently attached"
-                     "to")
-    player = Attribute("The player who the frontend is attached to")
 
     def priority_granted():
         """
@@ -45,49 +37,7 @@ class IFrontend(Interface):
 
         """
 
-
-class IInfoDisplay(Interface):
-    """
-    Interface for information displays.
-
-    An information display knows how to manipulate a particular frontend to
-    display information about different game objects.
-
-    """
-
-    turn = Attribute("Display information about the current turn and phase.")
-    zone_overview = Attribute("Display an overview of all zones' contents.")
-    player_overview = Attribute(
-        "Display an overview of all players' information."
-    )
-
-
-    def card(card):
-        """
-        Display a card.
-
-        """
-
-    def player(player):
-        """
-        Display a player's information.
-
-        """
-
-    def zone(zone):
-        """
-        Display a zone's contents.
-
-        """
-
-
-class ISelector(Interface):
-    """
-    Interface for selectors.
-
-    """
-
-    def choice(choices, how_many=1, duplicates=False):
+    def select(choices, how_many=1, duplicates=False):
         """
         Select from a given set of choices.
 
@@ -97,9 +47,9 @@ class ISelector(Interface):
 
         """
 
-    __call__ = choice
-
-    def cards(zone=None, match=ANY, how_many=1, duplicates=False, bad=True):
+    def select_cards(
+        zone=None, match=ANY, how_many=1, duplicates=False, bad=True
+    ):
         """
         Select cards from a given zone.
 
@@ -111,7 +61,7 @@ class ISelector(Interface):
 
         """
 
-    def players(match=ANY, how_many=1, duplicates=False, bad=True):
+    def select_players(match=ANY, how_many=1, duplicates=False, bad=True):
         """
         Select a matching player.
 
@@ -122,7 +72,7 @@ class ISelector(Interface):
 
         """
 
-    def combined(zone=None, match_cards=ANY, how_many_cards=1,
+    def select_combined(zone=None, match_cards=ANY, how_many_cards=1,
                  duplicate_cards=False, match_players=ANY, how_many_players=1,
                  duplicate_players=False, bad=True):
         """
@@ -141,7 +91,7 @@ class ISelector(Interface):
 
         """
 
-    def range(start, stop, how_many=1, duplicates=False):
+    def select_range(start, stop, how_many=1, duplicates=False):
         """
         Select from a given range of numbers.
 

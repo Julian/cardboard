@@ -20,7 +20,7 @@ class TestCommon(GameTestCase):
         draw = self.p1.library[-3:]
         discard = list(self.p1.hand)[:2]
 
-        with self.p1.frontend.select.cards.will_return(*discard):
+        with self.p1.frontend.select_cards.will_return(*discard):
             c.draw_discard(self.p1, len(draw), len(discard), self.p1.exile)
 
         for card in draw:
@@ -33,7 +33,7 @@ class TestCommon(GameTestCase):
         draw = self.p1.library[-1]
         discard = next(iter(self.p1.hand))
 
-        with self.p1.frontend.select.cards.will_return(discard):
+        with self.p1.frontend.select_cards.will_return(discard):
             c.draw_discard(self.p1, 1, 1)
 
         self.assertIn(discard, self.p1.graveyard)

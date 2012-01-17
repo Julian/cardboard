@@ -24,9 +24,6 @@ class FrontendMixin(object):
         self.game = player.game
         self.player = player
 
-        # info and select should be set to factories for the proper providers
-        self.info, self.select = self.info(self), self.select(self)
-
     def __repr__(self):
         return "<{0.__class__.__name__} connected to {0.player}>".format(self)
 

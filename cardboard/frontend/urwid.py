@@ -155,9 +155,6 @@ class Layout(object):
 
 
 class UrwidInfoDisplay(object):
-
-    implements(interfaces.IInfoDisplay)
-
     def __init__(self, frontend):
         self.frontend = frontend
         self.game = frontend.game
@@ -200,45 +197,13 @@ class UrwidInfoDisplay(object):
         title = zone.name.title()
 
 
-class UrwidSelector(object):
-
-    implements(interfaces.ISelector)
-
-    def __init__(self, frontend):
-        self.frontend = frontend
-        self.game = frontend.game
-
-    def choice(choices, how_many=1, duplicates=False):
-        pass
-
-    __call__ = choice
-
-    def cards(
-        self, zone=None, match=ANY, how_many=1, duplicates=False, bad=True
-    ):
-        pass
-
-    def players(self, match=ANY, how_many=1, duplicates=False, bad=True):
-        pass
-
-    def combined(self, zone=None, match_cards=ANY, how_many_cards=1,
-                 duplicate_cards=False, match_players=ANY, how_many_players=1,
-                 duplicate_players=False, bad=True):
-        pass
-
-    def range(start, stop, how_many=1, duplicates=False):
-        pass
-
-
 class UrwidFrontend(FrontendMixin):
 
     implements(interfaces.IFrontend)
 
-    info = UrwidInfoDisplay
-    select = UrwidSelector
-
     def __init__(self, player, debug=False):
         super(UrwidFrontend, self).__init__(player=player, debug=debug)
+        self.info = UrwidInfoDisplay(self)
         self.layout = Layout(self)
 
     def priority_granted(self):
@@ -250,3 +215,24 @@ class UrwidFrontend(FrontendMixin):
 
     def started_running(self):
         return self.layout.run()
+
+    def select(choices, how_many=1, duplicates=False):
+        pass
+
+    def select_cards(
+        self, zone=None, match=ANY, how_many=1, duplicates=False, bad=True
+    ):
+        pass
+
+    def select_players(
+        self, match=ANY, how_many=1, duplicates=False, bad=True
+    ):
+        pass
+
+    def select_combined(self, zone=None, match_cards=ANY, how_many_cards=1,
+                 duplicate_cards=False, match_players=ANY, how_many_players=1,
+                 duplicate_players=False, bad=True):
+        pass
+
+    def select_range(start, stop, how_many=1, duplicates=False):
+        pass

@@ -297,7 +297,7 @@ def cleanup(game):
     discard = len(player.hand) - player.hand_size
 
     if discard > 0:
-        selection = player.frontend.select.cards(
+        selection = player.frontend.select_cards(
             zone=player.hand, how_many=discard,
         )
 
