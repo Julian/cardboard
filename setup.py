@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-from distutils.core import setup
+from setuptools import find_packages, setup
 
 from cardboard import __version__
 
@@ -17,35 +16,19 @@ setup(
     author="Julian Berman",
     author_email="Julian+Cardboard@GrayVines.com",
     description="A Magic: The Gathering game engine",
+    long_description = long_description,
     license="MIT/X",
     url="http://github.com/Julian/Cardboard",
-    long_description = long_description,
+    packages=find_packages(),
     scripts=["bin/cardboard"],
-
-    packages=[
-        "cardboard",
-        "cardboard.integration_tests",
-        "cardboard.tests",
-
-        "cardboard.cards",
-        "cardboard.cards.tests",
-        "cardboard.cards.sets",
-        "cardboard.cards.sets.tests",
-
-        "cardboard.db",
-        "cardboard.db.tests",
-
-        "cardboard.frontend",
-        "cardboard.frontend.tests",
-    ],
-
+    include_package_data=True,
     install_requires=[
         "Minerva",
         "SQLAlchemy",
         "Twisted",
         # "jinja2",
         "jsonschema",
-        # "mock",
+        "mock",
         "panglery",
         "urwid >= 1.0.2",
         "zope.interface",
