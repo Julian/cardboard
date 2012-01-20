@@ -8,7 +8,7 @@ All of the implementations I found were either resource-based or really ugly.
 import itertools
 
 from jsonschema import validate
-from twisted.internet import defer, protocol
+from twisted.internet import defer, error, protocol
 from twisted.python import failure, log
 from zope.interface import implements
 
@@ -19,11 +19,29 @@ class JSONRPC(protocol.Protocol):
 
     implements(network.IRPC)
 
+    _fail_all_reason = None
     transport = None
 
     def __init__(self):
         self._counter = itertools.count(1)
         self._requests = {}
+
+    def connectionMade(self):
+        self.transport.protocol = self
+        host, peer = self.transport.getHost(), self.transport.getPeer()
+        log.msg("{} connection established (HOST: {}, PEER: {})".format(
+            self.__class__.__name__, host, peer
+        ))
+
+    def connectionLost(self, reason):
+        host, peer = self.transport.getHost(), self.transport.getPeer()
+        log.msg("{} connection lost (HOST: {}, PEER: {})".format(
+            self.__class__.__name__, host, peer
+        ))
+
+        self.transport = None
+        self.fail_all(reason)
+
 
     def dataReceived(self, data):
         try:
@@ -37,9 +55,19 @@ class JSONRPC(protocol.Protocol):
             return self._received_request(received)
 
     def _received_result(self, result):
-        defer.execute(jsonrpclib.received_result, result).addCallback(
-            lambda res : self._requests[res["id"]].callback(res["result"])
-        ).addErrback(self.unhandled_error, id=result.get("id"))
+        id = result.get("id")
+
+        try:
+            d = self._requests.pop(id).addErrback(self.unhandled_error, id=id)
+        except KeyError:
+            return self.unhandled_error(failure.Failure())
+
+        try:
+            res = jsonrpclib.received_result(result)
+        except:
+            d.errback(failure.Failure())
+        else:
+            d.callback(res["result"])
 
     def _received_request(self, request):
         try:
@@ -61,7 +89,16 @@ class JSONRPC(protocol.Protocol):
             d.addCallback(self._send)
 
     def _send(self, obj):
+        if self.transport is None:
+            raise error.ConnectionLost()
         self.transport.write(obj)
+
+    def fail_all(self, reason):
+        self._fail_all_reason = reason
+        requests, self._requests = self._requests, None
+
+        for request in requests.itervalues():
+            request.errback(reason)
 
     def unhandled_error(self, failure, id=None):
         log.err(
@@ -75,14 +112,30 @@ class JSONRPC(protocol.Protocol):
             self._send(jsonrpclib.error(id, failure))
             self.transport.loseConnection()
 
+    def _build_outgoing(self, method, parameters, notification=False):
+        if self._fail_all_reason is not None:
+            return defer.fail(self._fail_all_reason)
+
+        if notification:
+            to_send = jsonrpclib.notify(method, parameters)
+        else:
+            id = str(next(self._counter))
+            to_send = jsonrpclib.request(id, method, parameters)
+
+        self._send(to_send)
+
+        if not notification:
+            return self._requests.setdefault(id, defer.Deferred())
+
     def notify(self, method, parameters=()):
-        self._send(jsonrpclib.notify(method, parameters))
+        return self._build_outgoing(
+            method=method, parameters=parameters, notification=True,
+        )
 
     def request(self, method, parameters=()):
-        id = str(next(self._counter))
-        self._send(jsonrpclib.request(id, method, parameters))
-        deferred = self._requests[id] = defer.Deferred()
-        return deferred
+        return self._build_outgoing(
+            method=method, parameters=parameters, notification=False,
+        )
 
 
 class JSONRPCFactory(protocol.Factory):

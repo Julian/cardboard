@@ -1,6 +1,6 @@
 import json
 
-from twisted.internet import defer
+from twisted.internet import defer, error
 from twisted.python import failure
 from twisted.test import proto_helpers
 from twisted.trial import unittest
@@ -23,7 +23,7 @@ class TestJSONRPC(unittest.TestCase):
         self.frontend = mock.Mock()
         self.factory = jsonrpc.JSONRPCFactory(self.frontend, exposed)
         self.proto = self.factory.buildProtocol(("127.0.0.1", 0))
-        self.tr = proto_helpers.StringTransport()
+        self.tr = proto_helpers.StringTransportWithDisconnection()
         self.proto.makeConnection(self.tr)
 
     def assertSent(self, expected):
@@ -41,8 +41,8 @@ class TestJSONRPC(unittest.TestCase):
 
         self.tr.clear()
 
-        self.proto.notify("bar", [1, 2, "baz"])
-        self.assertSent({"method" : "bar", u"params" : [1, 2, "baz"]})
+        self.proto.notify("bar", [3])
+        self.assertSent({"method" : "bar", u"params" : [3]})
 
     def test_request(self):
         """
@@ -67,7 +67,6 @@ class TestJSONRPC(unittest.TestCase):
 
         v = failure.Failure(ValueError("Hey a value error"))
         self.proto.unhandled_error(v)
-        self.assertTrue(self.tr.disconnecting)
 
         errors = self.flushLoggedErrors(ValueError)
         self.assertEqual(errors, [v])
@@ -79,7 +78,6 @@ class TestJSONRPC(unittest.TestCase):
         """
 
         self.proto.dataReceived("[1,2,")
-        self.assertTrue(self.tr.disconnecting)
 
         err = {"id" : None, "error" : jsonrpclib.ParseError().to_response()}
         self.assertSent(err)
@@ -94,7 +92,6 @@ class TestJSONRPC(unittest.TestCase):
         """
 
         self.proto.dataReceived(json.dumps({"id" : 12}))
-        self.assertTrue(self.tr.disconnecting)
 
         err = jsonrpclib.InvalidRequest({"reason" : "jsonrpc"})
         self.assertSent({"id" : None, "error" : err.to_response()})
@@ -111,12 +108,10 @@ class TestJSONRPC(unittest.TestCase):
         receive = {"jsonrpc" : "2.0", "id" :  "1", "result" : [2, 3, "bar"]}
         self.proto.dataReceived(json.dumps(receive))
 
-        self.assertTrue(self.tr.disconnecting)
-
         err = jsonrpclib.InternalError({
             "exception" : "KeyError", "message" : "u'1'",
         })
-        expect = {"jsonrpc" : "2.0", "id" : "1", "error" : err.to_response()}
+        expect = {"jsonrpc" : "2.0", "id" : None, "error" : err.to_response()}
         sent = json.loads(self.tr.value())
         tb = sent["error"]["data"].pop("traceback")
 
@@ -127,17 +122,36 @@ class TestJSONRPC(unittest.TestCase):
         errors = self.flushLoggedErrors(KeyError)
         self.assertEqual(len(errors), 1)
 
-    def test_error_result(self):
-        for id, error in enumerate(jsonrpclib.PROTOCOL_ERRORS.itervalues(), 1):
-            d = self.proto.request("foo")
-            d.addErrback(lambda fail : self.assertEqual(fail.type, error))
+    def _error_test(self, err):
+        d = self.proto.request("foo").addErrback(lambda f : self.assertEqual(
+            f.value.to_response(), err.to_response()
+        ))
 
-            receive = {"jsonrpc" : "2.0", "id" : str(id), "error" : {}}
-            receive["error"] = {"code" : error.code, "message" : error.message}
-            self.proto.dataReceived(json.dumps(receive))
+        receive = {"jsonrpc" : "2.0", "id" : "1", "error" : {}}
+        receive["error"] = {"code" : err.code, "message" : err.message}
+        self.proto.dataReceived(json.dumps(receive))
+        return d
 
-            errors = self.flushLoggedErrors(error)
-            self.assertEqual(len(errors), 1)
+    def test_parse_error(self):
+        self._error_test(jsonrpclib.ParseError())
+
+    def test_invalid_request(self):
+        self._error_test(jsonrpclib.InvalidRequest())
+
+    def test_method_not_found(self):
+        self._error_test(jsonrpclib.MethodNotFound())
+
+    def test_invalid_params(self):
+        self._error_test(jsonrpclib.InvalidParams())
+
+    def test_internal_error(self):
+        self._error_test(jsonrpclib.InternalError())
+
+    def test_application_error(self):
+        self._error_test(jsonrpclib.ApplicationError(code=2400, message="Go."))
+
+    def test_server_error(self):
+        self._error_test(jsonrpclib.ServerError(code=-32020))
 
     def test_received_notify(self):
         receive = {"jsonrpc" : "2.0", "method" : "foo"}
@@ -207,3 +221,22 @@ class TestJSONRPC(unittest.TestCase):
 
         errors = self.flushLoggedErrors(TypeError)
         self.assertEqual(len(errors), 1)
+
+        errors = self.flushLoggedErrors(error.ConnectionLost)
+        self.assertEqual(len(errors), 1)
+
+    def test_fail_all(self):
+        d1, d2 = self.proto.request("foo"), self.proto.request("bar", [1, 2])
+        exc = failure.Failure(ValueError("A ValueError"))
+        self.proto.fail_all(exc)
+
+        d3 = self.proto.request("baz", "foo")
+
+        for d in d1, d2, d3:
+            d.addErrback(lambda reason: self.assertIs(reason, exc))
+
+    def test_connection_lost(self):
+        self.proto.connectionLost(failure.Failure(error.ConnectionLost("Bye")))
+        return self.proto.request("foo").addErrback(
+            lambda f : self.assertIs(f.type, error.ConnectionLost)
+        )
