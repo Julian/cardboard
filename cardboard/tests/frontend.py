@@ -6,10 +6,6 @@ A frontend for use when testing.
 import contextlib
 
 from twisted.python import log
-from zope.interface import implements
-
-from cardboard.frontend import interfaces
-from cardboard.frontend.mixin import FrontendMixin
 
 
 def mock_selector(name):
@@ -31,9 +27,7 @@ def mock_selector(name):
     return select
 
 
-class TestingFrontend(FrontendMixin):
-
-    implements(interfaces.IFrontend)
+class TestingFrontend(object):
 
     select = mock_selector("choice")
     select_cards = mock_selector("cards")

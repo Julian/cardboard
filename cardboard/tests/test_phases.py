@@ -3,7 +3,6 @@ import unittest
 import mock
 
 from cardboard import events, phases as p
-from cardboard.frontend.testing import TestingFrontend
 from cardboard.tests.util import GameTestCase
 
 
@@ -199,7 +198,6 @@ class TestPhaseMechanics(GameTestCase):
         self.game.start()
 
         player = self.game.turn.active_player
-        player.frontend = TestingFrontend(player)
         player.draw(3)
 
         discard = list(player.hand)[:-7]

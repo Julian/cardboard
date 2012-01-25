@@ -2,15 +2,9 @@ import mock
 
 from cardboard.tests.util import GameTestCase
 from cardboard.cards import common as c
-from cardboard.frontend.testing import TestingFrontend
 
 
 class TestCommon(GameTestCase):
-    def setUp(self):
-        super(TestCommon, self).setUp()
-        self.p1.frontend = TestingFrontend(self.p1)
-        self.game.start()
-
     def test_destroy(self):
         m = mock.Mock()
         c.destroy(m)

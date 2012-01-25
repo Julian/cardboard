@@ -2,7 +2,6 @@ import mock
 
 from cardboard import core as c, events, exceptions, phases
 from cardboard.tests.util import GameTestCase
-from cardboard.frontend.testing import TestingFrontend
 
 
 class TestManaPool(GameTestCase):
@@ -124,10 +123,10 @@ class TestManaPool(GameTestCase):
 
 class TestPlayer(GameTestCase):
     def test_repr_str(self):
-        p3 = self.game.add_player(library=[], name="Test")
-        self.assertEqual(repr(p3), "<Player: Test>")
+        p3 = self.game.add_player(frontend=self.frontend, library=[], name="T")
+        self.assertEqual(repr(p3), "<Player: T>")
 
-        p4 = self.game.add_player(library=[])
+        p4 = self.game.add_player(frontend=self.frontend, library=[])
         self.assertEqual(repr(p4), "<Player>")
 
     def test_sets_card_attribs(self):
@@ -252,7 +251,7 @@ class TestPlayer(GameTestCase):
 
     def test_shallow_copies_library(self):
         library = [mock.Mock() for _ in range(10)]
-        p3 = self.game.add_player(library=library)
+        p3 = self.game.add_player(frontend=self.frontend, library=library)
 
         self.assertIsNot(p3.library, library)
         self.assertEqual(list(p3.library), library)
@@ -317,10 +316,12 @@ class TestGame(GameTestCase):
         self.game.start()
 
         with self.assertRaises(exceptions.InvalidAction):
-            self.game.add_player(library=self.library)
+            self.game.add_player(frontend=self.frontend, library=self.library)
 
         with self.assertRaises(exceptions.InvalidAction):
-            player = c.Player(game=self.game, library=self.library)
+            player = c.Player(
+                frontend=self.frontend, game=self.game, library=self.library
+            )
             self.game.add_existing_player(player)
 
         self.assertNotIn(player, self.game.players)
@@ -356,13 +357,6 @@ class TestGame(GameTestCase):
 
         self.assertFalse(self.p3.dead)
 
-    def test_frontends(self):
-        self.p1.frontend = object()
-        self.p2.frontend = object()
-
-        self.assertEqual(self.game.frontends, {self.p1 : self.p1.frontend,
-                                               self.p2 : self.p2.frontend})
-
     def test_zones(self):
         zones = {"shared" : {self.game.battlefield, self.game.stack},
                  self.p1 : {self.p1.exile, self.p1.graveyard,
@@ -376,7 +370,8 @@ class TestGame(GameTestCase):
         game = c.Game(self.events)
         self.assertFalse(game.teams)
 
-        p1, p3 = (c.Player(game=game, library=self.library) for _ in range(2))
+        p1 = c.Player(frontend=self.frontend, game=game, library=self.library)
+        p3 = c.Player(frontend=self.frontend, game=game, library=self.library)
 
         game.add_existing_player(p1)
 
@@ -384,7 +379,7 @@ class TestGame(GameTestCase):
         self.assertEqual(p1.team, {p1})
         self.assertEqual(p1.opponents, set())
 
-        p2 = game.add_player(library=self.library)
+        p2 = game.add_player(frontend=self.frontend, library=self.library)
 
         self.assertEqual(game.teams, [{p1}, {p2}])
         self.assertEqual(p1.team, {p1})
@@ -402,7 +397,9 @@ class TestGame(GameTestCase):
         self.assertEqual(p3.team, {p1, p3})
         self.assertEqual(p3.opponents, {p2})
 
-        p4 = game.add_player(library=self.library, team=game.teams[1])
+        p4 = game.add_player(
+            frontend=self.frontend, library=self.library, team=game.teams[1]
+        )
 
         self.assertEqual(game.teams, [{p1, p3}, {p2, p4}])
         self.assertEqual(p1.team, {p1, p3})
@@ -417,10 +414,14 @@ class TestGame(GameTestCase):
         unknown_team = []
 
         with self.assertRaises(ValueError):
-            game.add_player(library=self.library, team=unknown_team)
+            game.add_player(
+                frontend=self.frontend, library=self.library, team=unknown_team
+            )
 
         with self.assertRaises(ValueError):
-            p5 = c.Player(game=game, library=self.library)
+            p5 = c.Player(
+                frontend=self.frontend, game=game, library=self.library
+            )
             game.add_existing_player(p5, team=unknown_team)
 
         # didn't modify teams
@@ -482,10 +483,6 @@ class TestStateBasedEffects(GameTestCase):
 class TestTurnManager(GameTestCase):
     def setUp(self):
         super(TestTurnManager, self).setUp()
-
-        for player in self.p1, self.p2, self.p3:
-            player.frontend = TestingFrontend(player)
-
         self.turn = self.game.turn
 
     def test_initialize_turn_and_phase(self):

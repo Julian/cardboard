@@ -7,7 +7,6 @@ from collections import deque
 from random import shuffle
 
 from cardboard import events, exceptions, types
-from cardboard.frontend._none import NoFrontend
 from cardboard.phases import phases
 from cardboard.util import requirements
 from cardboard.zone import zone
@@ -47,10 +46,6 @@ class Game(object):
 
     def __repr__(self):
         return "<{} Player Game>".format(len(self.players))
-
-    @property
-    def frontends(self):
-        return {player : player.frontend for player in self.players}
 
     @property
     def players(self):
@@ -293,9 +288,12 @@ class Player(object):
     require = requirements({"dead" : {True : "{self} is dead.",
                                       False : "{self} is alive."}})
 
-    def __init__(self, game, library, frontend=NoFrontend, name=""):
+    def __init__(self, game, library, frontend, name=""):
+        frontend.player = self
+        frontend.game = game
+
         self.game = game
-        self.frontend = frontend(self)
+        self.frontend = frontend
         self.name = name
 
         self.death_by = None

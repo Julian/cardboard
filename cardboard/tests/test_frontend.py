@@ -2,7 +2,7 @@ import unittest
 
 import mock
 
-from cardboard.frontend import testing as t
+from cardboard.tests import frontend as t
 from cardboard.tests.util import GameTestCase
 
 
@@ -28,13 +28,8 @@ class TestMockSelector(unittest.TestCase):
 
 
 class TestTestingFrontend(GameTestCase):
-    def setUp(self):
-        super(TestTestingFrontend, self).setUp()
-        self.t = t.TestingFrontend(self.p1)
-        self.p1.frontend = self.t
-
     def test_prompt(self):
-        with mock.patch("cardboard.frontend.testing.log") as log:
-            self.t.prompt("Testing 123")
+        with mock.patch("cardboard.tests.frontend.log") as log:
+            self.p1.frontend.prompt("Testing 123")
 
         log.msg.assert_called_once_with("Testing 123")
