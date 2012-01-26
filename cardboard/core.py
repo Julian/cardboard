@@ -57,9 +57,21 @@ class Game(object):
 
     @property
     def zones(self):
-        zones = {"shared" : {self.battlefield, self.stack}}
-        zones.update((p, {p.exile, p.graveyard, p.hand, p.library})
-                     for p in self.players)
+        """
+        Get all of the zones present in the game.
+
+        Returns a dict of dicts, where the keys are all of the game's players
+        and the values are a dict mapping the names of each zone to the
+        player's zone object of that zone. The game's battlefield and stack
+        zones are also present in a top level key named "shared".
+
+        """
+
+        zones = {
+            p : {z.name : z for z in {p.exile, p.graveyard, p.hand, p.library}}
+            for p in self.players
+        }
+        zones["shared"] = dict(battlefield=self.battlefield, stack=self.stack)
         return zones
 
     def add_player(self, team=None, **kwargs):
@@ -74,7 +86,7 @@ class Game(object):
 
     def add_existing_player(self, player, team=None):
         """
-        Add an existing Player object to the game.
+        Add an existing player to the game.
 
         """
 
