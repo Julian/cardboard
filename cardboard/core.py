@@ -324,23 +324,33 @@ class Player(object):
 
     @property
     def battlefield(self):
+        """
+        Get the cards on the battlefield currently under the player's control.
+
+        """
+
         return {c for c in self.game.battlefield if c.controller == self}
 
     @property
     def dead(self):
+        """
+        Am... am I... dead?
+
+        """
+
         return self.death_by is not None
 
     @property
     def life(self):
+        """
+        Get the current life total.
+
+        """
+
         return self._life
 
     @life.setter
     def life(self, amount):
-        """
-        Set the player's life total.
-
-        """
-
         if amount == self.life:
             return
         elif amount > self.life:
@@ -355,14 +365,29 @@ class Player(object):
 
     @property
     def opponents(self):
+        """
+        The player's opponents (not subdivided into teams).
+
+        """
+
         return set().union(*(t for t in self.game.teams if self not in t))
 
     @property
     def team(self):
+        """
+        The player's entire team.
+
+        """
+
         team, = (team for team in self.game.teams if self in team)
         return team
 
     def concede(self):
+        """
+        I can go on no longer.
+
+        """
+
         self.game.events.trigger(event=events.PLAYER_CONCEDED, player=self)
         self.die(reason="concede")
 
