@@ -1,13 +1,13 @@
 from twisted.trial import unittest
+import jsonschema
 import mock
 
-from cardboard import communicate
+from cardboard import api
 
 
-class TestNetworkFrontend(unittest.TestCase):
+class TestUser(unittest.TestCase):
 
-    game, protocol = mock.Mock(), mock.Mock()
-    frontend = communicate.NetworkFrontend(game, protocol)
+    skip = True
 
     def test_select(self):
         self.frontend.select([u"foo", u"bar", u"baz"])
@@ -133,3 +133,39 @@ class TestNetworkFrontend(unittest.TestCase):
             how_many=3,
             duplicates=True,
         )
+
+
+class TestAPIController(unittest.TestCase):
+    def setUp(self):
+        self.api = api.APIController()
+
+    def call(self, fn, *args, **kwargs):
+        response = fn(*args, **kwargs)
+        jsonschema.validate(response, fn.response_schema)
+        return response
+
+    def test_Game(self):
+        create = self.api.lookup_method("Game.create")
+        info = self.api.lookup_method("Game.info")
+        join = self.api.lookup_method("Game.join")
+        start = self.api.lookup_method("Game.start")
+
+        response = self.call(create)
+        self.assertEqual(response, {"gameID" : 0})
+        self.assertEqual(len(self.api.games), 1)
+
+        response = self.call(create)
+        self.assertEqual(response, {"gameID" : 1})
+        self.assertEqual(len(self.api.games), 2)
+
+        game = self.api.games[0]
+
+        response = self.call(info, gameID=0)
+        self.assertEqual(response, {"gameID" : 0, "teams" : game.teams})
+
+        response = self.call(join, gameID=0, name="Foo")
+        self.assertEqual(response, dict(playerID=0, **info(gameID=0)))
+
+        response = self.call(start, gameID=0)
+        self.assertEqual(response, {})
+        self.assertTrue(self.api.games[0].started)
