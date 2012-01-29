@@ -135,6 +135,7 @@ class Game(object):
 
         for player in self.players:
             if all(opponent.dead for opponent in player.opponents):
+                # XXX: Simultaneous victory
                 self.end()
 
     def end(self):
