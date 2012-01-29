@@ -10,7 +10,7 @@ class TestUser(unittest.TestCase):
     skip = True
 
     def test_select(self):
-        self.frontend.select([u"foo", u"bar", u"baz"])
+        self.user.select([u"foo", u"bar", u"baz"])
 
         self.protocol.callRemote.assert_called_with(
             communicate.Select,
@@ -19,7 +19,7 @@ class TestUser(unittest.TestCase):
             duplicates=False,
         )
 
-        self.frontend.select([u"foo"], how_many=2, duplicates=True)
+        self.user.select([u"foo"], how_many=2, duplicates=True)
 
         self.protocol.callRemote.assert_called_with(
             communicate.Select,
@@ -30,7 +30,7 @@ class TestUser(unittest.TestCase):
 
     def test_select_cards(self):
         # Instead of a real zone, let's just match a list
-        self.frontend.select_cards([1, 2, 3, 4])
+        self.user.select_cards([1, 2, 3, 4])
 
         self.protocol.callRemote.assert_called_with(
             communicate.SelectCards,
@@ -42,7 +42,7 @@ class TestUser(unittest.TestCase):
 
         # match should be evaluated immediately,
         # since we can't serialize the match function
-        self.frontend.select_cards(
+        self.user.select_cards(
             [1, 2, 3, 4], match=lambda x : x % 2,
             how_many=3, duplicates=True, bad=False
         )
@@ -56,9 +56,9 @@ class TestUser(unittest.TestCase):
         )
 
     def test_select_players(self):
-        self.frontend.game.players = [1, 2, 3, 4]
+        self.user.game.players = [1, 2, 3, 4]
 
-        self.frontend.select_players()
+        self.user.select_players()
 
         self.protocol.callRemote.assert_called_with(
             communicate.SelectPlayers,
@@ -68,7 +68,7 @@ class TestUser(unittest.TestCase):
             bad=True,
         )
 
-        self.frontend.select_players(
+        self.user.select_players(
             match=lambda x : x % 2, how_many=4, duplicates=True, bad=False,
         )
 
@@ -81,9 +81,9 @@ class TestUser(unittest.TestCase):
         )
 
     def test_select_combined(self):
-        self.frontend.game.players = [1, 2, 3, 4]
+        self.user.game.players = [1, 2, 3, 4]
 
-        self.frontend.select_combined(zone=[2, 4, 6, 8])
+        self.user.select_combined(zone=[2, 4, 6, 8])
 
         self.protocol.callRemote.assert_called_with(
             communicate.SelectCombined,
@@ -96,7 +96,7 @@ class TestUser(unittest.TestCase):
             bad=True,
         )
 
-        self.frontend.select_combined(
+        self.user.select_combined(
             zone=[2, 4, 6, 8], bad=False, how_many_cards=2, how_many_players=4,
             match_cards=lambda x : x > 4, match_players=lambda x : x % 2,
             duplicate_cards=True, duplicate_players=True,
@@ -114,7 +114,7 @@ class TestUser(unittest.TestCase):
         )
 
     def test_select_range(self):
-        self.frontend.select_range(2, 24)
+        self.user.select_range(2, 24)
 
         self.protocol.callRemote.assert_called_with(
             communicate.SelectRange,
@@ -124,7 +124,7 @@ class TestUser(unittest.TestCase):
             duplicates=False,
         )
 
-        self.frontend.select_range(2, 4, how_many=3, duplicates=True)
+        self.user.select_range(2, 4, how_many=3, duplicates=True)
 
         self.protocol.callRemote.assert_called_with(
             communicate.SelectRange,

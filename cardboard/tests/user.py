@@ -1,5 +1,5 @@
 """
-A frontend for use when testing.
+A user for use when testing.
 
 """
 
@@ -27,7 +27,7 @@ def mock_selector(name):
     return select
 
 
-class TestingFrontend(object):
+class TestingUser(object):
 
     select = mock_selector("choice")
     select_cards = mock_selector("cards")

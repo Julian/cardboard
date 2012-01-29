@@ -170,11 +170,11 @@ def declare_attackers(game):
         targets |= {card for card in opponent.battlefield
                     if card.type == "Planeswalker"}
 
-    # attackers = game.turn.active_player.frontend.select.cards(
+    # attackers = game.turn.active_player.user.select.cards(
     #     game.battlefield, how_many=None
     # )
     # attacks = {
-    #    k : game.turn.active_player.frontend.select.combined(attackers)
+    #    k : game.turn.active_player.user.select.combined(attackers)
     #    for k in attackers
     # }
 
@@ -297,7 +297,7 @@ def cleanup(game):
     discard = len(player.hand) - player.hand_size
 
     if discard > 0:
-        selection = player.frontend.select_cards(
+        selection = player.user.select_cards(
             zone=player.hand, how_many=discard,
         )
 

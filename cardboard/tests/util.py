@@ -25,7 +25,7 @@ import panglery
 from cardboard.core import Game, Player
 from cardboard.card import Card
 from cardboard.exceptions import RequirementNotMet
-from cardboard.tests.frontend import TestingFrontend
+from cardboard.tests.user import TestingUser
 
 
 class _CheckRequirementsContext(object):
@@ -185,7 +185,7 @@ class GameTestCase(EventHandlerTestCase):
 
     TEST_LIBRARY_SIZE = 12
 
-    frontend = TestingFrontend()
+    user = TestingUser()
     libraries = [
         [mock.Mock(spec=Card) for _ in range(TEST_LIBRARY_SIZE)]
         for _ in range(4)
@@ -197,12 +197,12 @@ class GameTestCase(EventHandlerTestCase):
         super(GameTestCase, self).setUp()
         self.game = Game(self.events)
         self.p1 = self.game.add_player(
-            frontend=self.frontend, library=self.libraries[0], name=u"1"
+            user=self.user, library=self.libraries[0], name=u"1"
         )
         self.p2 = self.game.add_player(
-            frontend=self.frontend, library=self.libraries[1], name=u"2"
+            user=self.user, library=self.libraries[1], name=u"2"
         )
         self.p3 = Player(
-            frontend=self.frontend, game=self.game,
+            user=self.user, game=self.game,
             library=self.libraries[2], name=u"3"
         )

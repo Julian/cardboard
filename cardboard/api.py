@@ -236,8 +236,8 @@ class APIController(object):
 
         # XXX: Can't join a started game, can't join twice, library
         game = self.games[gameID]
-        frontend = User()
-        player = game.add_player(library=[], frontend=frontend, name=name)
+        user = User()
+        player = game.add_player(library=[], user=user, name=name)
         info = self.lookup_method("Game.info")(gameID=gameID)
         info["playerID"] = len(player.team) - 1
         return info

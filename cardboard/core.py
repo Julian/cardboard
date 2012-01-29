@@ -162,7 +162,7 @@ class Game(object):
 
         self._check_state_based_actions()
         # TODO: Put triggered abilities on the stack
-        to.frontend.priority_granted()
+        to.user.priority_granted()
 
     def _check_state_based_actions(self):
         """
@@ -301,12 +301,12 @@ class Player(object):
     require = requirements({"dead" : {True : "{self} is dead.",
                                       False : "{self} is alive."}})
 
-    def __init__(self, game, library, frontend, name=""):
-        frontend.player = self
-        frontend.game = game
+    def __init__(self, game, library, user, name=""):
+        user.player = self
+        user.game = game
 
         self.game = game
-        self.frontend = frontend
+        self.user = user
         self.name = name
 
         self.death_by = None

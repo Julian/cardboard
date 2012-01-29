@@ -2,7 +2,7 @@ import unittest
 
 import mock
 
-from cardboard.tests import frontend as t
+from cardboard.tests import user as t
 from cardboard.tests.util import GameTestCase
 
 
@@ -27,9 +27,9 @@ class TestMockSelector(unittest.TestCase):
         self.assertEqual(f.foo.__name__, "foo")
 
 
-class TestTestingFrontend(GameTestCase):
+class TestTestingUser(GameTestCase):
     def test_prompt(self):
-        with mock.patch("cardboard.tests.frontend.log") as log:
-            self.p1.frontend.prompt("Testing 123")
+        with mock.patch("cardboard.tests.user.log") as log:
+            self.p1.user.prompt("Testing 123")
 
         log.msg.assert_called_once_with("Testing 123")

@@ -202,7 +202,7 @@ class TestPhaseMechanics(GameTestCase):
 
         discard = list(player.hand)[:-7]
 
-        with player.frontend.select_cards.will_return(*discard):
+        with player.user.select_cards.will_return(*discard):
             p.cleanup(self.game)
 
         for card in discard:

@@ -28,9 +28,7 @@ class TestCard(GameTestCase):
     def setUp(self):
         super(TestCard, self).setUp()
         self.library[-3:] = [self.creature, self.instant, self.land]
-        self.p4 = self.game.add_player(
-            frontend=self.frontend, library=self.library
-        )
+        self.p4 = self.game.add_player(user=self.user, library=self.library)
         self.game.start()
 
     def test_repr_str(self):
@@ -201,9 +199,7 @@ class TestStatus(GameTestCase):
         self.creature = c.Card(self.creature_db_card)
 
         self.library[-1] = self.creature
-        self.p3 = self.game.add_player(
-            frontend=self.frontend, library=self.library
-        )
+        self.p3 = self.game.add_player(user=self.user, library=self.library)
 
         self.statuses = [("tapped", "untapped"), ("flipped", "unflipped"),
                          ("face down", "face up"), ("phased out", "phased in")]
