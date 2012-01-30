@@ -28,7 +28,7 @@ from epilog import rst_epilog
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx',
-    'sphinx.ext.todo', 'sphinx.ext.coverage', 'roles',
+    'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode', 'roles',
 ]
 
 intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None)}
