@@ -115,6 +115,8 @@ def exposed(request_schema, response_schema, validate=jsonschema.validate):
             res_doc = document_schema(response_schema, "response", indent)
             fn.__doc__  = "\n\n".join([fn.__doc__.rstrip(), req_doc, res_doc])
 
+        # TODO: Document schema["properties"] too
+
         @wraps(fn)
         def exposed_fn(self, **request):
             validate(request, request_schema)
@@ -152,6 +154,7 @@ class APIController(object):
          "type" : "object",
          "properties" : {
              "gameID" : {"type" : "integer", "required" : True},
+             "started" : {"type" : "boolean", "required" : True},
              "teams" : {"required" : True},
          },
          "additionalProperties" : False,
@@ -165,16 +168,31 @@ class APIController(object):
 
         # XXX: verbose
         game = self.games[gameID]
-        return {"gameID" : gameID, "teams" : game.teams}
+        return {
+            "gameID" : gameID, "started" : game.started, "teams" : game.teams,
+        }
 
-    @exposed({}, {})
-    def api_Game_list(self):
+    @exposed(
+        {
+         "type" : "object",
+         "properties" : {
+         },
+         "additionalProperties" : False,
+        },
+        {
+         "type" : "array",
+        },
+    )
+    def api_Game_list(self, verbose=False):
         """
         List the currently open games.
 
         """
 
-        pass
+        info = self.lookup_method("Game.info")
+        return [
+            info(gameID=i, verbose=verbose) for i in xrange(len(self.games))
+        ]
 
 
     @exposed(
@@ -246,6 +264,7 @@ class APIController(object):
         {
          "type" : "object",
          "properties" : {
+             "gameID" : {"type" : "integer", "required" : True},
          },
          "additionalProperties" : False,
         },
@@ -256,13 +275,14 @@ class APIController(object):
          "additionalProperties" : False,
         },
     )
-    def api_Game_end(self):
+    def api_Game_end(self, gameID):
         """
         End the current game.
 
         """
 
-        pass
+        self.games[gameID].end()
+        return {}
 
 
     @exposed({}, {})

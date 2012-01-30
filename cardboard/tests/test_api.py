@@ -148,7 +148,9 @@ class TestAPIController(unittest.TestCase):
         create = self.api.lookup_method("Game.create")
         info = self.api.lookup_method("Game.info")
         join = self.api.lookup_method("Game.join")
+        lst = self.api.lookup_method("Game.list")
         start = self.api.lookup_method("Game.start")
+        end = self.api.lookup_method("Game.end")
 
         response = self.call(create)
         self.assertEqual(response, {"gameID" : 0})
@@ -161,7 +163,12 @@ class TestAPIController(unittest.TestCase):
         game = self.api.games[0]
 
         response = self.call(info, gameID=0)
-        self.assertEqual(response, {"gameID" : 0, "teams" : game.teams})
+        expected = {"gameID" : 0, "teams" : game.teams, "started" : False}
+        self.assertEqual(response, expected)
+
+        response = self.call(lst)
+        expected = [info(gameID=0), info(gameID=1)]
+        self.assertEqual(response, expected)
 
         response = self.call(join, gameID=0, name="Foo")
         self.assertEqual(response, dict(playerID=0, **info(gameID=0)))
@@ -169,3 +176,7 @@ class TestAPIController(unittest.TestCase):
         response = self.call(start, gameID=0)
         self.assertEqual(response, {})
         self.assertTrue(self.api.games[0].started)
+
+        response = self.call(end, gameID=0)
+        self.assertEqual(response, {})
+        self.assertTrue(self.api.games[0].ended)
