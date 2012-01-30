@@ -320,11 +320,10 @@ class Player(object):
 
         self.mana_pool = ManaPool(self)
 
-        self.exile = zone["exile"](game=self.game, owner=self)
-        self.graveyard = zone["graveyard"](game=self.game, owner=self)
-        self.hand = zone["hand"](game=self.game, owner=self)
-        self.library = zone["library"](game=self.game, contents=library,
-                                       owner=self)
+        self.exile = zone["exile"](game=game, owner=self)
+        self.graveyard = zone["graveyard"](game=game, owner=self)
+        self.hand = zone["hand"](game=game, owner=self)
+        self.library = zone["library"](game=game, contents=library, owner=self)
 
         for card in self.library:
             card.game = self.game
