@@ -396,6 +396,7 @@ class APIController(object):
          "type" : "object",
          "properties" : {
              "name" : {"type" : "string", "required" : True},
+             "dead" : {"type" : "boolean", "required" : True},
              "handSize" : {"type" : "integer", "required" : True},
              "life" : {"type" : "integer", "required" : True},
              "poison" : {
@@ -417,4 +418,5 @@ class APIController(object):
         return {
             "name" : player.name, "handSize" : player.hand_size,
             "life" : player.life, "poison" : player.poison,
+            "dead" : player.dead,
         }

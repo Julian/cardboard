@@ -191,7 +191,10 @@ class TestAPIController(unittest.TestCase):
         info = self.api.lookup_method("Player.info")
 
         response = self.call(info, gameID=gameID, playerID=playerID)
-        expected = {"name" : "Foo", "handSize" : 7, "life" : 20, "poison" : 0}
+        expected = {
+            "name" : "Foo", "handSize" : 7, "life" : 20,
+            "poison" : 0, "dead" : False,
+        }
         self.assertEqual(response, expected)
 
     def test_concede(self):
