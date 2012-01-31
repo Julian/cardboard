@@ -200,10 +200,18 @@ class TestAPIController(unittest.TestCase):
     def test_concede(self):
         gameID = self.api.lookup_method("Game.create")()["gameID"]
         p = self.api.lookup_method("Game.join")(gameID=gameID, name="Foo")
-        playerID = p["playerID"]
+        auth, playerID = p["auth"], p["playerID"]
 
         concede = self.api.lookup_method("concede")
 
-        response = self.call(concede, gameID=gameID, playerID=playerID)
+        self.assertRaises(
+            api.NotAuthorized,
+            concede, auth="wrong", gameID=gameID, playerID=playerID
+        )
+        self.assertFalse(self.api.players[0][0][1].dead)
+
+        response = self.call(
+            concede, auth=auth, gameID=gameID, playerID=playerID,
+        )
         self.assertTrue(self.api.players[0][0][1].dead)
         self.assertEqual(response, {})

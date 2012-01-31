@@ -9,6 +9,16 @@ from cardboard import core
 from cardboard.util import ANY
 
 
+class NotAuthorized(Exception):
+    """
+    The user was not authorized to call an API method.
+
+    """
+
+    def __str__(self):
+        return "Authorization failed or was not provided."
+
+
 class User(object):
     """
     A user is an enraged animal sitting across the network.
@@ -147,6 +157,7 @@ class APIController(object):
         {
          "type" : "object",
          "properties" : {
+             "auth" : {"type" : "string", "required" : True},
              "gameID" : {"type" : "integer", "required" : True},
              "playerID" : {"type" : "integer", "required" : True},
          },
@@ -159,13 +170,16 @@ class APIController(object):
          "additionalProperties" : False,
         },
     )
-    def api_concede(self, gameID, playerID):
+    def api_concede(self, auth, gameID, playerID):
         """
         Concede from the current game.
 
         """
 
-        self.players[gameID][playerID][1].concede()
+        expected_auth, player = self.players[gameID][playerID]
+        if auth != expected_auth:
+            raise NotAuthorized()
+        player.concede()
         return {}
 
     @exposed(
