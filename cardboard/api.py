@@ -1,5 +1,6 @@
-from functools import wraps
+import functools
 import json
+import uuid
 
 import jsonschema
 import panglery
@@ -117,7 +118,7 @@ def exposed(request_schema, response_schema, validate=jsonschema.validate):
 
         # TODO: Document schema["properties"] too
 
-        @wraps(fn)
+        @functools.wraps(fn)
         def exposed_fn(self, **request):
             validate(request, request_schema)
             return fn(self, **request)
@@ -132,6 +133,7 @@ class APIController(object):
     def __init__(self):
         self.drafts = []
         self.games = []
+        self.players = []
 
     def lookup_method(self, name):
         """
@@ -140,6 +142,31 @@ class APIController(object):
         """
 
         return getattr(self, "api_" + name.replace(".", "_"))
+
+    @exposed(
+        {
+         "type" : "object",
+         "properties" : {
+             "gameID" : {"type" : "integer", "required" : True},
+             "playerID" : {"type" : "integer", "required" : True},
+         },
+         "additionalProperties" : False,
+        },
+        {
+         "type" : "object",
+         "properties" : {
+         },
+         "additionalProperties" : False,
+        },
+    )
+    def api_concede(self, gameID, playerID):
+        """
+        Concede from the current game.
+
+        """
+
+        self.players[gameID][playerID][1].concede()
+        return {}
 
     @exposed(
         {
@@ -212,6 +239,7 @@ class APIController(object):
         """
 
         self.games.append(core.Game(panglery.Pangler()))
+        self.players.append([])
         return {"gameID" : len(self.games) - 1}
 
 
@@ -223,7 +251,12 @@ class APIController(object):
          },
          "additionalProperties" : False,
         },
-        {},
+        {
+         "type" : "object",
+         "properties" : {
+         },
+         "additionalProperties" : False,
+        },
     )
     def api_Game_start(self, gameID):
         """
@@ -244,7 +277,14 @@ class APIController(object):
          },
          "additionalProperties" : False,
         },
-        {},
+        {
+         "type" : "object",
+         "properties" : {
+             "auth" : {"type" : "string", "required" : True},
+             "playerID" : {"type" : "integer", "required" : True},
+         },
+         "additionalProperties" : False,
+        },
     )
     def api_Game_join(self, gameID, name):
         """
@@ -253,12 +293,11 @@ class APIController(object):
         """
 
         # XXX: Can't join a started game, can't join twice, library
-        game = self.games[gameID]
-        user = User()
-        player = game.add_player(library=[], user=user, name=name)
-        info = self.lookup_method("Game.info")(gameID=gameID)
-        info["playerID"] = len(player.team) - 1
-        return info
+        game, players = self.games[gameID], self.players[gameID]
+        player = game.add_player(library=[], user=User(), name=name)
+        auth = uuid.uuid4().bytes
+        players.append((auth, player))
+        return {"playerID" : len(players) - 1, "auth" : auth}
 
     @exposed(
         {
@@ -343,3 +382,39 @@ class APIController(object):
         """
 
         pass
+
+    @exposed(
+        {
+         "type" : "object",
+         "properties" : {
+             "gameID" : {"type" : "integer", "required" : True},
+             "playerID" : {"type" : "integer", "required" : True},
+         },
+         "additionalProperties" : False,
+        },
+        {
+         "type" : "object",
+         "properties" : {
+             "name" : {"type" : "string", "required" : True},
+             "handSize" : {"type" : "integer", "required" : True},
+             "life" : {"type" : "integer", "required" : True},
+             "poison" : {
+                 "type" : "integer", "required" : True,
+                 "minimum" : 0, "maximum" : 10,
+             },
+         },
+         "additionalProperties" : False,
+        },
+    )
+    def api_Player_info(self, gameID, playerID):
+        """
+        Retrieve info about a given player.
+
+        """
+
+        # XXX: No such player
+        player = self.players[gameID][playerID][1]
+        return {
+            "name" : player.name, "handSize" : player.hand_size,
+            "life" : player.life, "poison" : player.poison,
+        }

@@ -171,7 +171,8 @@ class TestAPIController(unittest.TestCase):
         self.assertEqual(response, expected)
 
         response = self.call(join, gameID=0, name="Foo")
-        self.assertEqual(response, dict(playerID=0, **info(gameID=0)))
+        auth = response.pop("auth")
+        self.assertEqual(response, {"playerID" : 0})
 
         response = self.call(start, gameID=0)
         self.assertEqual(response, {})
@@ -180,3 +181,26 @@ class TestAPIController(unittest.TestCase):
         response = self.call(end, gameID=0)
         self.assertEqual(response, {})
         self.assertTrue(self.api.games[0].ended)
+
+    def test_Player(self):
+        gameID = self.api.lookup_method("Game.create")()["gameID"]
+
+        p = self.api.lookup_method("Game.join")(gameID=gameID, name="Foo")
+        playerID = p["playerID"]
+
+        info = self.api.lookup_method("Player.info")
+
+        response = self.call(info, gameID=gameID, playerID=playerID)
+        expected = {"name" : "Foo", "handSize" : 7, "life" : 20, "poison" : 0}
+        self.assertEqual(response, expected)
+
+    def test_concede(self):
+        gameID = self.api.lookup_method("Game.create")()["gameID"]
+        p = self.api.lookup_method("Game.join")(gameID=gameID, name="Foo")
+        playerID = p["playerID"]
+
+        concede = self.api.lookup_method("concede")
+
+        response = self.call(concede, gameID=gameID, playerID=playerID)
+        self.assertTrue(self.api.players[0][0][1].dead)
+        self.assertEqual(response, {})

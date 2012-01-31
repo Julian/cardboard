@@ -302,9 +302,6 @@ class Player(object):
                                       False : "{self} is alive."}})
 
     def __init__(self, game, library, user, name=""):
-        user.player = self
-        user.game = game
-
         self.game = game
         self.user = user
         self.name = name
