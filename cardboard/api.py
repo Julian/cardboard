@@ -98,7 +98,8 @@ def document_schema(schema, type, indent=0):
         raise ValueError(type)
 
     ind = (indent + 4) * " "
-    schema = ind + json.dumps(schema, indent=4).replace("\n", "\n" + ind)
+    schema = ind + json.dumps(schema, sort_keys=True, indent=4)
+    schema = schema.replace("\n", "\n" + ind)
     return indent * " " + ".. {}::\n\n{}".format(type, schema)
 
 
