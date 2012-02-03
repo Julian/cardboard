@@ -1,17 +1,28 @@
-from twisted.application import service, internet
+import os.path
+
+from twisted.application import internet, service
+from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
-from twisted.internet import protocol, reactor
-from txjsonrpc import JSONRPCFactory
 
-from cardboard.api import APIController
+from cardboard import api
+from cardboard.web import config as web_config
 
+
+options = {
+    "closure-library" : os.path.dirname(web_config.__file__),
+    "domain" : "Cardboard",
+    "enginePort" : 6497,
+    "minerva" : ["tcp:6479:interface=127.0.0.1"],
+}
 
 application = service.Application("Cardboard")
 
-port = 6497
-api = APIController()
-factory = JSONRPCFactory(api.lookup_method)
+cardboardService = service.MultiService()
+cardboardService.setServiceParent(application)
 
-endpoint = TCP4ServerEndpoint(reactor, port)
-cardboard = internet.StreamServerEndpointService(endpoint, factory)
-cardboard.setServiceParent(application)
+engineEndpoint = TCP4ServerEndpoint(reactor, options["enginePort"])
+engine = internet.StreamServerEndpointService(engineEndpoint, api.factory)
+engine.setServiceParent(cardboardService)
+
+httpService = web_config.makeService(options)
+httpService.setServiceParent(cardboardService)
