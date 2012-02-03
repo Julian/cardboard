@@ -26,6 +26,7 @@ setup(
         "Minerva",
         "SQLAlchemy",
         "Twisted",
+        "jinja2",
         "jsonschema",
         "mock",
         "panglery",
