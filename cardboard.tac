@@ -12,7 +12,9 @@ options = {
     "closure-library" : os.path.dirname(web_config.__file__),
     "domain" : "Cardboard",
     "enginePort" : 6497,
-    "minerva" : ["tcp:6479:interface=127.0.0.1"],
+    "minerva" : ["tcp:6479:interface=localhost"],
+    "http" : [],
+    "no-tracebacks" : False,
 }
 
 application = service.Application("Cardboard")

@@ -19,20 +19,21 @@ def makeService(config):
 
     socketPorts = []
     for minervaStrport in config['minerva']:
-        _, _args, _ = strports.parse(minervaStrport, object())
-        socketPorts.append(_args[0])
+            _, _args, _ = strports.parse(minervaStrport, object())
+            socketPorts.append(_args[0])
 
     fileCache = FileCache(lambda: reactor.seconds(), -1)
     stf, httpSite = site.setupMinerva(
-        reactor, fileCache, socketPorts, domain, closureLibrary,
+            reactor, fileCache, socketPorts, domain, closureLibrary
     )
+    httpSite.displayTracebacks = not config["no-tracebacks"]
 
-    for httpStrport in config["minerva"]:
-        httpService = strports.service(httpStrport, httpSite)
-        httpService.setServiceParent(multi)
+    for httpStrport in config['http']:
+            httpServer = strports.service(httpStrport, httpSite)
+            httpServer.setServiceParent(multi)
 
-    for minervaStrport in config["minerva"]:
-        minervaServer = strports.service(minervaStrport, stf)
-        minervaServer.setServiceParent(multi)
+    for minervaStrport in config['minerva']:
+            minervaServer = strports.service(minervaStrport, stf)
+            minervaServer.setServiceParent(multi)
 
     return multi
