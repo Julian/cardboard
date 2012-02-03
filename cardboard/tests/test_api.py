@@ -145,12 +145,12 @@ class TestAPIController(unittest.TestCase):
         return response
 
     def test_Game(self):
-        create = self.api.lookup_method("Game.create")
-        info = self.api.lookup_method("Game.info")
-        join = self.api.lookup_method("Game.join")
-        lst = self.api.lookup_method("Game.list")
-        start = self.api.lookup_method("Game.start")
-        end = self.api.lookup_method("Game.end")
+        create = self.api.lookupMethod("Game.create")
+        info = self.api.lookupMethod("Game.info")
+        join = self.api.lookupMethod("Game.join")
+        lst = self.api.lookupMethod("Game.list")
+        start = self.api.lookupMethod("Game.start")
+        end = self.api.lookupMethod("Game.end")
 
         response = self.call(create)
         self.assertEqual(response, {"gameID" : 0})
@@ -183,12 +183,12 @@ class TestAPIController(unittest.TestCase):
         self.assertTrue(self.api.games[0].ended)
 
     def test_Player(self):
-        gameID = self.api.lookup_method("Game.create")()["gameID"]
+        gameID = self.api.lookupMethod("Game.create")()["gameID"]
 
-        p = self.api.lookup_method("Game.join")(gameID=gameID, name="Foo")
+        p = self.api.lookupMethod("Game.join")(gameID=gameID, name="Foo")
         playerID = p["playerID"]
 
-        info = self.api.lookup_method("Player.info")
+        info = self.api.lookupMethod("Player.info")
 
         response = self.call(info, gameID=gameID, playerID=playerID)
         expected = {
@@ -198,11 +198,11 @@ class TestAPIController(unittest.TestCase):
         self.assertEqual(response, expected)
 
     def test_concede(self):
-        gameID = self.api.lookup_method("Game.create")()["gameID"]
-        p = self.api.lookup_method("Game.join")(gameID=gameID, name="Foo")
+        gameID = self.api.lookupMethod("Game.create")()["gameID"]
+        p = self.api.lookupMethod("Game.join")(gameID=gameID, name="Foo")
         auth, playerID = p["auth"], p["playerID"]
 
-        concede = self.api.lookup_method("concede")
+        concede = self.api.lookupMethod("concede")
 
         self.assertRaises(
             api.NotAuthorized,

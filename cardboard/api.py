@@ -4,6 +4,7 @@ import uuid
 
 import jsonschema
 import panglery
+import txjsonrpc
 
 from cardboard import core
 from cardboard.util import ANY
@@ -146,7 +147,7 @@ class APIController(object):
         self.games = []
         self.players = []
 
-    def lookup_method(self, name):
+    def lookupMethod(self, name):
         """
         Lookup the appropriate API method with the given name.
 
@@ -231,7 +232,7 @@ class APIController(object):
 
         """
 
-        info = self.lookup_method("Game.info")
+        info = self.lookupMethod("Game.info")
         return [
             info(gameID=i, verbose=verbose) for i in xrange(len(self.games))
         ]
@@ -435,3 +436,7 @@ class APIController(object):
             "life" : player.life, "poison" : player.poison,
             "dead" : player.dead,
         }
+
+
+controller = APIController()
+factory = txjsonrpc.JSONRPCFactory(controller.lookupMethod)
