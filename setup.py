@@ -23,13 +23,13 @@ setup(
     scripts=["bin/cardboard"],
     include_package_data=True,
     install_requires=[
-        "Minerva",
-        "SQLAlchemy",
-        "Twisted",
         "jinja2",
         "jsonschema",
+        "minerva",
         "mock",
         "panglery",
+        "sqlalchemy",
+        "twisted",
         "txjsonrpc-tcp",
     ],
 )
